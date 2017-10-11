@@ -1,0 +1,20 @@
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: carts-db
+  labels:
+    name: carts-db
+  namespace: sock-shop
+spec:
+  replicas: 1
+  template:
+    spec:
+      containers:
+      - name: carts-db
+        image: mongo
+        resources:
+          limits:
+            cpu: 300m
+          requests:
+            cpu: 300m
