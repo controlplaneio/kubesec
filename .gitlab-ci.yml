@@ -1,0 +1,26 @@
+image: sublimino/alpine-base:latest
+
+stages:
+  - test
+
+cache:
+  untracked: true
+  paths:
+  - /root/.npm
+  - node_modules/
+
+before_script:
+  - export PATH="node_modules/.bin/:$PATH"
+  - npm config set cache-min 31540000
+  - npm i sublimino/rollcage
+
+duplicate-remote:
+  stage: test
+  script:
+    - rollcage git-backup
+
+test:
+  stage: test
+  script:
+    - 'echo tests not running'
+

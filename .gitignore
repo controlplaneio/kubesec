@@ -1,0 +1,105 @@
+# Compiled source #
+###################
+*.com
+*.class
+*.dll
+*.exe
+*.o
+*.so
+*.pyc
+
+# Packages #
+############
+# it's better to unpack these files and commit the raw source
+# git has its own built in compression methods
+*.7z
+*.dmg
+*.gz
+*.iso
+*.jar
+*.rar
+*.tar
+*.zip
+
+# Logs and databases #
+######################
+*.log
+*.sqlite
+pip-log.txt
+
+# OS generated files #
+######################
+.DS_Store?
+ehthumbs.db
+Icon?
+Thumbs.db
+
+# IDE generated files #
+#######################
+.idea/
+atlassian-ide-plugin.xml
+
+# Test Files #
+##############
+test/log
+.coverage
+.tox
+nosetests.xml
+
+# Package Managed Files #
+#########################
+bower_components/
+components/
+vendor/
+composer.lock
+node_modules/
+.npm/
+venv/
+.venv/
+.venv3/
+
+# temporary files #
+###################
+*.*swp
+nohup.out
+*.tmp
+
+# Virtual machines #
+####################
+.vagrant/
+
+# Pythonics #
+#############
+*.py[cod]
+
+# Packages
+*.egg
+*.egg-info
+dist
+build
+eggs
+parts
+bin/
+var
+sdist
+develop-eggs
+.installed.cfg
+lib
+lib64
+
+# Translations
+*.mo
+
+# Mr Developer
+.mr.developer.cfg
+.project
+.pydevproject
+
+# Complexity
+output/*.html
+output/*/index.html
+
+# Sphinx
+docs/_build
+.scratch.md
+kube-sec-check

@@ -1,0 +1,15 @@
+---
+steps:
+  - name: 'docker.io/sublimino/alpine-base:latest'
+    args: ['make', 'alpine']
+    dir: '.'
+    env:
+      - 'BUILD=$BUILD_ID'
+      - 'GOPATH=/gocode'
+
+# - name: 'ubuntu'
+#  args: ['bash', './myscript.sh']
+#  env:
+#  - 'BUILD=$BUILD_ID'
+#  - 'PROJECT=$PROJECT_ID'
+#  - 'REV=$REVISION_ID'
