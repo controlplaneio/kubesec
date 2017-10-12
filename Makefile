@@ -10,12 +10,17 @@ all:
 	make test
 	make build
 
-test :
+test-go :
 	go test $$(go list ./... | grep -v '/vendor/')
 
-test-old:
+test:
 	bash -xc ' \
 	  cd test && ./bin/bats/bin/bats . \
+	'
+
+test-new:
+	bash -xc ' \
+	  cd test && /usr/src/bats-core/bin/bats . \
 	'
 
 test-acceptance-old:
