@@ -23,10 +23,20 @@ load '_helper'
   assert_failure
 }
 
-#@test "passes with permissive PodSecurityPolicy YAML (SLOW)" {
-#  run ${APP} ${TEST_DIR}/asset/score-0-pod-security-policy-permissive.yml
-#  assert_success
-#}
+@test "only accepts pod or deployment - PodSecurityPolicy" {
+  run ${APP} ${TEST_DIR}/asset/score-0-podsecuritypolicy-permissive.yml
+  assert_failure
+}
+
+@test "only accepts pod or deployment - Pod" {
+  run ${APP} ${TEST_DIR}/asset/score-1-pod-default.yml
+  refute_output --regexp ".*Only kinds .* accepted.*"
+}
+
+@test "only accepts pod or deployment - Deployment" {
+  run ${APP} ${TEST_DIR}/asset/score-1-dep-default.yml
+  refute_output --regexp ".*Only kinds .* accepted.*"
+}
 
 @test "fails with CAP_SYS_ADMIN" {
   run ${APP} ${TEST_DIR}/asset/score-0-cap-sys-admin.yml
