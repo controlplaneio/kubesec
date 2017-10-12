@@ -7,6 +7,8 @@
 #
 ## Usage: %SCRIPT_NAME% [options] <k8s resource>
 ##
+## Validate security parameters of a Kubernetes resource
+##
 ## Options:
 ##   --debug                     More debug
 ##
@@ -34,6 +36,7 @@ EXPECTED_NUM_ARGUMENTS=1
 ARGUMENTS=()
 FILENAME=''
 JSON=''
+FULL_JSON=''
 POINTS=0
 
 KEYS_PLUS_ONE_POINT=(
@@ -72,13 +75,18 @@ KEYS_MINUS_ONE_POINT=(
 
 KEYS_FAIL=(
   'containers[].securityContext.capabilities.add | index("SYS_ADMIN")'
-  #  'containers[].securityContext.capabilities | select(.add, index("SYS_ADMIN"))'
+)
+
+KEYS_STATEFULSET_PLUS_ONE_POINT=(
+  '.spec.volumeClaimTemplates[].spec.accessModes | index("ReadWriteOnce")'
+  '.spec.volumeClaimTemplates[].spec.resources.requests.storage'
 )
 
 main() {
   handle_arguments "$@"
 
   JSON=$(get_json "${FILENAME}")
+  FULL_JSON="${JSON}"
 
   check_valid_kind
 
@@ -97,21 +105,16 @@ main() {
     fi
   done
 
-  # TODO: rules
-
   rule_capabilities
   rule_resources
+
+  rule_statefulset
 
   if [[ "${POINTS}" -gt 0 ]]; then
     success "Passed with ${POINTS} points"
   else
     error "Failed with 0 points"
   fi
-}
-
-advise() {
-  local SPEC_PATH='.spec'
-  echo "${1}" "${SPEC_PATH}.${2}"
 }
 
 rule_capabilities() {
@@ -128,17 +131,39 @@ rule_resources() {
   :
 }
 
+advise() {
+  local SPEC_PATH="${3-.spec.}"
+  echo "${1}" "${SPEC_PATH}${2}"
+}
+
+rule_statefulset() {
+  if is_statefulset; then
+    for KEY in "${KEYS_STATEFULSET_PLUS_ONE_POINT[@]}"; do
+      if is_key_full_json "${KEY}"; then
+        POINTS=$((POINTS + 1))
+      else
+        advise "Add" "${KEY}" ''
+      fi
+    done
+  fi
+}
+
 get_json() {
   local FILENAME="${1}"
   kubectl convert -o json --local=true --filename="${FILENAME}"
 }
 
+get_kind() {
+  echo "${FULL_JSON}" | jq -r '.kind'
+}
+
 check_valid_kind() {
+  echo "Type: $(get_kind)" >&2
   if ! is_pod; then
-    if is_deployment; then
+    if is_deployment || is_statefulset || is_daemonset; then
       JSON=$(echo "${JSON}" | jq -r '.spec.template')
     else
-      error "Only kinds pod and deployments accepted"
+      error "Only kinds Pod, Deployment, StatefulSet, DaemonSet accepted"
     fi
   fi
 
@@ -157,19 +182,41 @@ is_key() {
   [[ "${RESULT}" != 'null' ]] && [[ "${RESULT}" != '' ]]
 }
 
-is_deployment() {
-  _is_type 'Deployment'
+is_key_full_json() {
+  local KEY="${1}"
+
+  #  if ! jq "select(.spec.${KEY}) | .spec.${KEY}"; then
+  #    error "jq error"
+  #  fi
+
+  # TODO: if debug read user input
+
+  local RESULT=$(echo "${FULL_JSON}" | jq "select(${KEY}) | ${KEY}")
+  [[ "${RESULT}" != 'null' ]] && [[ "${RESULT}" != '' ]]
 }
 
 is_pod() {
   _is_type 'Pod'
 }
 
+is_deployment() {
+  _is_type 'Deployment'
+}
+
+is_daemonset() {
+  _is_type 'DaemonSet'
+}
+
+is_statefulset() {
+  _is_type 'StatefulSet'
+}
+
 _is_type() {
   local TYPE="${1:-}"
-  [[ $(echo "${JSON}" | jq -r '.kind') == "${TYPE}" ]]
+  [[ $(get_kind) == "${TYPE}" ]]
 
 }
+
 # ---
 
 handle_arguments() {
