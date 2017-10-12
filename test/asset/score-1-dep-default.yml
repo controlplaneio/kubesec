@@ -8,3 +8,5 @@ spec:
       containers:
       - name: carts-db
         image: mongo
+        securityContext:
+          runAsNonRoot: true

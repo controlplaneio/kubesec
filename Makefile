@@ -23,6 +23,9 @@ test-new:
 	  cd test && /usr/src/bats-core/bin/bats . \
 	'
 
+deploy:
+	cd up
+
 test-acceptance-old:
 	cd test && ./test-acceptance.sh
 

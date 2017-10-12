@@ -23,20 +23,39 @@ load '_helper'
   assert_failure
 }
 
-@test "only accepts pod or deployment - PodSecurityPolicy" {
+# ---
+
+@test "only valid types - deny PodSecurityPolicy" {
   run ${APP} ${TEST_DIR}/asset/score-0-podsecuritypolicy-permissive.yml
+  assert_output --regexp ".*Only kinds .* accepted.*"
   assert_failure
 }
 
-@test "only accepts pod or deployment - Pod" {
+@test "only valid types - allow Pod" {
   run ${APP} ${TEST_DIR}/asset/score-1-pod-default.yml
   refute_output --regexp ".*Only kinds .* accepted.*"
+  assert_success
 }
 
-@test "only accepts pod or deployment - Deployment" {
+@test "only valid types - allow Deployment" {
   run ${APP} ${TEST_DIR}/asset/score-1-dep-default.yml
   refute_output --regexp ".*Only kinds .* accepted.*"
+  assert_success
 }
+
+@test "only valid types - allow StatefulSet" {
+  run ${APP} ${TEST_DIR}/asset/score-1-statefulset-default.yml
+  refute_output --regexp ".*Only kinds .* accepted.*"
+  assert_success
+}
+
+@test "only valid types - allow DaemonSet" {
+  run ${APP} ${TEST_DIR}/asset/score-1-daemonset-default.yml
+  refute_output --regexp ".*Only kinds .* accepted.*"
+  assert_success
+}
+
+# ---
 
 @test "fails with CAP_SYS_ADMIN" {
   run ${APP} ${TEST_DIR}/asset/score-0-cap-sys-admin.yml
@@ -91,5 +110,27 @@ load '_helper'
 @test "passes deployment with cgroup memory limits" {
   run ${APP} ${TEST_DIR}/asset/score-1-dep-resource-limit-memory.yml
   assert_non_zero_points
+}
+
+@test "passes StatefulSet with volumeClaimTemplate" {
+  run ${APP} ${TEST_DIR}/asset/score-1-statefulset-volumeclaimtemplate.yml
+  assert_non_zero_points
+}
+
+@test "fails StatefulSet with no security" {
+  run ${APP} ${TEST_DIR}/asset/score-0-statefulset-no-sec.yml
+  assert_zero_points
+}
+
+@test "fails DaemonSet with securityContext.privileged = true" {
+  run ${APP} ${TEST_DIR}/asset/score-0-daemonset-securitycontext-privileged.yml
+  assert_zero_points
+}
+
+# TODO: tests for all the permutations of this file
+@test "fails DaemonSet with loads o' permutations" {
+  skip
+  run ${APP} ${TEST_DIR}/asset/score-0-daemonset-securitycontext-privileged.yml
+  assert_zero_points
 }
 
