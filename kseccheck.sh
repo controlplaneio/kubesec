@@ -75,16 +75,12 @@ KEYS_FAIL=(
   #  'containers[].securityContext.capabilities | select(.add, index("SYS_ADMIN"))'
 )
 
-# TODO: add https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
-
 main() {
   handle_arguments "$@"
 
   JSON=$(get_json "${FILENAME}")
 
-  if is_deployment; then
-    JSON=$(echo "${JSON}" | jq -r '.spec.template')
-  fi
+  check_valid_kind
 
   for KEY in "${KEYS_PLUS_ONE_POINT[@]}"; do
     if is_key "${KEY}"; then
@@ -134,7 +130,18 @@ rule_resources() {
 
 get_json() {
   local FILENAME="${1}"
-  kubectl convert -o json --local --filename="${FILENAME}"
+  kubectl convert -o json --local=true --filename="${FILENAME}"
+}
+
+check_valid_kind() {
+  if ! is_pod; then
+    if is_deployment; then
+      JSON=$(echo "${JSON}" | jq -r '.spec.template')
+    else
+      error "Only kinds pod and deployments accepted"
+    fi
+  fi
+
 }
 
 is_key() {
@@ -151,9 +158,18 @@ is_key() {
 }
 
 is_deployment() {
-  [[ $(echo "${JSON}" | jq -r '.kind') == 'Deployment' ]]
+  _is_type 'Deployment'
 }
 
+is_pod() {
+  _is_type 'Pod'
+}
+
+_is_type() {
+  local TYPE="${1:-}"
+  [[ $(echo "${JSON}" | jq -r '.kind') == "${TYPE}" ]]
+
+}
 # ---
 
 handle_arguments() {
