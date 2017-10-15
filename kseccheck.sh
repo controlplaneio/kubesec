@@ -38,6 +38,7 @@ FILENAME=''
 JSON=''
 FULL_JSON=''
 POINTS=0
+KUBECTL='kubectl'
 
 KEYS_PLUS_ONE_POINT=(
   'seLinux'
@@ -82,8 +83,28 @@ KEYS_STATEFULSET_PLUS_ONE_POINT=(
   '.spec.volumeClaimTemplates[].spec.resources.requests.storage'
 )
 
+resolve_kubectl() {
+  if ! command -v "${KUBECTL}" &>/dev/null; then
+    KUBECTL='./kubectl'
+
+    if ! command -v "${KUBECTL}" &>/dev/null; then
+      KUBECTL=$(find . -regex '.*/kubectl$' -type f -executable -print -quit)
+
+      if [[ "${KUBECTL:-}" == "" ]]; then
+        KUBECTL=$(find ../ -regex '.*/kubectl$' -type f -executable -print -quit)
+
+        if [[ "${KUBECTL:-}" == "" ]]; then
+          error "kubectl not found"
+        fi
+      fi
+    fi
+  fi
+}
+
 main() {
   handle_arguments "$@"
+
+  resolve_kubectl
 
   JSON=$(get_json "${FILENAME}")
   FULL_JSON="${JSON}"
@@ -150,7 +171,7 @@ rule_statefulset() {
 
 get_json() {
   local FILENAME="${1}"
-  kubectl convert -o json --local=true --filename="${FILENAME}"
+  ${KUBECTL} convert -o json --local=true --filename="${FILENAME}"
 }
 
 get_kind() {

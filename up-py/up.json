@@ -1,0 +1,7 @@
+{
+  "name": "kube-seccheck",
+  "proxy": {
+    "memory": 1024,
+    "timeout": 15
+  }
+}
