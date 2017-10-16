@@ -24,7 +24,9 @@ test-new:
 	'
 
 deploy:
-	cd up
+	bash -xc ' \
+		cd up && AWS_PROFILE=binslug-s3 up deploy production \
+	'
 
 test-acceptance-old:
 	cd test && ./test-acceptance.sh
