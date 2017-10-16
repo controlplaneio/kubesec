@@ -1,18 +1,17 @@
 #!/usr/bin/env bash
 #
-# Kubernetes Pod Security Checker
+# Kubernetes Resource Security Checker
 #
 # Andrew Martin, 2017-10-11 21:07:42
 # sublimino@gmail.com
 #
-## Usage: %SCRIPT_NAME% [options] <k8s resource>
+## Usage: %SCRIPT_NAME% [options] <k8s resource file>
 ##
 ## Validate security parameters of a Kubernetes resource
 ##
 ## Options:
-##   --debug                     More debug
-##
 ##   -h --help                   Display this message
+##   --debug                     More debug
 ##
 
 # exit on error or pipe failure
@@ -38,7 +37,9 @@ FILENAME=''
 JSON=''
 FULL_JSON=''
 POINTS=0
+
 KUBECTL='kubectl'
+JQ='jq'
 
 KEYS_PLUS_ONE_POINT=(
   'seLinux'
@@ -76,6 +77,7 @@ KEYS_MINUS_ONE_POINT=(
 
 KEYS_FAIL=(
   'containers[].securityContext.capabilities.add | index("SYS_ADMIN")'
+  'containers[].securityContext.privileged == true'
 )
 
 KEYS_STATEFULSET_PLUS_ONE_POINT=(
@@ -83,28 +85,63 @@ KEYS_STATEFULSET_PLUS_ONE_POINT=(
   '.spec.volumeClaimTemplates[].spec.resources.requests.storage'
 )
 
+#resolve_kubectl() {
+#  if ! command -v "${KUBECTL}" &>/dev/null; then
+#    KUBECTL='./kubectl'
+#
+#    if ! command -v "${KUBECTL}" &>/dev/null; then
+#      KUBECTL=$(find . -regex '.*/kubectl$' -type f -executable -print -quit)
+#
+#      if [[ "${KUBECTL:-}" == "" ]]; then
+#        KUBECTL=$(find ../ -regex '.*/kubectl$' -type f -executable -print -quit)
+#
+#        if [[ "${KUBECTL:-}" == "" ]]; then
+#          error "kubectl not found"
+#        fi
+#      fi
+#    fi
+#  fi
+#}
+
+resolve_jq() {
+  if ! JQ=$(resolve_binary jq); then
+    exit 1
+  fi
+}
+
 resolve_kubectl() {
-  if ! command -v "${KUBECTL}" &>/dev/null; then
-    KUBECTL='./kubectl'
+  if ! KUBECTL=$(resolve_binary kubectl); then
+    exit 1
+  fi
+}
 
-    if ! command -v "${KUBECTL}" &>/dev/null; then
-      KUBECTL=$(find . -regex '.*/kubectl$' -type f -executable -print -quit)
+resolve_binary() {
+  local BINARY="${1}"
+  local ORIGINAL_BINARY="${BINARY}"
 
-      if [[ "${KUBECTL:-}" == "" ]]; then
-        KUBECTL=$(find ../ -regex '.*/kubectl$' -type f -executable -print -quit)
+  if ! command -v "${BINARY}" &>/dev/null; then
+    BINARY="./${ORIGINAL_BINARY}"
 
-        if [[ "${KUBECTL:-}" == "" ]]; then
-          error "kubectl not found"
+    if ! command -v "${BINARY}" &>/dev/null; then
+      BINARY=$(find . -regex ".*/${ORIGINAL_BINARY}$" -type f -executable -print -quit)
+
+      if [[ "${BINARY:-}" == "" ]]; then
+        BINARY=$(find ../ -regex ".*/${ORIGINAL_BINARY}$" -type f -executable -print -quit)
+
+        if [[ "${BINARY:-}" == "" ]]; then
+          error "${BINARY} not found"
         fi
       fi
     fi
   fi
+  echo "${BINARY}"
 }
 
 main() {
   handle_arguments "$@"
 
   resolve_kubectl
+  resolve_jq
 
   JSON=$(get_json "${FILENAME}")
   FULL_JSON="${JSON}"
@@ -175,14 +212,14 @@ get_json() {
 }
 
 get_kind() {
-  echo "${FULL_JSON}" | jq -r '.kind'
+  echo "${FULL_JSON}" | ${JQ} -r '.kind'
 }
 
 check_valid_kind() {
   echo "Type: $(get_kind)" >&2
   if ! is_pod; then
     if is_deployment || is_statefulset || is_daemonset; then
-      JSON=$(echo "${JSON}" | jq -r '.spec.template')
+      JSON=$(echo "${JSON}" | ${JQ} -r '.spec.template')
     else
       error "Only kinds Pod, Deployment, StatefulSet, DaemonSet accepted"
     fi
@@ -193,26 +230,26 @@ check_valid_kind() {
 is_key() {
   local KEY="${1}"
 
-  #  if ! jq "select(.spec.${KEY}) | .spec.${KEY}"; then
+  #  if ! ${JQ} "select(.spec.${KEY}) | .spec.${KEY}"; then
   #    error "jq error"
   #  fi
 
   # TODO: if debug read user input
 
-  local RESULT=$(echo "${JSON}" | jq "select(.spec.${KEY}) | .spec.${KEY}")
+  local RESULT=$(echo "${JSON}" | ${JQ} "select(.spec.${KEY}) | .spec.${KEY}")
   [[ "${RESULT}" != 'null' ]] && [[ "${RESULT}" != '' ]]
 }
 
 is_key_full_json() {
   local KEY="${1}"
 
-  #  if ! jq "select(.spec.${KEY}) | .spec.${KEY}"; then
+  #  if ! ${JQ} "select(.spec.${KEY}) | .spec.${KEY}"; then
   #    error "jq error"
   #  fi
 
   # TODO: if debug read user input
 
-  local RESULT=$(echo "${FULL_JSON}" | jq "select(${KEY}) | ${KEY}")
+  local RESULT=$(echo "${FULL_JSON}" | ${JQ} "select(${KEY}) | ${KEY}")
   [[ "${RESULT}" != 'null' ]] && [[ "${RESULT}" != '' ]]
 }
 

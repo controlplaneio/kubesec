@@ -62,16 +62,18 @@ class myHandler(BaseHTTPRequestHandler):
         sys.stderr.write(subprocess.check_output(["cat", info], stderr=subprocess.STDOUT))
         sys.stderr.write("POST LOG END\n")
 
+        status_code = 200
         try:
             output = subprocess.check_output(["./kseccheck.sh", info], stderr=subprocess.STDOUT)
         except subprocess.CalledProcessError as e:
             output = e.output
+            status_code = 200
 
         f = StringIO()
         f.write(output)
         length = f.tell()
         f.seek(0)
-        self.send_response(200)
+        self.send_response(status_code)
         self.send_header("Content-type", "text/html")
         self.send_header("Content-Length", str(length))
         self.end_headers()
