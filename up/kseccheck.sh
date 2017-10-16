@@ -1,18 +1,17 @@
 #!/usr/bin/env bash
 #
-# Kubernetes Pod Security Checker
+# Kubernetes Resource Security Checker
 #
 # Andrew Martin, 2017-10-11 21:07:42
 # sublimino@gmail.com
 #
-## Usage: %SCRIPT_NAME% [options] <k8s resource>
+## Usage: %SCRIPT_NAME% [options] <k8s resource file>
 ##
 ## Validate security parameters of a Kubernetes resource
 ##
 ## Options:
-##   --debug                     More debug
-##
 ##   -h --help                   Display this message
+##   --debug                     More debug
 ##
 
 # exit on error or pipe failure
@@ -78,6 +77,7 @@ KEYS_MINUS_ONE_POINT=(
 
 KEYS_FAIL=(
   'containers[].securityContext.capabilities.add | index("SYS_ADMIN")'
+  'containers[].securityContext.privileged == true'
 )
 
 KEYS_STATEFULSET_PLUS_ONE_POINT=(
