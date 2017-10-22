@@ -23,6 +23,12 @@ load '_helper'
   assert_failure
 }
 
+@test "accepts --json flag" {
+  run ${APP} --json ${TEST_DIR}/asset/score-1-pod-default.yml
+  assert_output --regexp '  "score": [0-9]+.*'
+  assert_success
+}
+
 # ---
 
 @test "only valid types - deny PodSecurityPolicy" {
