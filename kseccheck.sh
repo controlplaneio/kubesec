@@ -10,8 +10,9 @@
 ## Validate security parameters of a Kubernetes resource
 ##
 ## Options:
-##   -h --help                   Display this message
-##   --debug                     More debug
+##   --json             JSON output
+##   -h --help          Display this message
+##   --debug            More debug
 ##
 
 # exit on error or pipe failure
@@ -36,10 +37,15 @@ ARGUMENTS=()
 FILENAME=''
 JSON=''
 FULL_JSON=''
-POINTS=0
+IS_JSON=0
 
 KUBECTL='kubectl'
 JQ='jq'
+
+POINTS=0
+OUTPUT_ADVISE=()
+OUTPUT_CRITICAL=()
+OUTPUT_SUCCESS=()
 
 KEYS_PLUS_ONE_POINT=(
   'seLinux'
@@ -281,6 +287,7 @@ parse_arguments() {
   while [ $# -gt 0 ]; do
     case $1 in
       -h | --help) usage ;;
+      --json) IS_JSON=1 ;;
       --debug)
         DEBUG=1
         set -xe
