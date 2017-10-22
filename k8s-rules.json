@@ -1,0 +1,144 @@
+{
+  "rules": [
+    {
+      "selector": "seLinux",
+      "reason": null,
+      "points": 1,
+      "href": null
+    },
+    {
+      "selector": "supplementalGroups",
+      "reason": null,
+      "points": 1,
+      "href": null
+    },
+    {
+      "selector": "runAsUser",
+      "reason": null,
+      "points": 1,
+      "href": null
+    },
+    {
+      "selector": "fsGroup",
+      "reason": null,
+      "points": 1,
+      "href": null
+    },
+    {
+      "selector": "allowedCapabilities",
+      "reason": null,
+      "points": 1,
+      "href": null
+    },
+    {
+      "selector": "containers[].securityContext.capabilities.drop",
+      "reason": null,
+      "points": 1,
+      "href": null
+    },
+    {
+      "selector": "containers[].securityContext.capabilities.drop | index(\"ALL\")",
+      "reason": null,
+      "points": 1,
+      "href": null
+    },
+    {
+      "selector": "containers[].securityContext.runAsNonRoot == true",
+      "reason": null,
+      "points": 1,
+      "href": null
+    },
+    {
+      "selector": "containers[].securityContext.runAsUser > 10000",
+      "reason": null,
+      "points": 1,
+      "href": null
+    },
+    {
+      "selector": "containers[].securityContext.readOnlyRootFilesystem == true",
+      "reason": null,
+      "points": 1,
+      "href": null
+    },
+    {
+      "selector": "containers[].resources.limits.cpu",
+      "reason": null,
+      "points": 1,
+      "href": null
+    },
+    {
+      "selector": "containers[].resources.limits.memory",
+      "reason": null,
+      "points": 1,
+      "href": null
+    },
+    {
+      "selector": "containers[].resources.requests.cpu",
+      "reason": null,
+      "points": 1,
+      "href": null
+    },
+    {
+      "selector": "containers[].resources.requests.memory",
+      "reason": null,
+      "points": 1,
+      "href": null
+    },
+    {
+      "selector": "seLinux",
+      "reason": null,
+      "points": -1,
+      "href": null
+    },
+    {
+      "selector": "supplementalGroups",
+      "reason": null,
+      "points": -1,
+      "href": null
+    },
+    {
+      "selector": "runAsUser",
+      "reason": null,
+      "points": -1,
+      "href": null
+    },
+    {
+      "selector": "fsGroup",
+      "reason": null,
+      "points": -1,
+      "href": null
+    },
+    {
+      "selector": "allowedCapabilities",
+      "reason": null,
+      "points": -1,
+      "href": null
+    },
+    {
+      "selector": ".spec.volumeClaimTemplates[].spec.accessModes | index(\"ReadWriteOnce\")",
+      "reason": null,
+      "points": 1,
+      "href": null,
+      "kind": "StatefulSet"
+    },
+    {
+      "selector": ".spec.volumeClaimTemplates[].spec.resources.requests.storage",
+      "reason": null,
+      "points": 1,
+      "href": null,
+      "kind": "StatefulSet"
+    },
+    {
+      "selector": "containers[].securityContext.capabilities.add | index(\"SYS_ADMIN\")",
+      "reason": null,
+      "points": -30,
+      "href": null
+    },
+    {
+      "selector": "containers[].securityContext.privileged == true",
+      "reason": null,
+      "points": -30,
+      "href": null
+    }
+  ]
+}
