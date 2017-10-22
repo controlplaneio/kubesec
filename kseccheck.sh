@@ -47,100 +47,6 @@ OUTPUT_ADVISE=()
 OUTPUT_CRITICAL=()
 OUTPUT_SUCCESS=()
 
-KEYS_PLUS_ONE_POINT=(
-  'seLinux'
-  'supplementalGroups'
-  'runAsUser'
-  'fsGroup'
-  'allowedCapabilities'
-  'containers[].securityContext.capabilities.drop'
-  'containers[].securityContext.capabilities.drop | index("ALL")'
-  'containers[].securityContext.runAsNonRoot == true'
-  'containers[].securityContext.runAsUser > 10000'
-  'containers[].securityContext.readOnlyRootFilesystem == true'
-  'containers[].resources.limits.cpu'
-  'containers[].resources.limits.memory'
-  'containers[].resources.requests.cpu'
-  'containers[].resources.requests.memory'
-
-  # TODO: Root keys, delve
-  #  'securityContext'
-  #  'securityContext.capabilities'
-
-  # TODO: where is this?
-  #  'securityContext.allowPrivilegeEscalation == false'
-)
-
-KEYS_MINUS_ONE_POINT=(
-  'seLinux'
-  'supplementalGroups'
-  'runAsUser'
-  'fsGroup'
-  'allowedCapabilities'
-)
-
-KEYS_FAIL=(
-  'containers[].securityContext.capabilities.add | index("SYS_ADMIN")'
-  'containers[].securityContext.privileged == true'
-)
-
-KEYS_STATEFULSET_PLUS_ONE_POINT=(
-  '.spec.volumeClaimTemplates[].spec.accessModes | index("ReadWriteOnce")'
-  '.spec.volumeClaimTemplates[].spec.resources.requests.storage'
-)
-
-resolve_jq() {
-  if ! JQ=$(resolve_binary jq); then
-    exit 1
-  fi
-}
-
-resolve_kubectl() {
-  if ! KUBECTL=$(resolve_binary kubectl); then
-    exit 1
-  fi
-}
-
-resolve_binary() {
-  local BINARY="${1}"
-  local ORIGINAL_BINARY="${BINARY}"
-
-  if ! command -v "${BINARY}" &>/dev/null; then
-    BINARY="./${ORIGINAL_BINARY}"
-
-    if ! command -v "${BINARY}" &>/dev/null; then
-      BINARY=$(find . -regex ".*/${ORIGINAL_BINARY}$" -type f -executable -print -quit)
-
-      if [[ "${BINARY:-}" == "" ]]; then
-        BINARY=$(find ../ -regex ".*/${ORIGINAL_BINARY}$" -type f -executable -print -quit)
-
-        if [[ "${BINARY:-}" == "" ]]; then
-          error "${BINARY} not found"
-        fi
-      fi
-    fi
-  fi
-  echo "${BINARY}"
-}
-
-get_rules() {
-    cat "${DIR}/"k8s-rules.json | jq "[ .rules[] | select(.kind == \"$(get_kind)\" or .kind == null) ]"
-}
-
-get_rule_by_selector() {
-    local SELECTOR="${1//\"/\\\"}"
-    get_rules | jq \
-        ".[] | select(.selector == \"${SELECTOR}\")"
-}
-
-escape_json() {
-    :
-}
-
-get_points() {
-    local SELECTOR="${1}"
-    get_rule_by_selector "${SELECTOR}" | jq '.points'
-}
 
 main() {
   handle_arguments "$@"
@@ -285,6 +191,59 @@ check_valid_kind() {
     fi
   fi
 
+}
+
+resolve_jq() {
+  if ! JQ=$(resolve_binary jq); then
+    exit 1
+  fi
+}
+
+resolve_kubectl() {
+  if ! KUBECTL=$(resolve_binary kubectl); then
+    exit 1
+  fi
+}
+
+resolve_binary() {
+  local BINARY="${1}"
+  local ORIGINAL_BINARY="${BINARY}"
+
+  if ! command -v "${BINARY}" &>/dev/null; then
+    BINARY="./${ORIGINAL_BINARY}"
+
+    if ! command -v "${BINARY}" &>/dev/null; then
+      BINARY=$(find . -regex ".*/${ORIGINAL_BINARY}$" -type f -executable -print -quit)
+
+      if [[ "${BINARY:-}" == "" ]]; then
+        BINARY=$(find ../ -regex ".*/${ORIGINAL_BINARY}$" -type f -executable -print -quit)
+
+        if [[ "${BINARY:-}" == "" ]]; then
+          error "${BINARY} not found"
+        fi
+      fi
+    fi
+  fi
+  echo "${BINARY}"
+}
+
+get_rules() {
+    cat "${DIR}/"k8s-rules.json | jq "[ .rules[] | select(.kind == \"$(get_kind)\" or .kind == null) ]"
+}
+
+get_rule_by_selector() {
+    local SELECTOR="${1//\"/\\\"}"
+    get_rules | jq \
+        ".[] | select(.selector == \"${SELECTOR}\")"
+}
+
+escape_json() {
+    :
+}
+
+get_points() {
+    local SELECTOR="${1}"
+    get_rule_by_selector "${SELECTOR}" | jq '.points'
 }
 
 is_key() {
