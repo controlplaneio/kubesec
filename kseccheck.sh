@@ -123,6 +123,25 @@ resolve_binary() {
   echo "${BINARY}"
 }
 
+get_rules() {
+    cat "${DIR}/"k8s-rules.json | jq "[ .rules[] | select(.kind == \"$(get_kind)\" or .kind == null) ]"
+}
+
+get_rule_by_selector() {
+    local SELECTOR="${1//\"/\\\"}"
+    get_rules | jq \
+        ".[] | select(.selector == \"${SELECTOR}\")"
+}
+
+escape_json() {
+    :
+}
+
+get_points() {
+    local SELECTOR="${1}"
+    get_rule_by_selector "${SELECTOR}" | jq '.points'
+}
+
 main() {
   handle_arguments "$@"
 
@@ -134,31 +153,58 @@ main() {
 
   check_valid_kind
 
-  for KEY in "${KEYS_PLUS_ONE_POINT[@]}"; do
-    if is_key "${KEY}"; then
-      POINTS=$((POINTS + 1))
-    else
-      advise "Add" "${KEY}"
-    fi
-  done
+  RULES=$(get_rules)
+  SELECTORS=$(echo "${RULES}" | jq -r ".[].selector" | sed 's,\",",g')
 
-  for KEY in "${KEYS_FAIL[@]}"; do
-    if is_key "${KEY}"; then
-      advise "Remove" "${KEY}"
-      POINTS=0
+  while read SELECTOR; do
+    THIS_POINTS=$(get_points "${SELECTOR}")
+    if is_key "${SELECTOR}"; then
+      POINTS=$((POINTS + THIS_POINTS))
+    else
+      if [[ ${THIS_POINTS} > 0 ]]; then
+        advise "Add" "${SELECTOR}"
+      else
+        advise "Remove" "${SELECTOR}"
+      fi
     fi
-  done
+  done < <(echo "${SELECTORS}")
 
   rule_capabilities
   rule_resources
 
-  rule_statefulset
+  print_output
 
   if [[ "${POINTS}" -gt 0 ]]; then
     success "Passed with a score of ${POINTS} points"
   else
     error "Failed with a score of 0 points"
   fi
+}
+
+print_output() {
+  if [[ "${IS_JSON}" == 1 ]]; then
+    local JQ_OUT=''
+    JQ_OUT=$(jq --null-input \
+      ".score |= ${POINTS}")
+
+    for THIS_OUTPUT in "${OUTPUT_CRITICAL[@]}"; do
+      JQ_OUT=$(echo "${JQ_OUT}" | jq \
+        ".scoring.critical += [${THIS_OUTPUT}]")
+    done
+
+    echo "${JQ_OUT}"
+  else
+    output_array "${OUTPUT_CRITICAL[@]:-}"
+    output_array "${OUTPUT_ADVISE[@]:-}"
+    output_array "${OUTPUT_SUCCESS[@]:-}"
+  fi
+}
+
+output_array() {
+  local OUTPUT_ARRAY=("${@:-}")
+  for THIS_OUTPUT in "${OUTPUT_ARRAY[@]}"; do
+    echo "${THIS_OUTPUT}"
+  done
 }
 
 rule_capabilities() {
@@ -175,9 +221,24 @@ rule_resources() {
   :
 }
 
+get_spec_path() {
+  local SPEC_PATH="${1-.spec.}"
+  echo "${SPEC_PATH}"
+}
+
+critical() {
+  local SPEC_PATH=$(get_spec_path "${3:-}")
+  OUTPUT_CRITICAL+=("${1} ${SPEC_PATH}${2}")
+}
+
 advise() {
-  local SPEC_PATH="${3-.spec.}"
-  echo "${1}" "${SPEC_PATH}${2}"
+  local SPEC_PATH=$(get_spec_path "${3:-}")
+  OUTPUT_ADVISE+=("${1} ${SPEC_PATH}${2}")
+}
+
+output_success() {
+  local SPEC_PATH=$(get_spec_path "${3:-}")
+  OUTPUT_SUCCESS+=("${1} ${SPEC_PATH}${2}")
 }
 
 rule_statefulset() {
@@ -228,27 +289,23 @@ check_valid_kind() {
 
 is_key() {
   local KEY="${1}"
+  local TEST_JSON="${JSON}"
 
-  #  if ! ${JQ} "select(.spec.${KEY}) | .spec.${KEY}"; then
-  #    error "jq error"
-  #  fi
-
-  # TODO: if debug read user input
-
-  local RESULT=$(echo "${JSON}" | ${JQ} "select(.spec.${KEY}) | .spec.${KEY}")
-  [[ "${RESULT}" != 'null' ]] && [[ "${RESULT}" != '' ]]
-}
-
-is_key_full_json() {
-  local KEY="${1}"
-
-  #  if ! ${JQ} "select(.spec.${KEY}) | .spec.${KEY}"; then
-  #    error "jq error"
-  #  fi
+  if [[ "${KEY:0:1}" != '.' ]]; then
+    KEY=".spec.${KEY}"
+  else
+    TEST_JSON="${FULL_JSON}"
+  fi
 
   # TODO: if debug read user input
 
-  local RESULT=$(echo "${FULL_JSON}" | ${JQ} "select(${KEY}) | ${KEY}")
+  local RESULT=$(echo "${TEST_JSON}" | ${JQ} "select(${KEY}) | ${KEY}" 2>&1)
+  if [[ "${RESULT}" =~ ^jq:\ error ]]; then
+    warning "${RESULT}"
+    warning "$(echo "${TEST_JSON}")"
+    error "${JQ} \"select(${KEY}) | ${KEY}\""
+  fi
+
   [[ "${RESULT}" != 'null' ]] && [[ "${RESULT}" != '' ]]
 }
 
