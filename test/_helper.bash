@@ -7,11 +7,11 @@ APP="./../kseccheck.sh"
 TEST_DIR="."
 
 assert_non_zero_points() {
-  assert_output --regexp ".*with [1-9]+ points.*"
+  assert_output --regexp ".*with a score of [1-9]+ points.*"
   assert_success
 }
 
 assert_zero_points() {
-  assert_output --regexp ".*with 0 points.*"
+  assert_output --regexp ".*with a score of 0 points.*"
   assert_failure
 }

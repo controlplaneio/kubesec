@@ -45,7 +45,6 @@ KEYS_PLUS_ONE_POINT=(
   'seLinux'
   'supplementalGroups'
   'runAsUser'
-  'runAsUser'
   'fsGroup'
   'allowedCapabilities'
   'containers[].securityContext.capabilities.drop'
@@ -70,7 +69,6 @@ KEYS_MINUS_ONE_POINT=(
   'seLinux'
   'supplementalGroups'
   'runAsUser'
-  'runAsUser'
   'fsGroup'
   'allowedCapabilities'
 )
@@ -84,24 +82,6 @@ KEYS_STATEFULSET_PLUS_ONE_POINT=(
   '.spec.volumeClaimTemplates[].spec.accessModes | index("ReadWriteOnce")'
   '.spec.volumeClaimTemplates[].spec.resources.requests.storage'
 )
-
-#resolve_kubectl() {
-#  if ! command -v "${KUBECTL}" &>/dev/null; then
-#    KUBECTL='./kubectl'
-#
-#    if ! command -v "${KUBECTL}" &>/dev/null; then
-#      KUBECTL=$(find . -regex '.*/kubectl$' -type f -executable -print -quit)
-#
-#      if [[ "${KUBECTL:-}" == "" ]]; then
-#        KUBECTL=$(find ../ -regex '.*/kubectl$' -type f -executable -print -quit)
-#
-#        if [[ "${KUBECTL:-}" == "" ]]; then
-#          error "kubectl not found"
-#        fi
-#      fi
-#    fi
-#  fi
-#}
 
 resolve_jq() {
   if ! JQ=$(resolve_binary jq); then
@@ -169,9 +149,9 @@ main() {
   rule_statefulset
 
   if [[ "${POINTS}" -gt 0 ]]; then
-    success "Passed with ${POINTS} points"
+    success "Passed with a score of ${POINTS} points"
   else
-    error "Failed with 0 points"
+    error "Failed with a score of 0 points"
   fi
 }
 
@@ -208,7 +188,20 @@ rule_statefulset() {
 
 get_json() {
   local FILENAME="${1}"
-  ${KUBECTL} convert -o json --local=true --filename="${FILENAME}"
+  local COMMAND="${KUBECTL} convert -o json --local=true --filename=\"${FILENAME}\""
+  if is_unprivileged_userns_clone; then
+    unshare --net \
+      --map-root-user \
+      bash -c "\
+        PATH=\"${PATH}\"; ${COMMAND}\
+    "
+  else
+    ${COMMAND}
+  fi
+}
+
+is_unprivileged_userns_clone() {
+  sysctl kernel.unprivileged_userns_clone | grep -q ' = 1'
 }
 
 get_kind() {

@@ -127,10 +127,19 @@ load '_helper'
   assert_zero_points
 }
 
+@test "fails DaemonSet with mounted host docker.sock" {
+  skip
+  run ${APP} ${TEST_DIR}/asset/score-0-daemonset-mount-docker-socket.yml
+  assert_zero_points
+}
+
+
+
+
 # TODO: tests for all the permutations of this file
 @test "fails DaemonSet with loads o' permutations" {
   skip
-  run ${APP} ${TEST_DIR}/asset/score-0-daemonset-securitycontext-privileged.yml
+  run ${APP} ${TEST_DIR}/asset/score-0-daemonset-
   assert_zero_points
 }
 
