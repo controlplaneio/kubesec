@@ -85,36 +85,6 @@
       "href": null
     },
     {
-      "selector": "seLinux",
-      "reason": null,
-      "points": -1,
-      "href": null
-    },
-    {
-      "selector": "supplementalGroups",
-      "reason": null,
-      "points": -1,
-      "href": null
-    },
-    {
-      "selector": "runAsUser",
-      "reason": null,
-      "points": -1,
-      "href": null
-    },
-    {
-      "selector": "fsGroup",
-      "reason": null,
-      "points": -1,
-      "href": null
-    },
-    {
-      "selector": "allowedCapabilities",
-      "reason": null,
-      "points": -1,
-      "href": null
-    },
-    {
       "selector": ".spec.volumeClaimTemplates[].spec.accessModes | index(\"ReadWriteOnce\")",
       "reason": null,
       "points": 1,
