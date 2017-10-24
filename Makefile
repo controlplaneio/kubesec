@@ -23,7 +23,17 @@ test-new:
 	  cd test && /usr/src/bats-core/bin/bats . \
 	'
 
-deploy:
+up-start:
+	bash -xc ' \
+		cd up && AWS_PROFILE=binslug-s3 up start \
+	'
+
+up-deploy:
+	bash -xc ' \
+		cd up && AWS_PROFILE=binslug-s3 up deploy production \
+	'
+
+up-url:
 	bash -xc ' \
 		cd up && AWS_PROFILE=binslug-s3 up deploy production \
 	'

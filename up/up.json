@@ -12,7 +12,7 @@
   },
   "stages": {
     "production": {
-      "domain": "seccheck.control-plane.io"
+      "domain": "kubesec.io"
     }
   }
 }
