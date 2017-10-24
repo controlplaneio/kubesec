@@ -33,14 +33,14 @@ kseccheck.sh [options] <k8s resource file>
     ],
     "advisory": [
       {
-        "reason": "gremlins in the system",
+        "reason": "you should fix this",
         "href": "http:/",
-        "points": 1
+        "points": -1
       }
     ],
     "positive": [
       {
-        "reason": "you're really nice",
+        "reason": "well done",
         "points": 100,
         "href": "https://more-info.com"
       }
@@ -48,3 +48,8 @@ kseccheck.sh [options] <k8s resource file>
   }
 }
 ```
+
+## To add
+
+1. contents of https://kubernetes.io/docs/concepts/policy/pod-security-policy/
+1. examples from https://github.com/kubernetes/kubernetes/tree/master/examples

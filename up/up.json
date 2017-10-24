@@ -4,7 +4,7 @@
     "eu-west-2"
   ],
   "hooks": {
-    "build": "cp -f ../kseccheck.sh ."
+    "build": "cp -f ../kseccheck.sh ../k8s-rules.json ."
   },
   "proxy": {
     "memory": 1024,

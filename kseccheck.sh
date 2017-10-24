@@ -45,8 +45,8 @@ JQ='jq'
 POINTS=0
 OUTPUT_ADVISE=()
 OUTPUT_CRITICAL=()
-OUTPUT_SUCCESS=()
-
+OUTPUT_POSTITIVE=()
+OUTPUT_NEGATIVE=()
 
 main() {
   handle_arguments "$@"
@@ -60,19 +60,35 @@ main() {
   check_valid_kind
 
   RULES=$(get_rules)
-  SELECTORS=$(echo "${RULES}" | jq -r ".[].selector" | sed 's,\",",g')
+  SELECTORS=$(echo "${RULES}" | jq -r ".selector" | sed 's,\",",g')
+
+  COUNT=0
 
   while read SELECTOR; do
     THIS_POINTS=$(get_points "${SELECTOR}")
+
     if is_key "${SELECTOR}"; then
       POINTS=$((POINTS + THIS_POINTS))
-    else
-      if [[ ${THIS_POINTS} > 0 ]]; then
-        advise "Add" "${SELECTOR}"
+
+      THIS_RULE=$(get_rule_by_selector "${SELECTOR}")
+      # warning "THIS_RULE ${THIS_RULE}"
+
+      if [[ ${THIS_POINTS} -gt 0 ]]; then
+        positive "${THIS_RULE}"
+      elif [[ ${THIS_POINTS} -le 10 ]]; then
+        critical "${THIS_RULE}"
       else
-        advise "Remove" "${SELECTOR}"
+        negative "${THIS_RULE}"
+      fi
+    else
+      if [[ ${THIS_POINTS} -gt 0 ]]; then
+        THIS_RULE=$(get_rule_by_selector "${SELECTOR}")
+        # warning "THIS_RULE ${THIS_RULE}"
+        advise "${THIS_RULE}"
       fi
     fi
+    # warning "COUNT is $COUNT : $THIS_POINTS $SELECTOR "
+    COUNT=$((COUNT + 1))
   done < <(echo "${SELECTORS}")
 
   rule_capabilities
@@ -80,11 +96,6 @@ main() {
 
   print_output
 
-  if [[ "${POINTS}" -gt 0 ]]; then
-    success "Passed with a score of ${POINTS} points"
-  else
-    error "Failed with a score of 0 points"
-  fi
 }
 
 print_output() {
@@ -98,11 +109,33 @@ print_output() {
         ".scoring.critical += [${THIS_OUTPUT}]")
     done
 
+    for THIS_OUTPUT in "${OUTPUT_ADVISE[@]}"; do
+      JQ_OUT=$(echo "${JQ_OUT}" | jq \
+        ".scoring.advise += [${THIS_OUTPUT}]")
+    done
+
+    for THIS_OUTPUT in "${OUTPUT_POSITIVE[@]}"; do
+      JQ_OUT=$(echo "${JQ_OUT}" | jq \
+        ".scoring.postitive += [${THIS_OUTPUT}]")
+    done
+
+    for THIS_OUTPUT in "${OUTPUT_NEGATIVE[@]}"; do
+      JQ_OUT=$(echo "${JQ_OUT}" | jq \
+        ".scoring.negative += [${THIS_OUTPUT}]")
+    done
+
     echo "${JQ_OUT}"
   else
     output_array "${OUTPUT_CRITICAL[@]:-}"
     output_array "${OUTPUT_ADVISE[@]:-}"
-    output_array "${OUTPUT_SUCCESS[@]:-}"
+    output_array "${OUTPUT_POSITIVE[@]:-}"
+    output_array "${OUTPUT_NEGATIVE[@]:-}"
+
+    if [[ "${POINTS}" -gt 0 ]]; then
+      success "Passed with a score of ${POINTS} points"
+    else
+      error "Failed with a score of 0 points"
+    fi
   fi
 }
 
@@ -133,18 +166,19 @@ get_spec_path() {
 }
 
 critical() {
-  local SPEC_PATH=$(get_spec_path "${3:-}")
-  OUTPUT_CRITICAL+=("${1} ${SPEC_PATH}${2}")
+  OUTPUT_CRITICAL+=("${1}")
 }
 
 advise() {
-  local SPEC_PATH=$(get_spec_path "${3:-}")
-  OUTPUT_ADVISE+=("${1} ${SPEC_PATH}${2}")
+  OUTPUT_ADVISE+=("${1}")
 }
 
-output_success() {
-  local SPEC_PATH=$(get_spec_path "${3:-}")
-  OUTPUT_SUCCESS+=("${1} ${SPEC_PATH}${2}")
+positive() {
+  OUTPUT_POSITIVE+=("${1}")
+}
+
+negative() {
+  OUTPUT_NEGATIVE+=("${1}")
 }
 
 rule_statefulset() {
@@ -182,7 +216,6 @@ get_kind() {
 }
 
 check_valid_kind() {
-  echo "Type: $(get_kind)" >&2
   if ! is_pod; then
     if is_deployment || is_statefulset || is_daemonset; then
       JSON=$(echo "${JSON}" | ${JQ} -r '.spec.template')
@@ -228,22 +261,22 @@ resolve_binary() {
 }
 
 get_rules() {
-    cat "${DIR}/"k8s-rules.json | jq "[ .rules[] | select(.kind == \"$(get_kind)\" or .kind == null) ]"
+  cat "${DIR}/"k8s-rules.json | ${JQ} ".rules[] | select(.kind == \"$(get_kind)\" or .kind == null)"
 }
 
 get_rule_by_selector() {
-    local SELECTOR="${1//\"/\\\"}"
-    get_rules | jq \
-        ".[] | select(.selector == \"${SELECTOR}\")"
+  local SELECTOR="${1//\"/\\\"}"
+  echo "${RULES}" | ${JQ} \
+    ". | select(.selector == \"${SELECTOR}\")"
 }
 
 escape_json() {
-    :
+  :
 }
 
 get_points() {
-    local SELECTOR="${1}"
-    get_rule_by_selector "${SELECTOR}" | jq '.points'
+  local SELECTOR="${1}"
+  get_rule_by_selector "${SELECTOR}" | ${JQ} '.points'
 }
 
 is_key() {
@@ -259,9 +292,9 @@ is_key() {
   # TODO: if debug read user input
 
   local RESULT=$(echo "${TEST_JSON}" | ${JQ} "select(${KEY}) | ${KEY}" 2>&1)
-  if [[ "${RESULT}" =~ ^jq:\ error ]]; then
+  if [[ "${RESULT}" =~ ^jq:[[:space:]]error ]]; then
     warning "${RESULT}"
-    warning "$(echo "${TEST_JSON}")"
+    warning "${TEST_JSON}"
     error "${JQ} \"select(${KEY}) | ${KEY}\""
   fi
 

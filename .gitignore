@@ -103,3 +103,6 @@ output/*/index.html
 docs/_build
 .scratch.md
 kube-sec-check
+
+up/kseccheck.sh
+up/k8s-rules.json

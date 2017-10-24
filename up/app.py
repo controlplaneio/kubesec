@@ -58,13 +58,13 @@ class myHandler(BaseHTTPRequestHandler):
         print r, info, "by: ", self.client_address
 
         sys.stderr.write("POST LOG START\n")
-        sys.stderr.write(info + "\n")
+        sys.stderr.write("  " + info + "\n")
         sys.stderr.write(subprocess.check_output(["cat", info], stderr=subprocess.STDOUT))
         sys.stderr.write("POST LOG END\n")
 
         status_code = 200
         try:
-            output = subprocess.check_output(["./kseccheck.sh", info], stderr=subprocess.STDOUT)
+            output = subprocess.check_output(["./kseccheck.sh", "--json", info], stderr=subprocess.STDOUT)
         except subprocess.CalledProcessError as e:
             output = e.output
             status_code = 200
