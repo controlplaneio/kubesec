@@ -120,7 +120,7 @@ print_output() {
 
     for THIS_OUTPUT in "${OUTPUT_POSITIVE[@]:-}"; do
       JQ_OUT=$(echo "${JQ_OUT}" | ${JQ} \
-        ".scoring.postitive += [${THIS_OUTPUT}]")
+        ".scoring.positive += [${THIS_OUTPUT}]")
     done
 
     for THIS_OUTPUT in "${OUTPUT_NEGATIVE[@]:-}"; do
