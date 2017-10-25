@@ -23,7 +23,7 @@ load '_helper'
   assert_failure
 }
 
-@test "accepts --json flag locally" {
+@test "accepts --json flag (local)" {
   if _is_remote; then
     skip
   fi
@@ -31,6 +31,21 @@ load '_helper'
   run _app --json ${TEST_DIR}/asset/score-1-pod-default.yml
   assert_output --regexp '  "score": [0-9]+.*'
   assert_success
+}
+
+# ---
+
+@test "does not reference local file (local)" {
+  if _is_remote; then
+    skip
+  fi
+
+  local COUNT=0
+
+  COUNT_JQ=$(grep -E '\bjq\b' ../kseccheck.sh | grep -v "JQ='jq'" | grep -v "=~ ^jq" | wc -l)
+  [ "${COUNT_JQ}" -eq 0 ]
+  COUNT_KUBECTL=$(grep -E '\bkubectl\b' ../kseccheck.sh | grep -v "KUBECTL='kubectl'" | wc -l)
+  [ "${COUNT_KUBECTL}" -eq 0 ]
 }
 
 # ---
