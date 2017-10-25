@@ -60,9 +60,13 @@ main() {
   check_valid_kind
 
   RULES=$(get_rules)
-  SELECTORS=$(echo "${RULES}" | jq -r ".selector" | sed 's,\",",g')
+  SELECTORS=$(echo "${RULES}" | ${JQ} -r ".selector" | sed 's,\",",g')
 
   COUNT=0
+
+  # TODO(ajm): /dev/fd/X redirect below fails on Lambda, BASH 4.2 - replaced with tmp file
+  local TEMP_FILE=$(mktemp)
+  echo "${SELECTORS}" >>"${TEMP_FILE}"
 
   while read SELECTOR; do
     THIS_POINTS=$(get_points "${SELECTOR}")
@@ -89,7 +93,7 @@ main() {
     fi
     # warning "COUNT is $COUNT : $THIS_POINTS $SELECTOR "
     COUNT=$((COUNT + 1))
-  done < <(echo "${SELECTORS}")
+  done <"${TEMP_FILE}"
 
   rule_capabilities
   rule_resources
@@ -101,26 +105,26 @@ main() {
 print_output() {
   if [[ "${IS_JSON}" == 1 ]]; then
     local JQ_OUT=''
-    JQ_OUT=$(jq --null-input \
+    JQ_OUT=$(${JQ} --null-input \
       ".score |= ${POINTS}")
 
-    for THIS_OUTPUT in "${OUTPUT_CRITICAL[@]}"; do
-      JQ_OUT=$(echo "${JQ_OUT}" | jq \
+    for THIS_OUTPUT in "${OUTPUT_CRITICAL[@]:-}"; do
+      JQ_OUT=$(echo "${JQ_OUT}" | ${JQ} \
         ".scoring.critical += [${THIS_OUTPUT}]")
     done
 
-    for THIS_OUTPUT in "${OUTPUT_ADVISE[@]}"; do
-      JQ_OUT=$(echo "${JQ_OUT}" | jq \
+    for THIS_OUTPUT in "${OUTPUT_ADVISE[@]:-}"; do
+      JQ_OUT=$(echo "${JQ_OUT}" | ${JQ} \
         ".scoring.advise += [${THIS_OUTPUT}]")
     done
 
-    for THIS_OUTPUT in "${OUTPUT_POSITIVE[@]}"; do
-      JQ_OUT=$(echo "${JQ_OUT}" | jq \
+    for THIS_OUTPUT in "${OUTPUT_POSITIVE[@]:-}"; do
+      JQ_OUT=$(echo "${JQ_OUT}" | ${JQ} \
         ".scoring.postitive += [${THIS_OUTPUT}]")
     done
 
-    for THIS_OUTPUT in "${OUTPUT_NEGATIVE[@]}"; do
-      JQ_OUT=$(echo "${JQ_OUT}" | jq \
+    for THIS_OUTPUT in "${OUTPUT_NEGATIVE[@]:-}"; do
+      JQ_OUT=$(echo "${JQ_OUT}" | ${JQ} \
         ".scoring.negative += [${THIS_OUTPUT}]")
     done
 
@@ -208,7 +212,11 @@ get_json() {
 }
 
 is_unprivileged_userns_clone() {
-  sysctl kernel.unprivileged_userns_clone | grep -q ' = 1'
+  command -v sysctl &>/dev/null \
+    && sysctl kernel.unprivileged_userns_clone | grep -q ' = 1' \
+      && unshare --net \
+        --map-root-user \
+        touch /dev/null &>/dev/null
 }
 
 get_kind() {
@@ -227,13 +235,13 @@ check_valid_kind() {
 }
 
 resolve_jq() {
-  if ! JQ=$(resolve_binary jq); then
+  if ! JQ=$(resolve_binary ${JQ}); then
     exit 1
   fi
 }
 
 resolve_kubectl() {
-  if ! KUBECTL=$(resolve_binary kubectl); then
+  if ! KUBECTL=$(resolve_binary ${KUBECTL}); then
     exit 1
   fi
 }
@@ -380,15 +388,26 @@ info() {
 } 1>&2
 
 warning() {
+  if [[ "${IS_JSON:-0}" == 1 ]]; then
+    return
+  fi
   [ "${*:-}" ] && ERROR="$*" || ERROR="Unknown Warning"
   printf "%s\n" "$(log_message_prefix)${COLOUR_RED}${ERROR}${COLOUR_RESET}"
 } 1>&2
 
 error() {
   [ "${*:-}" ] && ERROR="$*" || ERROR="Unknown Error"
+  json_error "${ERROR}"
   printf "%s\n" "$(log_message_prefix)${COLOUR_RED}${ERROR}${COLOUR_RESET}"
   exit 3
 } 1>&2
+
+json_error() {
+  if [[ "${IS_JSON:-0}" == 1 ]]; then
+    ${JQ} --null-input ".error |= \"${*//\"/\\\"}\""
+    exit 3
+  fi
+}
 
 error_env_var() {
   error "${1} environment variable required"

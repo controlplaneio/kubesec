@@ -1,7 +1,7 @@
 {
-  "name": "kube-seccheck",
+  "name": "kubesec-io",
   "regions": [
-    "eu-west-2"
+    "us-east-1"
   ],
   "hooks": {
     "build": "cp -f ../kseccheck.sh ../k8s-rules.json ."

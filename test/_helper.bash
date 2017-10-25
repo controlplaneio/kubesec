@@ -3,15 +3,51 @@
 load './bin/bats-support/load'
 load './bin/bats-assert/load'
 
-APP="./../kseccheck.sh"
 TEST_DIR="."
 
-assert_non_zero_points() {
-  assert_output --regexp ".*with a score of [1-9]+ points.*"
-  assert_success
+_is_local() {
+  [[ "${TEST_REMOTE:-0}" != 1 ]]
+}
+_is_remote() {
+  ! _is_local
 }
 
-assert_zero_points() {
-  assert_output --regexp ".*with a score of 0 points.*"
-  assert_failure
-}
+if _is_remote; then
+
+  _app() {
+    local FILE="${1:-}"
+    shift
+    curl --fail -v https://kubesec.io -F file=@"${FILE}" "${@}"
+  }
+
+  assert_non_zero_points() {
+    assert_output --regexp ".*\"score\": [1-9]+,.*"
+    assert_success
+  }
+
+  assert_zero_points() {
+    assert_output --regexp ".*\"score\": (0|\-[1-9][0-9]*),.*"
+    assert_success
+  }
+
+  assert_file_not_found() {
+    assert_output --regexp ".*couldn't open file \"somefile.yaml\".*"
+  }
+else
+
+  _app() { ./../kseccheck.sh "${@}"; }
+
+  assert_non_zero_points() {
+    assert_output --regexp ".*with a score of [1-9]+ points.*"
+    assert_success
+  }
+
+  assert_zero_points() {
+    assert_output --regexp ".*with a score of 0 points.*"
+    assert_failure
+  }
+
+  assert_file_not_found() {
+    assert_output --regexp ".*File somefile.yaml does not exist.*"
+  }
+fi
