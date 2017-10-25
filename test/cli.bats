@@ -13,18 +13,22 @@ load '_helper'
 # refute_line
 
 @test "errors with no filename" {
-  run "${APP}"
+  run _app
   assert_failure
 }
 
 @test "errors with invalid file" {
-  run ${APP} somefile.yaml
-  assert_output --regexp ".*File somefile.yaml does not exist.*"
+  run _app somefile.yaml
+  assert_file_not_found
   assert_failure
 }
 
-@test "accepts --json flag" {
-  run ${APP} --json ${TEST_DIR}/asset/score-1-pod-default.yml
+@test "accepts --json flag locally" {
+  if _is_remote; then
+    skip
+  fi
+
+  run _app --json ${TEST_DIR}/asset/score-1-pod-default.yml
   assert_output --regexp '  "score": [0-9]+.*'
   assert_success
 }
@@ -32,31 +36,33 @@ load '_helper'
 # ---
 
 @test "only valid types - deny PodSecurityPolicy" {
-  run ${APP} ${TEST_DIR}/asset/score-0-podsecuritypolicy-permissive.yml
+  run _app ${TEST_DIR}/asset/score-0-podsecuritypolicy-permissive.yml
   assert_output --regexp ".*Only kinds .* accepted.*"
-  assert_failure
+  if _is_local; then
+    assert_failure
+  fi
 }
 
 @test "only valid types - allow Pod" {
-  run ${APP} ${TEST_DIR}/asset/score-1-pod-default.yml
+  run _app ${TEST_DIR}/asset/score-1-pod-default.yml
   refute_output --regexp ".*Only kinds .* accepted.*"
   assert_success
 }
 
 @test "only valid types - allow Deployment" {
-  run ${APP} ${TEST_DIR}/asset/score-1-dep-default.yml
+  run _app ${TEST_DIR}/asset/score-1-dep-default.yml
   refute_output --regexp ".*Only kinds .* accepted.*"
   assert_success
 }
 
 @test "only valid types - allow StatefulSet" {
-  run ${APP} ${TEST_DIR}/asset/score-1-statefulset-default.yml
+  run _app ${TEST_DIR}/asset/score-1-statefulset-default.yml
   refute_output --regexp ".*Only kinds .* accepted.*"
   assert_success
 }
 
 @test "only valid types - allow DaemonSet" {
-  run ${APP} ${TEST_DIR}/asset/score-1-daemonset-default.yml
+  run _app ${TEST_DIR}/asset/score-1-daemonset-default.yml
   refute_output --regexp ".*Only kinds .* accepted.*"
   assert_success
 }
@@ -64,78 +70,78 @@ load '_helper'
 # ---
 
 @test "fails with CAP_SYS_ADMIN" {
-  run ${APP} ${TEST_DIR}/asset/score-0-cap-sys-admin.yml
+  run _app ${TEST_DIR}/asset/score-0-cap-sys-admin.yml
   assert_zero_points
 }
 
 @test "fails with CAP_CHOWN" {
-  run ${APP} ${TEST_DIR}/asset/score-0-cap-chown.yml
+  run _app ${TEST_DIR}/asset/score-0-cap-chown.yml
   assert_zero_points
 }
 
 @test "fails with CAP_SYS_ADMIN and CAP_CHOWN" {
-  run ${APP} ${TEST_DIR}/asset/score-0-cap-sys-admin-and-cap-chown.yml
+  run _app ${TEST_DIR}/asset/score-0-cap-sys-admin-and-cap-chown.yml
   assert_zero_points
 }
 
 @test "passes with securityContext capabilities drop all" {
-  run ${APP} ${TEST_DIR}/asset/score-1-cap-drop-all.yml
+  run _app ${TEST_DIR}/asset/score-1-cap-drop-all.yml
   assert_non_zero_points
 }
 
 @test "passes deployment with securitycontext readOnlyRootFilesystem" {
-  run ${APP} ${TEST_DIR}/asset/score-1-dep-ro-root-fs.yml
+  run _app ${TEST_DIR}/asset/score-1-dep-ro-root-fs.yml
   assert_non_zero_points
 }
 
 @test "passes deployment with securitycontext runAsNonRoot" {
-  run ${APP} ${TEST_DIR}/asset/score-1-dep-seccon-run-as-non-root.yml
+  run _app ${TEST_DIR}/asset/score-1-dep-seccon-run-as-non-root.yml
   assert_non_zero_points
 }
 
 @test "fails deployment with securitycontext runAsUser 1" {
-  run ${APP} ${TEST_DIR}/asset/score-1-dep-seccon-run-as-user-1.yml
+  run _app ${TEST_DIR}/asset/score-1-dep-seccon-run-as-user-1.yml
   assert_zero_points
 }
 
 @test "passes deployment with securitycontext runAsUser > 10000" {
-  run ${APP} ${TEST_DIR}/asset/score-1-dep-seccon-run-as-user-10001.yml
+  run _app ${TEST_DIR}/asset/score-1-dep-seccon-run-as-user-10001.yml
   assert_non_zero_points
 }
 
 @test "fails deployment with empty security context" {
-  run ${APP} ${TEST_DIR}/asset/score-1-dep-empty-security-context.yml
+  run _app ${TEST_DIR}/asset/score-1-dep-empty-security-context.yml
   assert_zero_points
 }
 
 @test "passes deployment with cgroup resource limits" {
-  run ${APP} ${TEST_DIR}/asset/score-1-dep-resource-limit-cpu.yml
+  run _app ${TEST_DIR}/asset/score-1-dep-resource-limit-cpu.yml
   assert_non_zero_points
 }
 
 @test "passes deployment with cgroup memory limits" {
-  run ${APP} ${TEST_DIR}/asset/score-1-dep-resource-limit-memory.yml
+  run _app ${TEST_DIR}/asset/score-1-dep-resource-limit-memory.yml
   assert_non_zero_points
 }
 
 @test "passes StatefulSet with volumeClaimTemplate" {
-  run ${APP} ${TEST_DIR}/asset/score-1-statefulset-volumeclaimtemplate.yml
+  run _app ${TEST_DIR}/asset/score-1-statefulset-volumeclaimtemplate.yml
   assert_non_zero_points
 }
 
 @test "fails StatefulSet with no security" {
-  run ${APP} ${TEST_DIR}/asset/score-0-statefulset-no-sec.yml
+  run _app ${TEST_DIR}/asset/score-0-statefulset-no-sec.yml
   assert_zero_points
 }
 
 @test "fails DaemonSet with securityContext.privileged = true" {
-  run ${APP} ${TEST_DIR}/asset/score-0-daemonset-securitycontext-privileged.yml
+  run _app ${TEST_DIR}/asset/score-0-daemonset-securitycontext-privileged.yml
   assert_zero_points
 }
 
 @test "fails DaemonSet with mounted host docker.sock" {
   skip
-  run ${APP} ${TEST_DIR}/asset/score-0-daemonset-mount-docker-socket.yml
+  run _app ${TEST_DIR}/asset/score-0-daemonset-mount-docker-socket.yml
   assert_zero_points
 }
 
@@ -145,7 +151,7 @@ load '_helper'
 # TODO: tests for all the permutations of this file
 @test "fails DaemonSet with loads o' permutations" {
   skip
-  run ${APP} ${TEST_DIR}/asset/score-0-daemonset-
+  run _app ${TEST_DIR}/asset/score-0-daemonset-
   assert_zero_points
 }
 
