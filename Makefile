@@ -1,6 +1,7 @@
 SHELL := /bin/bash
 PACKAGE = github.com/controlplane/theseus/cmd
 HAS_DEP := $(shell command -v dep 2>/dev/null)
+REMOTE_URL="https://kubesec.io/"
 
 .PHONY: build container dep dev local test test test-acceptance test-unit
 .SILENT:
@@ -10,36 +11,59 @@ all:
 	make test
 	make build
 
-test-go :
-	go test $$(go list ./... | grep -v '/vendor/')
+deploy:
+	bash -xec ' \
+		unalias make || true; \
+		make test \
+		&& make up-deploy-staging \
+			&& make test-remote-staging \
+			&& make up-deploy \
+			&& make test-remote ; \
+	'
 
 test:
 	bash -xc ' \
-	  cd test && ./bin/bats/bin/bats . \
+	  (cd test && ./bin/bats/bin/bats .) \
 	'
 test-remote:
 	bash -xc ' \
-	  cd test && TEST_REMOTE=1 ./bin/bats/bin/bats . \
+	  (cd test && TEST_REMOTE=1 REMOTE_URL=$(REMOTE_URL) ./bin/bats/bin/bats . )\
+	'
+
+test-remote-staging:
+	bash -xc ' \
+		(REMOTE_URL=$$(\make up-url-staging 2>/dev/null); \
+	  cd test && TEST_REMOTE=1 REMOTE_URL=$${REMOTE_URL} ./bin/bats/bin/bats .) \
 	'
 
 test-new:
 	bash -xc ' \
-	  cd test && /usr/src/bats-core/bin/bats . \
+	  (cd test && /usr/src/bats-core/bin/bats .) \
 	'
 
 up-start:
 	bash -xc ' \
-		cd up && AWS_PROFILE=binslug-s3 up start \
+		(cd up && AWS_PROFILE=binslug-s3 up start) \
+	'
+
+up-deploy-staging:
+	bash -xc ' \
+		(cd up && AWS_PROFILE=binslug-s3 up deploy staging) \
+	'
+
+up-url-staging:
+	bash -xc ' \
+		(cd up && AWS_PROFILE=binslug-s3 up url staging) \
 	'
 
 up-deploy:
 	bash -xc ' \
-		cd up && AWS_PROFILE=binslug-s3 up deploy production \
+		(cd up && AWS_PROFILE=binslug-s3 up deploy production) \
 	'
 
 up-url:
 	bash -xc ' \
-		cd up && AWS_PROFILE=binslug-s3 up deploy production \
+		(cd up && AWS_PROFILE=binslug-s3 up url production) \
 	'
 
 test-acceptance-old:
@@ -47,6 +71,9 @@ test-acceptance-old:
 
 test-unit-old:
 	cd test && ./test-theseus.sh
+
+test-go :
+	go test $$(go list ./... | grep -v '/vendor/')
 
 dev:
 	make test && make build
