@@ -17,6 +17,10 @@ test:
 	bash -xc ' \
 	  cd test && ./bin/bats/bin/bats . \
 	'
+test-remote:
+	bash -xc ' \
+	  cd test && TEST_REMOTE=1 ./bin/bats/bin/bats . \
+	'
 
 test-new:
 	bash -xc ' \
