@@ -128,7 +128,7 @@ print_output() {
         ".scoring.negative += [${THIS_OUTPUT}]")
     done
 
-    echo "${JQ_OUT}" | jq 'del(.scoring[][][] | nulls)'
+    echo "${JQ_OUT}" | ${JQ} 'del(.scoring[][][] | nulls)'
   else
     output_array "${OUTPUT_CRITICAL[@]:-}"
     output_array "${OUTPUT_ADVISE[@]:-}"
