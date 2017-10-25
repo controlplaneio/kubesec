@@ -20,6 +20,17 @@ deploy:
 			&& make up-deploy \
 			&& make test-remote ; \
 	'
+gen-html:
+	bash -xec ' \
+		(mkdir -p html && cd html \
+			&& cat ../k8s-rules.json \
+				| jq .rules[].selector -r \
+				| sed "s,[^a-zA-Z],-,g" \
+				| sed "s,--*,-,g" \
+				| sed "s,^-,," \
+				| sed "s,-$$,," \
+				| xargs -n1 touch ) \
+	'
 
 test:
 	bash -xc ' \

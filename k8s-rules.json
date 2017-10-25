@@ -32,7 +32,7 @@
     },
     {
       "selector": "containers[].securityContext.capabilities.drop",
-      "reason": null,
+      "reason": "Reducing kernel capabilities available to a container limits its attack surface",
       "points": 1,
       "href": null
     },
