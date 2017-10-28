@@ -53,3 +53,4 @@ kseccheck.sh [options] <k8s resource file>
 
 1. contents of https://kubernetes.io/docs/concepts/policy/pod-security-policy/
 1. examples from https://github.com/kubernetes/kubernetes/tree/master/examples
+1. https://github.com/weaveworks/weave/blob/master/prog/weave-kube/weave-daemonset.yaml
