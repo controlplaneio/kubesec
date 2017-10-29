@@ -10,6 +10,7 @@
 ## Validate security parameters of a Kubernetes resource
 ##
 ## Options:
+##   --full             Full console output
 ##   --json             JSON output
 ##   -h --help          Display this message
 ##   --debug            More debug
@@ -38,6 +39,7 @@ FILENAME=''
 JSON=''
 FULL_JSON=''
 IS_JSON=0
+IS_FULL=0
 
 KUBECTL='kubectl'
 JQ='jq'
@@ -128,13 +130,19 @@ print_output() {
         ".scoring.negative += [${THIS_OUTPUT}]")
     done
 
-    echo "${JQ_OUT}" | ${JQ} 'del(.scoring[][][] | nulls)'
-  else
-    output_array "${OUTPUT_CRITICAL[@]:-}"
-    output_array "${OUTPUT_ADVISE[@]:-}"
-    output_array "${OUTPUT_POSITIVE[@]:-}"
-    output_array "${OUTPUT_NEGATIVE[@]:-}"
+    if [[ "${IS_FULL:-}" != 1 ]]; then
+      JQ_OUT=$(echo "${JQ_OUT}" | ${JQ} 'del(.scoring[][] | .points)')
+    fi
 
+    echo "${JQ_OUT}" | ${JQ} 'del(.scoring[][][] | nulls)'
+    
+  else
+    if [[ "${IS_FULL:-}" == 1 ]]; then
+        output_array "${OUTPUT_CRITICAL[@]:-}"
+        output_array "${OUTPUT_ADVISE[@]:-}"
+        output_array "${OUTPUT_POSITIVE[@]:-}"
+        output_array "${OUTPUT_NEGATIVE[@]:-}"
+    fi
     if [[ "${POINTS}" -gt 0 ]]; then
       success "Passed with a score of ${POINTS} points"
     else
@@ -345,6 +353,7 @@ parse_arguments() {
     case $1 in
       -h | --help) usage ;;
       --json) IS_JSON=1 ;;
+      --full) IS_FULL=1 ;;
       --debug)
         DEBUG=1
         set -xe
