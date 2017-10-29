@@ -21,22 +21,19 @@ deploy:
 			&& make test-remote ; \
 	'
 gen-html:
-	bash -xec ' \
+	bash -ec ' \
 		(mkdir -p html/basics kubesec.io/contents/basics; \
 		IFS="$$(printf "\n+")"; \
 		IFS="$${IFS%+}"; \
 		for BLOB in $$(cat k8s-rules.json  | jq -c ".rules[]"); do \
-			echo "$$BLOB"; \
 			SELECTOR=$$(echo "$$BLOB" | jq .selector -r) \
 			FILE_NAME=$$(echo "$$SELECTOR" | sed "s,[^a-zA-Z],-,g" \
 							 | sed "s,--*,-,g" \
 							 | sed "s,^-,," | sed "s,-$$,,").md; \
 			FILE="kubesec.io/content/basics/$${FILE_NAME}"; \
-			echo "$$FILE"; \
 			rm "$${FILE}" || true; \
 			touch "$${FILE}" html/basics/"$${FILE_NAME}"; \
 			TITLE=$$(echo "$${BLOB}" | jq -r ".reason | select(values)"); \
-			echo $$TITLE; \
 			SELECTOR_ESCAPED=$${SELECTOR//\"/\\\"}; \
 			SELECTOR_ESCAPED=$${SELECTOR//\"/\\\"}; \
 			echo "+++" >> "$${FILE}"; \
