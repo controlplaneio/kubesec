@@ -22,21 +22,30 @@ deploy:
 	'
 gen-html:
 	bash -xec ' \
-		(mkdir -p html && cd html; \
+		(mkdir -p html/basics kubesec.io/contents/basics; \
 		IFS="$$(printf "\n+")"; \
 		IFS="$${IFS%+}"; \
-		for BLOB in $$(cat ../k8s-rules.json  | jq -c ".rules[]"); do \
-        echo "$$BLOB"; \
-        FILE=$$(echo "$$BLOB" | jq .selector | sed "s,[^a-zA-Z],-,g" \
-						 | sed "s,--*,-,g" \
-						 | sed "s,^-,," | sed "s,-$$,,").md; \
-        echo $$FILE; \
-        touch "$${FILE}"; \
-        TITLE=$$(echo "$${BLOB}" | jq -r ".reason | select(values)"); \
-        echo $$TITLE; \
-				[[ $$(wc -l  html/allowedCapabilities.md | awk "{print \$$1}") -lt 1 ]] && echo >> "$${FILE}"; \
-        sed "1c# $${TITLE}" -i "$${FILE}"; \
-    done \
+		for BLOB in $$(cat k8s-rules.json  | jq -c ".rules[]"); do \
+			echo "$$BLOB"; \
+			SELECTOR=$$(echo "$$BLOB" | jq .selector -r) \
+			FILE_NAME=$$(echo "$$SELECTOR" | sed "s,[^a-zA-Z],-,g" \
+							 | sed "s,--*,-,g" \
+							 | sed "s,^-,," | sed "s,-$$,,").md; \
+			FILE="kubesec.io/content/basics/$${FILE_NAME}"; \
+			echo "$$FILE"; \
+			rm "$${FILE}" || true; \
+			touch "$${FILE}" html/basics/"$${FILE_NAME}"; \
+			TITLE=$$(echo "$${BLOB}" | jq -r ".reason | select(values)"); \
+			echo $$TITLE; \
+			SELECTOR_ESCAPED=$${SELECTOR//\"/\\\"}; \
+			SELECTOR_ESCAPED=$${SELECTOR//\"/\\\"}; \
+			echo "+++" >> "$${FILE}"; \
+			echo "title = \"$${SELECTOR_ESCAPED}\"" >> "$${FILE}"; \
+			echo "weight = 15" >> "$${FILE}"; \
+			echo "+++" >> "$${FILE}"; \
+			printf "\n## $${TITLE}\n" >> "$${FILE}"; \
+			cat html/basics/$${FILE_NAME} >> $${FILE}; \
+		done \
 		) \
 	'
 

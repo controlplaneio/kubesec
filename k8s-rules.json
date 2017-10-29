@@ -31,81 +31,81 @@
       "href": null
     },
     {
-      "selector": "containers[].securityContext.capabilities.drop",
+      "selector": "containers[] .securityContext .capabilities .drop",
       "reason": "Reducing kernel capabilities available to a container limits its attack surface",
       "points": 1,
       "href": "https://kubernetes.io/docs/tasks/configure-pod-container/security-context/"
     },
     {
-      "selector": "containers[].securityContext.capabilities.drop | index(\"ALL\")",
+      "selector": "containers[] .securityContext .capabilities .drop | index(\"ALL\")",
       "reason": "Drop all capabilities and add only those required to reduce syscall attack surface",
       "points": 1,
       "href": null
     },
     {
-      "selector": "containers[].securityContext.runAsNonRoot == true",
+      "selector": "containers[] .securityContext .runAsNonRoot == true",
       "reason": "Force the running image to run as a non-root user to ensure least privilege",
       "points": 1,
       "href": null
     },
     {
-      "selector": "containers[].securityContext.runAsUser > 10000",
+      "selector": "containers[] .securityContext .runAsUser > 10000",
       "reason": "Run as a high-UID user to avoid conflicts with the host's user table",
       "points": 1,
       "href": null
     },
     {
-      "selector": "containers[].securityContext.readOnlyRootFilesystem == true",
+      "selector": "containers[] .securityContext .readOnlyRootFilesystem == true",
       "reason": "An immutable root filesystem can prevent malicious binaries being added to PATH and increase attack cost",
       "points": 1,
       "href": null
     },
     {
-      "selector": "containers[].resources.limits.cpu",
+      "selector": "containers[] .resources .limits .cpu",
       "reason": "Enforcing CPU limits prevents DOS via resource exhaustion",
       "points": 1,
       "href": null
     },
     {
-      "selector": "containers[].resources.limits.memory",
+      "selector": "containers[] .resources .limits .memory",
       "reason": "Enforcing memory limits prevents DOS via resource exhaustion",
       "points": 1,
       "href": null
     },
     {
-      "selector": "containers[].resources.requests.cpu",
+      "selector": "containers[] .resources .requests .cpu",
       "reason": "Enforcing CPU requests aids a fair balancing of resources across the cluster",
       "points": 1,
       "href": null
     },
     {
-      "selector": "containers[].resources.requests.memory",
+      "selector": "containers[] .resources .requests .memory",
       "reason": "Enforcing memory requests aids a fair balancing of resources across the cluster",
       "points": 1,
       "href": null
     },
     {
-      "selector": ".spec.volumeClaimTemplates[].spec.accessModes | index(\"ReadWriteOnce\")",
+      "selector": ".spec .volumeClaimTemplates[] .spec .accessModes | index(\"ReadWriteOnce\")",
       "reason": null,
       "points": 1,
       "href": null,
       "kind": "StatefulSet"
     },
     {
-      "selector": ".spec.volumeClaimTemplates[].spec.resources.requests.storage",
+      "selector": ".spec .volumeClaimTemplates[] .spec .resources .requests .storage",
       "reason": null,
       "points": 1,
       "href": null,
       "kind": "StatefulSet"
     },
     {
-      "selector": "containers[].securityContext.capabilities.add | index(\"SYS_ADMIN\")",
+      "selector": "containers[] .securityContext .capabilities .add | index(\"SYS_ADMIN\")",
       "reason": "CAP_SYS_ADMIN is the most privileged capability and should always be avoided",
       "points": -30,
       "href": null
     },
     {
-      "selector": "containers[].securityContext.privileged == true",
+      "selector": "containers[] .securityContext .privileged == true",
       "reason": "Privileged containers can allow almost completely unrestricted host access",
       "points": -30,
       "href": null
