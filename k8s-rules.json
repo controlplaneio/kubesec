@@ -34,53 +34,53 @@
       "selector": "containers[].securityContext.capabilities.drop",
       "reason": "Reducing kernel capabilities available to a container limits its attack surface",
       "points": 1,
-      "href": null
+      "href": "https://kubernetes.io/docs/tasks/configure-pod-container/security-context/"
     },
     {
       "selector": "containers[].securityContext.capabilities.drop | index(\"ALL\")",
-      "reason": null,
+      "reason": "Drop all capabilities and add only those required to reduce syscall attack surface",
       "points": 1,
       "href": null
     },
     {
       "selector": "containers[].securityContext.runAsNonRoot == true",
-      "reason": null,
+      "reason": "Force the running image to run as a non-root user to ensure least privilege",
       "points": 1,
       "href": null
     },
     {
       "selector": "containers[].securityContext.runAsUser > 10000",
-      "reason": null,
+      "reason": "Run as a high-UID user to avoid conflicts with the host's user table",
       "points": 1,
       "href": null
     },
     {
       "selector": "containers[].securityContext.readOnlyRootFilesystem == true",
-      "reason": null,
+      "reason": "An immutable root filesystem can prevent malicious binaries being added to PATH and increase attack cost",
       "points": 1,
       "href": null
     },
     {
       "selector": "containers[].resources.limits.cpu",
-      "reason": null,
+      "reason": "Enforcing CPU limits prevents DOS via resource exhaustion",
       "points": 1,
       "href": null
     },
     {
       "selector": "containers[].resources.limits.memory",
-      "reason": null,
+      "reason": "Enforcing memory limits prevents DOS via resource exhaustion",
       "points": 1,
       "href": null
     },
     {
       "selector": "containers[].resources.requests.cpu",
-      "reason": null,
+      "reason": "Enforcing CPU requests aids a fair balancing of resources across the cluster",
       "points": 1,
       "href": null
     },
     {
       "selector": "containers[].resources.requests.memory",
-      "reason": null,
+      "reason": "Enforcing memory requests aids a fair balancing of resources across the cluster",
       "points": 1,
       "href": null
     },
@@ -100,13 +100,13 @@
     },
     {
       "selector": "containers[].securityContext.capabilities.add | index(\"SYS_ADMIN\")",
-      "reason": null,
+      "reason": "CAP_SYS_ADMIN is the most privileged capability and should always be avoided",
       "points": -30,
       "href": null
     },
     {
       "selector": "containers[].securityContext.privileged == true",
-      "reason": null,
+      "reason": "Privileged containers can allow almost completely unrestricted host access",
       "points": -30,
       "href": null
     }
