@@ -42,37 +42,37 @@ kubesec test/asset/score-1-pod-default.yml  | jq --exit-status '.score > 10' >/d
 ## Example output
 ```json
 {
-  "score": 2,
+  "score": -30,
   "scoring": {
-    "critical": [],
+    "critical": [
+      {
+        "selector": "containers[] .securityContext .capabilities .add | index(\"SYS_ADMIN\")",
+        "reason": "CAP_SYS_ADMIN is the most privileged capability and should always be avoided"
+      }
+    ],
     "advise": [
+      {
+        "selector": "containers[] .securityContext .runAsNonRoot == true",
+        "reason": "Force the running image to run as a non-root user to ensure least privilege"
+      },
       {
         "selector": "containers[] .securityContext .capabilities .drop",
         "reason": "Reducing kernel capabilities available to a container limits its attack surface",
         "href": "https://kubernetes.io/docs/tasks/configure-pod-container/security-context/"
       },
       {
+        "selector": "containers[] .securityContext .readOnlyRootFilesystem == true",
+        "reason": "An immutable root filesystem can prevent malicious binaries being added to PATH and increase attack cost"
+      },
+      {
+        "selector": "containers[] .securityContext .runAsUser > 10000",
+        "reason": "Run as a high-UID user to avoid conflicts with the host's user table"
+      },
+      {
         "selector": "containers[] .securityContext .capabilities .drop | index(\"ALL\")",
-        "reason": "Drop all capabilities and add only those required to reduce syscall attack surface",
-      },
-      {
-        "selector": "containers[] .securityContext .runAsNonRoot == true",
-        "reason": "Force the running image to run as a non-root user to ensure least privilege",
-      },
-      ...
-    ],
-    "positive": [
-      {
-        "selector": ".spec .volumeClaimTemplates[] .spec .accessModes | index(\"ReadWriteOnce\")",
-        "kind": "StatefulSet"
-      },
-      {
-        "selector": ".spec .volumeClaimTemplates[] .spec .resources .requests .storage",
-        "kind": "StatefulSet"
-      },
-      ...
-    ],
-    "negative": []
+        "reason": "Drop all capabilities and add only those required to reduce syscall attack surface"
+      }
+    ]
   }
 }
 ```

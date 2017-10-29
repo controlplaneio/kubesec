@@ -56,7 +56,11 @@ main() {
   resolve_kubectl
   resolve_jq
 
-  JSON=$(get_json "${FILENAME}")
+  if ! JSON=$(get_json "${FILENAME}") \
+    || [[ $(echo "${JSON:0:1}") != '{' ]] \
+    || ! get_kind &>/dev/null; then
+    error "Invalid JSON"
+  fi
   FULL_JSON="${JSON}"
 
   check_valid_kind
@@ -77,7 +81,6 @@ main() {
       POINTS=$((POINTS + THIS_POINTS))
 
       THIS_RULE=$(get_rule_by_selector "${SELECTOR}")
-      # warning "THIS_RULE ${THIS_RULE}"
 
       if [[ ${THIS_POINTS} -gt 0 ]]; then
         positive "${THIS_RULE}"
@@ -88,9 +91,10 @@ main() {
       fi
     else
       if [[ ${THIS_POINTS} -gt 0 ]]; then
-        THIS_RULE=$(get_rule_by_selector "${SELECTOR}")
-        # warning "THIS_RULE ${THIS_RULE}"
-        advise "${THIS_RULE}"
+        if get_advise "${SELECTOR}"; then
+          THIS_RULE=$(get_rule_by_selector "${SELECTOR}")
+          advise "${THIS_RULE}"
+        fi
       fi
     fi
     # warning "COUNT is $COUNT : $THIS_POINTS $SELECTOR "
@@ -120,22 +124,27 @@ print_output() {
         ".scoring.advise += [${THIS_OUTPUT}]")
     done
 
-    for THIS_OUTPUT in "${OUTPUT_POSITIVE[@]:-}"; do
-      JQ_OUT=$(echo "${JQ_OUT}" | ${JQ} \
-        ".scoring.positive += [${THIS_OUTPUT}]")
-    done
+    if [[ "${IS_FULL:-}" == 1 ]]; then
 
-    for THIS_OUTPUT in "${OUTPUT_NEGATIVE[@]:-}"; do
-      JQ_OUT=$(echo "${JQ_OUT}" | ${JQ} \
-        ".scoring.negative += [${THIS_OUTPUT}]")
-    done
+      for THIS_OUTPUT in "${OUTPUT_POSITIVE[@]:-}"; do
+        JQ_OUT=$(echo "${JQ_OUT}" | ${JQ} \
+          ".scoring.positive += [${THIS_OUTPUT}]")
+      done
 
-    if [[ "${IS_FULL:-}" != 1 ]]; then
+      for THIS_OUTPUT in "${OUTPUT_NEGATIVE[@]:-}"; do
+        JQ_OUT=$(echo "${JQ_OUT}" | ${JQ} \
+          ".scoring.negative += [${THIS_OUTPUT}]")
+      done
+    else
       JQ_OUT=$(echo "${JQ_OUT}" | ${JQ} 'del(.scoring[][] | .points)')
     fi
 
-    echo "${JQ_OUT}" | ${JQ} 'del(.scoring[][][] | nulls)'
-    
+    echo "${JQ_OUT}" | ${JQ} \
+      "del(.scoring[][][] | nulls) \
+      | .scoring.advise |= \
+        (sort_by(.advise) | reverse | .[:5]) \
+      | del(.scoring[][] | .advise)"
+
   else
     if [[ "${IS_FULL:-}" == 1 ]]; then
         output_array "${OUTPUT_CRITICAL[@]:-}"
@@ -213,9 +222,9 @@ get_json() {
       --map-root-user \
       bash -c "\
         PATH=\"${PATH}\"; ${COMMAND}\
-    "
+    " 2>&1
   else
-    ${COMMAND}
+    ${COMMAND} 2>&1
   fi
 }
 
@@ -293,6 +302,11 @@ escape_json() {
 get_points() {
   local SELECTOR="${1}"
   get_rule_by_selector "${SELECTOR}" | ${JQ} '.points'
+}
+
+get_advise() {
+  local SELECTOR="${1}"
+  get_rule_by_selector "${SELECTOR}" | ${JQ} --exit-status '.advise > 0' >/dev/null
 }
 
 is_key() {
@@ -406,16 +420,17 @@ warning() {
 
 error() {
   [ "${*:-}" ] && ERROR="$*" || ERROR="Unknown Error"
-  json_error "${ERROR}"
-  printf "%s\n" "$(log_message_prefix)${COLOUR_RED}${ERROR}${COLOUR_RESET}"
-  exit 3
-} 1>&2
-
-json_error() {
   if [[ "${IS_JSON:-0}" == 1 ]]; then
-    ${JQ} --null-input ".error |= \"${*//\"/\\\"}\""
+    json_error "${ERROR}"
+  else
+    printf "%s\n" "$(log_message_prefix)${COLOUR_RED}${ERROR}${COLOUR_RESET}"  1>&2
     exit 3
   fi
+}
+
+json_error() {
+  ${JQ} --null-input ".error |= \"${*//\"/\\\"}\"" 2>&1
+  exit 3
 }
 
 error_env_var() {
