@@ -4,7 +4,10 @@
     "us-east-1"
   ],
   "hooks": {
-    "build": "cp -f ../kseccheck.sh ../k8s-rules.json ."
+    "build": [
+      "cp -f ../kseccheck.sh ../k8s-rules.json .",
+      "(cd ../kubesec.io/ && hugo --destination ../up/public/)"
+    ]
   },
   "proxy": {
     "memory": 1024,

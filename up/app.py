@@ -133,7 +133,14 @@ class myHandler(BaseHTTPRequestHandler):
         None, in which case the caller has nothing further to do.
 
         """
-        path = self.translate_path(self.path)
+        cwd = os.getcwd()
+
+        path = self \
+            .translate_path(self.path)
+
+        if "/public" not in path:
+            path = path.replace(cwd, cwd + "/public")
+
         f = None
         if os.path.isdir(path):
             if not self.path.endswith('/'):
@@ -178,15 +185,15 @@ class myHandler(BaseHTTPRequestHandler):
 
         """
 
-        f = StringIO()
-        f.write('POST a file to validate')
-        length = f.tell()
-        f.seek(0)
-        self.send_response(200)
-        self.send_header("Content-type", "text/html")
-        self.send_header("Content-Length", str(length))
-        self.end_headers()
-        return f
+        # f = StringIO()
+        # f.write('POST a file to validate')
+        # length = f.tell()
+        # f.seek(0)
+        # self.send_response(200)
+        # self.send_header("Content-type", "text/html")
+        # self.send_header("Content-Length", str(length))
+        # self.end_headers()
+        # return f
 
         try:
             list = os.listdir(path)

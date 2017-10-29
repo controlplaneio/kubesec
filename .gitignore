@@ -106,3 +106,5 @@ kube-sec-check
 
 up/kseccheck.sh
 up/k8s-rules.json
+up/public/
+kubesec.io/public/
