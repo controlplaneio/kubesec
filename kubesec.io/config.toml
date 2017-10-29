@@ -3,9 +3,9 @@ languageCode = "en-uk"
 defaultContentLanguage = "en"
 defaultContentLanguageInSubdir= true
 
-
 title = "kubesec.io"
 theme = "hugo-theme-learn"
+
 
 # For search functionnality
 [outputs]

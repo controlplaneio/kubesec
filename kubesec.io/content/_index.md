@@ -3,7 +3,9 @@ title = "kubesec.io"
 chapter = true
 weight = 5
 pre = "<b>1. </b>"
+
 +++
+<meta http-equiv="refresh" content="0; url=basics/"/>
 
 # kubesec.io
 
