@@ -11,8 +11,33 @@ Score Kubernetes resources for using security features
 
 ## Usage
 
+Try it here
+
+<textarea rows=11 name="file" form="usrform" >
+apiVersion: v1
+kind: Pod
+metadata:
+  name: kubesec-demo
+spec:
+  containers:
+  - name: kubesec-demo
+    image: gcr.io/google-samples/node-hello:1.0
+    securityContext:
+      readOnlyRootFilesystem: true
+</textarea>
+<form action="/"  method="post" enctype="multipart/form-data" id="usrform">
+  <input type="hidden" value="webfile" name="filename" />
+  <input type="submit" value="submit" id="submit" class="btn btn-default">
+</form>
+
+---
+
+<!--
+-->
+
 Define a BASH function
-```bash
+
+{{< highlight bash >}}
 kubesec () 
 { 
     local FILE="${1:-}";
@@ -26,21 +51,21 @@ kubesec ()
       -F file=@"${FILE}" \
       https://kubesec.io/
 }
-```
+{{< /highlight >}}
 
 POST a Kubernetes resource to kubesec.io   
-```bash
-kubesec test/asset/score-1-pod-default.yml
-```
+{{< highlight bash >}}
+kubesec ./deployment.yml
+{{< /highlight >}}
 
 Return non-zero status code is the score is not greater than 10
-```bash
-kubesec test/asset/score-1-pod-default.yml  | jq --exit-status '.score > 10' >/dev/null 
+{{< highlight bash >}}
+kubesec ./score-9-deployment.yml | jq --exit-status '.score > 10' >/dev/null 
 # status code 1
+{{< /highlight >}}
 
-```
 ## Example output
-```json
+{{< highlight json >}}
 {
   "score": -30,
   "scoring": {
@@ -57,8 +82,7 @@ kubesec test/asset/score-1-pod-default.yml  | jq --exit-status '.score > 10' >/d
       },
       {
         "selector": "containers[] .securityContext .capabilities .drop",
-        "reason": "Reducing kernel capabilities available to a container limits its attack surface",
-        "href": "https://kubernetes.io/docs/tasks/configure-pod-container/security-context/"
+        "reason": "Reducing kernel capabilities available to a container limits its attack surface"
       },
       {
         "selector": "containers[] .securityContext .readOnlyRootFilesystem == true",
@@ -75,7 +99,8 @@ kubesec test/asset/score-1-pod-default.yml  | jq --exit-status '.score > 10' >/d
     ]
   }
 }
-```
+{{< /highlight >}}
 
+---
 
 {{% children  %}}

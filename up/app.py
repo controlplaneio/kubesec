@@ -95,15 +95,17 @@ class myHandler(BaseHTTPRequestHandler):
         line = self.rfile.readline()
         remainbytes -= len(line)
         filename = re.findall(r'Content-Disposition.*name="file"; filename="(.*)"', line)
-        if not filename:
-            return (False, "Can't find out file name...")
+        if filename:
+            line = self.rfile.readline()
+            remainbytes -= len(line)
+            line = self.rfile.readline()
+            remainbytes -= len(line)
+        else:
+            filename = ["webfile"]
+
         # path = self.translate_path(self.path)
         path = '/tmp'
         filename = os.path.join(path, str(time.time()) + "-" + filename[0])
-        line = self.rfile.readline()
-        remainbytes -= len(line)
-        line = self.rfile.readline()
-        remainbytes -= len(line)
         try:
             out = open(filename, 'wb')
         except IOError:

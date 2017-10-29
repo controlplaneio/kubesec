@@ -59,7 +59,7 @@ main() {
   if ! JSON=$(get_json "${FILENAME}") \
     || [[ $(echo "${JSON:0:1}") != '{' ]] \
     || ! get_kind &>/dev/null; then
-    error "Invalid JSON"
+    error "Invalid input"
   fi
   FULL_JSON="${JSON}"
 
