@@ -33,6 +33,9 @@ if _is_remote; then
   assert_file_not_found() {
     assert_output --regexp ".*couldn't open file \"somefile.yaml\".*"
   }
+
+  assert_failure_local() { :; }
+
 else
 
   _app() { ./../kseccheck.sh "${@}"; }
@@ -50,4 +53,9 @@ else
   assert_file_not_found() {
     assert_output --regexp ".*File somefile.yaml does not exist.*"
   }
+
+  assert_failure_local() {
+    assert_failure
+  }
+
 fi
