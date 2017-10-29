@@ -57,18 +57,18 @@ class myHandler(BaseHTTPRequestHandler):
         r, info = self.deal_post_data()
         print r, info, "by: ", self.client_address
 
-        std_err_redirect = subprocess.STDERR
-        if os.environ['PORT'] != 'production':
-            std_err_redirect = subprocess.STDOUT
+        std_err_redirect = None
+        # if os.environ['UP_STAGE'] != 'production':
+        #     std_err_redirect = subprocess.STDOUT
 
         sys.stderr.write("POST LOG START\n")
         sys.stderr.write("  " + info + "\n")
-        sys.stderr.write(subprocess.check_output(["cat", info], stderr=std_err_redirect))
+        sys.stderr.write(subprocess.check_output(["cat", info], stderr=subprocess.STDOUT))
         sys.stderr.write("POST LOG END\n")
 
         status_code = 200
         try:
-            output = subprocess.check_output(["./kseccheck.sh", "--json", info], stderr=subprocess.STDOUT)
+            output = subprocess.check_output(["./kseccheck.sh", "--json", info], stderr=std_err_redirect)
         except subprocess.CalledProcessError as e:
             output = e.output
             status_code = 200
