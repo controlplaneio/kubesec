@@ -23,7 +23,53 @@ load '_helper'
   assert_failure
 }
 
-@test "accepts --json flag (local)" {
+@test "errors with empty file" {
+  run _app ${TEST_DIR}/asset/empty-file
+  assert_output --regexp 'Invalid input.*'
+  assert_failure_local
+}
+
+@test "errors with empty file (json, local)" {
+  if _is_remote; then
+    skip
+  fi
+
+  run _app ${TEST_DIR}/asset/empty-file --json
+  assert_output --regexp '  "error": "Invalid input"'
+  assert_failure_local
+}
+
+@test "errors with empty file (json, remote)" {
+  if _is_local; then
+    skip
+  fi
+
+  run _app ${TEST_DIR}/asset/empty-file
+  assert_output --regexp '  "error": "Invalid input"'
+  assert_failure_local
+}
+
+@test "errors with empty JSON (json, local)" {
+  if _is_remote; then
+    skip
+  fi
+
+  run _app ${TEST_DIR}/asset/empty-json-file --json
+  assert_output --regexp '  "error": "Invalid input"'
+  assert_failure
+}
+
+@test "errors with empty JSON (json, remote)" {
+  if _is_local; then
+    skip
+  fi
+
+  run _app ${TEST_DIR}/asset/empty-json-file
+  assert_output --regexp '  "error": "Invalid input"'
+  assert_success
+}
+
+@test "succeeds with valid file (json, local)" {
   if _is_remote; then
     skip
   fi
