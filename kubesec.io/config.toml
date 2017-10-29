@@ -1,0 +1,33 @@
+baseURL = "/"
+languageCode = "en-uk"
+defaultContentLanguage = "en"
+defaultContentLanguageInSubdir= true
+
+
+title = "kubesec.io"
+theme = "hugo-theme-learn"
+
+# For search functionnality
+[outputs]
+home = [ "HTML", "RSS", "JSON"]
+
+[params]
+  editURL = "https://github.com/sublimino/kube-sec-check/edit/master/html/"
+  description = "kubesec.io"
+  author = "control-plane.io"
+  showVisitedLinks = false
+  themeVariant = "green"
+
+
+[Languages]
+[Languages.en]
+title = "kubesec.io"
+weight = 1
+languageName = "English"
+
+[[Languages.en.menu.shortcuts]]
+name = "<i class='fa fa-twitter'></i> Twitter"
+identifier = "ds"
+url = "https://twitter.com/controlplaneio"
+weight = 10
+
