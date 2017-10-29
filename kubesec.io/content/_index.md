@@ -5,7 +5,6 @@ weight = 5
 pre = "<b>1. </b>"
 
 +++
-<meta http-equiv="refresh" content="0; url=basics/"/>
 
 # kubesec.io
 
@@ -104,5 +103,9 @@ kubesec ./score-9-deployment.yml | jq --exit-status '.score > 10' >/dev/null
 {{< /highlight >}}
 
 ---
+
+<br/>
+
+# Index
 
 {{% children  %}}
