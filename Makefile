@@ -68,7 +68,9 @@ test-new:
 
 up-start:
 	bash -xc ' \
-		(cd up && AWS_PROFILE=binslug-s3 up start) \
+		(cd up \
+		&& AWS_PROFILE=binslug-s3 up run build \
+		&& AWS_PROFILE=binslug-s3 up start) \
 	'
 
 up-deploy-staging:
