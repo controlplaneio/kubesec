@@ -20,9 +20,16 @@ deploy:
 			&& make up-deploy \
 			&& make test-remote ; \
 	'
+hugo:
+	bash -exc ' \
+		( \
+		(IS_KUBESEC=$$(wmctrl -l -x | grep -q kubesec.io && echo 1 || echo 0); cd kubesec.io && while read LINE; do echo "$${LINE}"; if [[ "$${IS_KUBESEC}" != 1 ]] && [[ "$${LINE}" =~ ^Web\ Server\ is\ available\ at ]]; then echo "$${LINE}" | sed -E "s,.*(localhost[^ ]*).*,\1,g" | xargs -I{} xdg-open "http://{}" || true; fi; done < <(hugo server --disableFastRender)); \
+		)'
+
 gen-html:
-	bash -ec ' \
-		(mkdir -p html/basics kubesec.io/contents/basics; \
+	bash -exc ' \
+		( \
+		mkdir -p html/basics kubesec.io/contents/basics; \
 		IFS="$$(printf "\n+")"; \
 		IFS="$${IFS%+}"; \
 		for BLOB in $$(cat k8s-rules.json  | jq -c ".rules[]"); do \
@@ -33,12 +40,13 @@ gen-html:
 			FILE="kubesec.io/content/basics/$${FILE_NAME}"; \
 			rm "$${FILE}" || true; \
 			touch "$${FILE}" html/basics/"$${FILE_NAME}"; \
+			WEIGHT=$$(echo "$${BLOB}" | jq -r ".weight | select(values)"); \
 			TITLE=$$(echo "$${BLOB}" | jq -r ".reason | select(values)"); \
 			SELECTOR_ESCAPED=$${SELECTOR//\"/\\\"}; \
 			SELECTOR_ESCAPED=$${SELECTOR//\"/\\\"}; \
 			echo "+++" >> "$${FILE}"; \
 			echo "title = \"$${SELECTOR_ESCAPED}\"" >> "$${FILE}"; \
-			echo "weight = 15" >> "$${FILE}"; \
+			echo "weight = $${WEIGHT:-5}" >> "$${FILE}"; \
 			echo "+++" >> "$${FILE}"; \
 			printf "\n## $${TITLE}\n" >> "$${FILE}"; \
 			cat html/basics/$${FILE_NAME} >> $${FILE}; \
