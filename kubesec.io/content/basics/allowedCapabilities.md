@@ -1,6 +1,6 @@
 +++
 title = "allowedCapabilities"
-weight = 15
+weight = 0
 +++
 
 ## 

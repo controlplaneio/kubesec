@@ -1,6 +1,6 @@
 +++
 title = ".spec .volumeClaimTemplates[] .spec .resources .requests .storage"
-weight = 15
+weight = 0
 +++
 
 ## 
