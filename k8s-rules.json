@@ -4,30 +4,35 @@
       "selector": "seLinux",
       "reason": null,
       "points": 1,
+      "weight": 0,
       "href": null
     },
     {
       "selector": "supplementalGroups",
       "reason": null,
       "points": 1,
+      "weight": 0,
       "href": null
     },
     {
       "selector": "runAsUser",
       "reason": null,
       "points": 1,
+      "weight": 0,
       "href": null
     },
     {
       "selector": "fsGroup",
       "reason": null,
       "points": 1,
+      "weight": 0,
       "href": null
     },
     {
       "selector": "allowedCapabilities",
       "reason": null,
       "points": 1,
+      "weight": 0,
       "href": null
     },
     {
@@ -99,6 +104,7 @@
       "points": 1,
       "href": null,
       "kind": "StatefulSet",
+      "weight": 0,
       "advise": 10
     },
     {
@@ -107,6 +113,7 @@
       "points": 1,
       "href": null,
       "kind": "StatefulSet",
+      "weight": 0,
       "advise": 2
     },
     {
@@ -119,6 +126,13 @@
       "selector": "containers[] .securityContext .privileged == true",
       "reason": "Privileged containers can allow almost completely unrestricted host access",
       "points": -30,
+      "href": null
+    },
+    {
+      "selector": ".metadata .annotations .\"container.apparmor.security.beta.kubernetes.io/nginx\"",
+      "reason": "Well defined AppArmor policies may provide greater protection from unknown threats. WARNING: NOT PRODUCTION READY",
+      "points": 3,
+      "weight": 0,
       "href": null
     }
   ]
