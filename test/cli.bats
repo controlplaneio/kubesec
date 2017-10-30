@@ -206,6 +206,28 @@ load '_helper'
   assert_zero_points
 }
 
+@test "passes Pod with apparmor annotation" {
+  run _app ${TEST_DIR}/asset/score-3-pod-apparmor.yaml
+  assert_non_zero_points
+}
+
+# TODO: tests for apparmor loaders
+@test "passes DaemonSet with apparmor loader" {
+  skip
+  https://github.com/kubernetes/contrib/blob/master/apparmor/loader/example-daemon.yaml
+  run _app ${TEST_DIR}/asset/score-0-daemonset-
+  assert_zero_points
+}
+
+
+# TODO: tests for apparmor loaders
+@test "passes DaemonSet with apparmor loader" {
+  skip
+  https://github.com/kubernetes/contrib/blob/master/apparmor/loader/example-daemon.yaml
+  run _app ${TEST_DIR}/asset/score-0-daemonset-
+  assert_zero_points
+}
+
 
 
 
