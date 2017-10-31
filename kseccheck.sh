@@ -155,7 +155,7 @@ print_output() {
     if [[ "${POINTS}" -gt 0 ]]; then
       success "Passed with a score of ${POINTS} points"
     else
-      error "Failed with a score of 0 points"
+      error "Failed with a score of ${POINTS} points"
     fi
   fi
 }
@@ -181,9 +181,9 @@ rule_resources() {
   :
 }
 
-get_spec_path() {
-  local SPEC_PATH="${1-.spec.}"
-  echo "${SPEC_PATH}"
+rule_seccomp_all_pods() {
+  # container.seccomp.security.alpha.kubernetes.io/${container_name}
+  :
 }
 
 critical() {
@@ -313,7 +313,7 @@ is_key() {
   local KEY="${1}"
   local TEST_JSON="${JSON}"
 
-  if [[ "${KEY:0:1}" != '.' ]]; then
+  if [[ "${KEY:0:12}" == 'containers[]' ]]; then
     KEY=".spec.${KEY}"
   else
     TEST_JSON="${FULL_JSON}"
