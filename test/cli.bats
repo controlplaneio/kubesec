@@ -12,6 +12,12 @@ load '_helper'
 # assert_line
 # refute_line
 
+@test "fails Pod with unconfined seccomp" {
+  run _app ${TEST_DIR}/asset/score-0-pod-seccomp-unconfined.yml
+  assert_negative_points
+}
+
+
 @test "errors with no filename" {
   run _app
   assert_failure
@@ -132,7 +138,7 @@ load '_helper'
 
 @test "fails with CAP_SYS_ADMIN" {
   run _app ${TEST_DIR}/asset/score-0-cap-sys-admin.yml
-  assert_zero_points
+  assert_negative_points
 }
 
 @test "fails with CAP_CHOWN" {
@@ -142,7 +148,7 @@ load '_helper'
 
 @test "fails with CAP_SYS_ADMIN and CAP_CHOWN" {
   run _app ${TEST_DIR}/asset/score-0-cap-sys-admin-and-cap-chown.yml
-  assert_zero_points
+  assert_negative_points
 }
 
 @test "passes with securityContext capabilities drop all" {
@@ -197,7 +203,7 @@ load '_helper'
 
 @test "fails DaemonSet with securityContext.privileged = true" {
   run _app ${TEST_DIR}/asset/score-0-daemonset-securitycontext-privileged.yml
-  assert_zero_points
+  assert_negative_points
 }
 
 @test "fails DaemonSet with mounted host docker.sock" {
@@ -219,16 +225,19 @@ load '_helper'
   assert_zero_points
 }
 
-
-# TODO: tests for apparmor loaders
-@test "passes DaemonSet with apparmor loader" {
-  skip
-  https://github.com/kubernetes/contrib/blob/master/apparmor/loader/example-daemon.yaml
-  run _app ${TEST_DIR}/asset/score-0-daemonset-
-  assert_zero_points
+@test "fails Pod with unconfined seccomp for all containers" {
+  run _app ${TEST_DIR}/asset/score-0-pod-seccomp-unconfined.yml
+  assert_negative_points
 }
 
+@test "passes Pod with non-unconfined seccomp for all containers" {
+  run _app ${TEST_DIR}/asset/score-0-pod-seccomp-non-unconfined.yml
+  assert_non_zero_points
+}
 
+# TODO: test for pod-specific seccomp
+
+# TODO: case sensitive check (use jq's ascii_downcase)
 
 
 # TODO: tests for all the permutations of this file

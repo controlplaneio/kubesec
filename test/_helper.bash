@@ -30,6 +30,11 @@ if _is_remote; then
     assert_success
   }
 
+  assert_negative_points() {
+    assert_output --regexp ".*\"score\": (\-[1-9][0-9]*),.*"
+    assert_success
+  }
+
   assert_file_not_found() {
     assert_output --regexp ".*couldn't open file \"somefile.yaml\".*"
   }
@@ -47,6 +52,11 @@ else
 
   assert_zero_points() {
     assert_output --regexp ".*with a score of 0 points.*"
+    assert_failure
+  }
+
+  assert_negative_points() {
+    assert_output --regexp ".*\with a score of \-[1-9][0-9]* points.*"
     assert_failure
   }
 
