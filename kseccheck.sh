@@ -40,6 +40,7 @@ JSON=''
 FULL_JSON=''
 IS_JSON=0
 IS_FULL=0
+KIND=""
 
 KUBECTL='kubectl'
 JQ='jq'
@@ -220,9 +221,7 @@ get_json() {
   if is_unprivileged_userns_clone; then
     unshare --net \
       --map-root-user \
-      bash -c "\
-        PATH=\"${PATH}\"; ${COMMAND}\
-    " 2>&1
+      ${COMMAND} 2>&1
   else
     ${COMMAND} 2>&1
   fi
@@ -237,7 +236,10 @@ is_unprivileged_userns_clone() {
 }
 
 get_kind() {
-  echo "${FULL_JSON}" | ${JQ} -r '.kind'
+  if [[ "${KIND:-}" == "" ]]; then
+    KIND=$(echo "${FULL_JSON}" | ${JQ} -r '.kind')
+  fi
+  echo "${KIND}"
 }
 
 check_valid_kind() {
@@ -267,7 +269,7 @@ resolve_binary() {
   local BINARY="${1}"
   local ORIGINAL_BINARY="${BINARY}"
 
-  if ! command -v "${BINARY}" &>/dev/null; then
+  if ! BINARY=$(command -v "${BINARY}" 2>/dev/null); then
     BINARY="./${ORIGINAL_BINARY}"
 
     if ! command -v "${BINARY}" &>/dev/null; then
@@ -291,8 +293,18 @@ get_rules() {
 
 get_rule_by_selector() {
   local SELECTOR="${1//\"/\\\"}"
-  echo "${RULES}" | ${JQ} \
-    ". | select(.selector == \"${SELECTOR}\")"
+  local CACHE="/dev/shm/cache/"
+  local CACHE_FILE="${CACHE}/$(echo "${SELECTOR}" | sed 's,[^a-zA-Z],-,g')"
+
+  mkdir -p "${CACHE}"
+
+  if [[ -f "${CACHE_FILE}" ]]; then
+    cat "${CACHE_FILE}"
+  else
+    echo "${RULES}" | ${JQ} \
+      ". | select(.selector == \"${SELECTOR}\")" \
+      | tee "${CACHE_FILE}"
+  fi
 }
 
 escape_json() {
