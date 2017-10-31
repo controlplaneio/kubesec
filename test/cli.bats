@@ -239,6 +239,12 @@ load '_helper'
 
 # TODO: case sensitive check (use jq's ascii_downcase)
 
+# TODO: deployment serviceAccountName pass
+@test "passes Deployment with serviceaccountname" {
+  skip
+  run _app ${TEST_DIR}/asset/score-2-dep-serviceaccount.yml
+  assert_zero_points
+}
 
 # TODO: tests for all the permutations of this file
 @test "fails DaemonSet with loads o' permutations" {
