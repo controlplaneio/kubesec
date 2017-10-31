@@ -1,41 +1,6 @@
 {
   "rules": [
     {
-      "selector": "seLinux",
-      "reason": null,
-      "points": 1,
-      "weight": 0,
-      "href": null
-    },
-    {
-      "selector": "supplementalGroups",
-      "reason": null,
-      "points": 1,
-      "weight": 0,
-      "href": null
-    },
-    {
-      "selector": "runAsUser",
-      "reason": null,
-      "points": 1,
-      "weight": 0,
-      "href": null
-    },
-    {
-      "selector": "fsGroup",
-      "reason": null,
-      "points": 1,
-      "weight": 0,
-      "href": null
-    },
-    {
-      "selector": "allowedCapabilities",
-      "reason": null,
-      "points": 1,
-      "weight": 0,
-      "href": null
-    },
-    {
       "selector": "containers[] .securityContext .capabilities .drop",
       "reason": "Reducing kernel capabilities available to a container limits its attack surface",
       "points": 1,
@@ -126,6 +91,24 @@
       "selector": "containers[] .securityContext .privileged == true",
       "reason": "Privileged containers can allow almost completely unrestricted host access",
       "points": -30,
+      "href": null
+    },
+    {
+      "selector": ".metadata .annotations .\"seccomp.security.alpha.kubernetes.io/pod\" | index(\"unconfined\")",
+      "reason": "Seccomp profiles are unconfined by default. Add a profile to set minimum privilege and secure against unknown threats",
+      "points": -1,
+      "href": null
+    },
+    {
+      "selector": "select(.metadata .annotations .\"seccomp.security.alpha.kubernetes.io/pod\" | index(\"unconfined\") == null) | .metadata .annotations .\"seccomp.security.alpha.kubernetes.io/pod\" | length > 0",
+      "reason": "Seccomp profiles set minimum privilege and secure against unknown threats",
+      "points": 5,
+      "href": null
+    },
+    {
+      "selector": "select(.metadata .annotations .\"container.seccomp.security.alpha.kubernetes.io/explorer\" | index(\"unconfined\") == null) | .metadata .annotations .\"container.seccomp.security.alpha.kubernetes.io/explorer\" | length > 0",
+      "reason": "Seccomp profiles for OpenShift set minimum privilege and secure against unknown threats",
+      "points": 5,
       "href": null
     },
     {

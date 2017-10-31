@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  annotations:
+    seccomp.security.alpha.kubernetes.io/pod: unconfined
+spec:
+  containers:
+    - name: trustworthy-container
+      image: sotrustworthy:latest
