@@ -44,6 +44,7 @@ KIND=""
 
 KUBECTL='kubectl'
 JQ='jq'
+CACHE_DIR=""
 
 POINTS=0
 OUTPUT_ADVISE=()
@@ -57,11 +58,19 @@ main() {
   resolve_kubectl
   resolve_jq
 
-  if ! JSON=$(get_json "${FILENAME}") \
-    || [[ $(echo "${JSON:0:1}") != '{' ]] \
-    || ! get_kind &>/dev/null; then
-    error "Invalid input"
+  configure_cache
+
+  if ! JSON=$(read_json_resource_cache "${FILENAME}"); then
+    if ! JSON=$(get_json "${FILENAME}") \
+      || [[ $(echo "${JSON:0:1}") != '{' ]] \
+      || ! get_kind &>/dev/null; then
+
+      error "Invalid input"
+    fi
+
+    write_json_resource_cache "${FILENAME}"
   fi
+
   FULL_JSON="${JSON}"
 
   check_valid_kind
@@ -136,6 +145,7 @@ print_output() {
         JQ_OUT=$(echo "${JQ_OUT}" | ${JQ} \
           ".scoring.negative += [${THIS_OUTPUT}]")
       done
+
     else
       JQ_OUT=$(echo "${JQ_OUT}" | ${JQ} 'del(.scoring[][] | .points)')
     fi
@@ -203,18 +213,6 @@ negative() {
   OUTPUT_NEGATIVE+=("${1}")
 }
 
-rule_statefulset() {
-  if is_statefulset; then
-    for KEY in "${KEYS_STATEFULSET_PLUS_ONE_POINT[@]}"; do
-      if is_key_full_json "${KEY}"; then
-        POINTS=$((POINTS + 1))
-      else
-        advise "Add" "${KEY}" ''
-      fi
-    done
-  fi
-}
-
 get_json() {
   local FILENAME="${1}"
   local COMMAND="${KUBECTL} convert -o json --local=true --filename=\"${FILENAME}\""
@@ -225,14 +223,6 @@ get_json() {
   else
     ${COMMAND} 2>&1
   fi
-}
-
-is_unprivileged_userns_clone() {
-  command -v sysctl &>/dev/null \
-    && sysctl kernel.unprivileged_userns_clone | grep -q ' = 1' \
-      && unshare --net \
-        --map-root-user \
-        touch /dev/null &>/dev/null
 }
 
 get_kind() {
@@ -253,51 +243,13 @@ check_valid_kind() {
 
 }
 
-resolve_jq() {
-  if ! JQ=$(resolve_binary ${JQ}); then
-    exit 1
-  fi
-}
-
-resolve_kubectl() {
-  if ! KUBECTL=$(resolve_binary ${KUBECTL}); then
-    exit 1
-  fi
-}
-
-resolve_binary() {
-  local BINARY="${1}"
-  local ORIGINAL_BINARY="${BINARY}"
-
-  if ! BINARY=$(command -v "${BINARY}" 2>/dev/null); then
-    BINARY="./${ORIGINAL_BINARY}"
-
-    if ! command -v "${BINARY}" &>/dev/null; then
-      BINARY=$(find . -regex ".*/${ORIGINAL_BINARY}$" -type f -executable -print -quit)
-
-      if [[ "${BINARY:-}" == "" ]]; then
-        BINARY=$(find ../ -regex ".*/${ORIGINAL_BINARY}$" -type f -executable -print -quit)
-
-        if [[ "${BINARY:-}" == "" ]]; then
-          error "${BINARY} not found"
-        fi
-      fi
-    fi
-  fi
-  echo "${BINARY}"
-}
-
 get_rules() {
   cat "${DIR}/"k8s-rules.json | ${JQ} ".rules[] | select(.kind == \"$(get_kind)\" or .kind == null)"
 }
 
 get_rule_by_selector() {
   local SELECTOR="${1//\"/\\\"}"
-  local CACHE="/dev/shm/cache/"
-  local CACHE_FILE="${CACHE}/$(echo "${SELECTOR}" | sed 's,[^a-zA-Z],-,g')"
-
-  mkdir -p "${CACHE}"
-
+  local CACHE_FILE="${CACHE_DIR}/$(echo "${SELECTOR}" | sed 's,[^a-zA-Z],-,g')"
   if [[ -f "${CACHE_FILE}" ]]; then
     cat "${CACHE_FILE}"
   else
@@ -343,6 +295,8 @@ is_key() {
   [[ "${RESULT}" != 'null' ]] && [[ "${RESULT}" != '' ]]
 }
 
+# ---
+
 is_pod() {
   _is_type 'Pod'
 }
@@ -362,7 +316,92 @@ is_statefulset() {
 _is_type() {
   local TYPE="${1:-}"
   [[ $(get_kind) == "${TYPE}" ]]
+}
 
+# ---
+
+is_unprivileged_userns_clone() {
+  command -v sysctl &>/dev/null \
+    && sysctl kernel.unprivileged_userns_clone | grep -q ' = 1' \
+      && unshare --net \
+        --map-root-user \
+        touch /dev/null &>/dev/null
+}
+
+resolve_jq() {
+  if ! JQ=$(resolve_binary ${JQ}); then
+    exit 1
+  fi
+}
+
+resolve_kubectl() {
+  if ! KUBECTL=$(resolve_binary ${KUBECTL}); then
+    exit 1
+  fi
+}
+
+resolve_binary() {
+  local BINARY="${1}"
+  local ORIGINAL_BINARY="${BINARY}"
+
+  if ! BINARY=$(command -v "${BINARY}" 2>/dev/null); then
+    BINARY="./${ORIGINAL_BINARY}"
+
+    if ! command -v "${BINARY}" &>/dev/null; then
+      BINARY=$(find . -regex ".*/${ORIGINAL_BINARY}$" -type f -executable -print -quit)
+
+      if [[ "${BINARY:-}" == "" ]]; then
+        BINARY=$(find ../ -regex ".*/${ORIGINAL_BINARY}$" -type f -executable -print -quit)
+
+        if [[ "${BINARY:-}" == "" ]]; then
+          error "${BINARY} not found"
+        fi
+      fi
+    fi
+  fi
+  echo "${BINARY}"
+}
+
+# ---
+
+configure_cache() {
+  if [[ "${CACHE_DIR:-}" == "" ]]; then
+    CACHE_DIR="/dev/shm/$(echo "${THIS_SCRIPT}" | base64_fs_sanitise)"
+    mkdir -p "${CACHE_DIR}"
+  fi
+}
+
+base64_fs_sanitise() {
+  base64 -w0 | tr '/' '-' | sed -r 's,(.{200}),\1/,g'
+}
+
+read_json_resource_cache() {
+  local FILENAME="${1:-}"
+  local CACHE_KEY=$(get_resource_cache_key "${FILENAME}")
+  if [[ "${CACHE_KEY}" != "" ]]; then
+    if [[ -f "${CACHE_DIR}/${CACHE_KEY}/data" ]]; then
+      mkdir -p "${CACHE_DIR}/${CACHE_KEY}"
+      cat "${CACHE_DIR}/${CACHE_KEY}/data"
+      return 0
+    fi
+  fi
+
+  return 1
+}
+
+get_resource_cache_key() {
+  local FILENAME="${1:-}"
+  local CACHE_KEY=$(cat "${FILENAME}" | base64_fs_sanitise)
+  echo "${CACHE_KEY}"
+}
+
+write_json_resource_cache() {
+  local FILENAME="${1:-}"
+  local CACHE_KEY=$(get_resource_cache_key "${FILENAME}")
+  if [[ "${CACHE_KEY}" != "" ]]; then
+    mkdir -p  "${CACHE_DIR}/${CACHE_KEY}"
+    echo "${JSON}" | tee "${CACHE_DIR}/${CACHE_KEY}/data" >/dev/null
+  fi
 }
 
 # ---
