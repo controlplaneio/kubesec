@@ -2,6 +2,7 @@
   "rules": [
     {
       "selector": "containers[] .securityContext .capabilities .drop",
+      "title": "securityContext capabilities",
       "reason": "Reducing kernel capabilities available to a container limits its attack surface",
       "points": 1,
       "href": "https://kubernetes.io/docs/tasks/configure-pod-container/security-context/",
@@ -99,16 +100,40 @@
       "points": -1,
       "href": null
     },
+
     {
       "selector": "select(.metadata .annotations .\"seccomp.security.alpha.kubernetes.io/pod\" | index(\"unconfined\") == null) | .metadata .annotations .\"seccomp.security.alpha.kubernetes.io/pod\" | length > 0",
+      "title": ".metadata .annotations .\"container.seccomp.security.alpha.kubernetes.io/explorer\"",
       "reason": "Seccomp profiles set minimum privilege and secure against unknown threats",
       "points": 5,
       "href": null
     },
     {
       "selector": "select(.metadata .annotations .\"container.seccomp.security.alpha.kubernetes.io/explorer\" | index(\"unconfined\") == null) | .metadata .annotations .\"container.seccomp.security.alpha.kubernetes.io/explorer\" | length > 0",
+      "title": ".metadata .annotations .\"container.seccomp.security.alpha.kubernetes.io/explorer\"",
       "reason": "Seccomp profiles for OpenShift set minimum privilege and secure against unknown threats",
       "points": 5,
+      "href": null
+    },
+    {
+      "selector": ".spec .serviceaccountname",
+      "title": "Service Accounts",
+      "reason": "TODO",
+      "points": 999,
+      "href": null
+    },
+    {
+      "selector": ".spec .template .spec .hostNetwork",
+      "title": "Sharing the host's network namespace permits processes in the pod to communicate with processes bound to the host's loopback adapter",
+      "reason": "blah",
+      "points": -9,
+      "href": null
+    },
+    {
+      "selector": ".spec .template .spec .hostPID",
+      "title": "Sharing the host's PID namespace allows visibility of processes on the host, potentially leaking information such as environment variables and configuration",
+      "reason": "blah",
+      "points": -9,
       "href": null
     },
     {

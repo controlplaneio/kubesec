@@ -1,0 +1,9 @@
+apiVersion: extensions/v1beta1
+kind: DaemonSet
+spec:
+  template:
+    spec:
+      hostPID: true
+      containers:
+      - name: example-daemonset
+        image: example-daemonset:latest
