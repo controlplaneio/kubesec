@@ -96,6 +96,7 @@
     },
     {
       "selector": ".metadata .annotations .\"seccomp.security.alpha.kubernetes.io/pod\" | index(\"unconfined\")",
+      "title": ".metadata .annotations .\"seccomp.security.alpha.kubernetes.io/pod\"",
       "reason": "Seccomp profiles are unconfined by default. Add a profile to set minimum privilege and secure against unknown threats",
       "points": -1,
       "href": null
@@ -124,15 +125,13 @@
     },
     {
       "selector": ".spec .template .spec .hostNetwork",
-      "title": "Sharing the host's network namespace permits processes in the pod to communicate with processes bound to the host's loopback adapter",
-      "reason": "blah",
+      "reason": "Sharing the host's network namespace permits processes in the pod to communicate with processes bound to the host's loopback adapter",
       "points": -9,
       "href": null
     },
     {
       "selector": ".spec .template .spec .hostPID",
-      "title": "Sharing the host's PID namespace allows visibility of processes on the host, potentially leaking information such as environment variables and configuration",
-      "reason": "blah",
+      "reason": "Sharing the host's PID namespace allows visibility of processes on the host, potentially leaking information such as environment variables and configuration",
       "points": -9,
       "href": null
     },
