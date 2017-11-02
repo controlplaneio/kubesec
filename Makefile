@@ -33,7 +33,7 @@ gen-html:
 		IFS="$$(printf "\n+")"; \
 		IFS="$${IFS%+}"; \
 		for BLOB in $$(cat k8s-rules.json  | jq -c ".rules[]"); do \
-			SELECTOR=$$(echo "$$BLOB" | jq .selector -r) \
+			SELECTOR=$$(echo "$$BLOB" | jq -r "(select(.title!=null) | .title), (select(.title==null) | .selector)") \
 			FILE_NAME=$$(echo "$$SELECTOR" | sed "s,[^a-zA-Z],-,g" \
 							 | sed "s,--*,-,g" \
 							 | sed "s,^-,," | sed "s,-$$,,").md; \
@@ -53,6 +53,8 @@ gen-html:
 		done \
 		) \
 	'
+logs:
+	AWS_PROFILE=binslug-s3 up logs -f
 
 test:
 	bash -xc ' \

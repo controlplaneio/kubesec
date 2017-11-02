@@ -1,5 +1,5 @@
 +++
-title = ".metadata .annotations .\"seccomp.security.alpha.kubernetes.io/pod\" | index(\"unconfined\")"
+title = ".metadata .annotations .\"seccomp.security.alpha.kubernetes.io/pod\""
 weight = 5
 +++
 
