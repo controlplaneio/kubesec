@@ -235,6 +235,16 @@ load '_helper'
   assert_non_zero_points
 }
 
+@test "fails DaemonSet with hostNetwork" {
+  run _app ${TEST_DIR}/asset/score-0-daemonset-host-network.yml
+  assert_negative_points
+}
+
+@test "fails DaemonSet with hostPid" {
+  run _app ${TEST_DIR}/asset/score-0-daemonset-host-pid.yml
+  assert_negative_points
+}
+
 # TODO: test for pod-specific seccomp
 
 # TODO: case sensitive check (use jq's ascii_downcase)
