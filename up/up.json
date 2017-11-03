@@ -13,6 +13,9 @@
     "memory": 1024,
     "timeout": 5
   },
+  "lambda": {
+    "memory": 1536
+  },
   "stages": {
     "production": {
       "domain": "kubesec.io"
