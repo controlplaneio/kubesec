@@ -8,7 +8,7 @@ pre = "<b>1. </b>"
 
 # kubesec.io
 
-Score Kubernetes resources for using security features 
+Score Kubernetes resources for using security features
 
 ## Usage
 
@@ -39,10 +39,10 @@ spec:
 Define a BASH function
 
 {{< highlight bash >}}
-kubesec () 
-{ 
+kubesec ()
+{
     local FILE="${1:-}";
-    [[ ! -f "${FILE}" ]] && { 
+    [[ ! -f "${FILE}" ]] && {
         echo "kubesec: ${FILE}: No such file" >&2;
         return 1
     };
@@ -54,14 +54,14 @@ kubesec ()
 }
 {{< /highlight >}}
 
-POST a Kubernetes resource to kubesec.io   
+POST a Kubernetes resource to kubesec.io
 {{< highlight bash >}}
 kubesec ./deployment.yml
 {{< /highlight >}}
 
 Return non-zero status code is the score is not greater than 10
 {{< highlight bash >}}
-kubesec ./score-9-deployment.yml | jq --exit-status '.score > 10' >/dev/null 
+kubesec ./score-9-deployment.yml | jq --exit-status '.score > 10' >/dev/null
 # status code 1
 {{< /highlight >}}
 
@@ -103,9 +103,3 @@ kubesec ./score-9-deployment.yml | jq --exit-status '.score > 10' >/dev/null
 {{< /highlight >}}
 
 ---
-
-<br/>
-
-# Index
-
-{{% children  %}}
