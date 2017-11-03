@@ -119,8 +119,8 @@
     {
       "selector": ".spec .serviceaccountname",
       "title": "Service Accounts",
-      "reason": "TODO",
-      "points": 999,
+      "reason": "Service accounts restrict Kubernetes API access and should be configured with least privilege",
+      "points": 3,
       "href": null
     },
     {
@@ -132,6 +132,12 @@
     {
       "selector": ".spec .template .spec .hostPID",
       "reason": "Sharing the host's PID namespace allows visibility of processes on the host, potentially leaking information such as environment variables and configuration",
+      "points": -9,
+      "href": null
+    },
+    {
+      "selector": ".spec .template .spec .hostIPC",
+      "reason": "Sharing the host's IPC namespace allows container processes to communicate with processes on the host",
       "points": -9,
       "href": null
     },

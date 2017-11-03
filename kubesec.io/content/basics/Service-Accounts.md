@@ -3,7 +3,8 @@ title = "Service Accounts"
 weight = 5
 +++
 
-## TODO
+## Service accounts restrict Kubernetes API access and should be configured with least privilege
+
 ServiceAccounts provide bot users for cluster access. These accounts can be configured with least privilege, reducing the risk of a vulnerability in the code that account runs being able to pivot into other services.
 
 ## External Links

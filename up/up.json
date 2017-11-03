@@ -6,7 +6,8 @@
   "hooks": {
     "build": [
       "cp -f ../kseccheck.sh ../k8s-rules.json .",
-      "(cd ../kubesec.io/ && hugo --destination ../up/public/)"
+      "(cd ../ && make gen-html)",
+      "(cd ../kubesec.io/ && rm -rf ../up/public/ && hugo --destination ../up/public/)"
     ]
   },
   "proxy": {
