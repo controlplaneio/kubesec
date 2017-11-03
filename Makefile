@@ -29,7 +29,9 @@ hugo:
 gen-html:
 	bash -exc ' \
 		( \
-		mkdir -p html/basics kubesec.io/contents/basics; \
+		HTML_PATH="kubesec.io/content/basics"; \
+		mkdir -p html/basics "$${HTML_PATH}"; \
+		find "$${HTML_PATH}" -type f | grep -v index.md | xargs --no-run-if-empty rm; \
 		IFS="$$(printf "\n+")"; \
 		IFS="$${IFS%+}"; \
 		for BLOB in $$(cat k8s-rules.json  | jq -c ".rules[]"); do \
@@ -37,7 +39,7 @@ gen-html:
 			FILE_NAME=$$(echo "$$SELECTOR" | sed "s,[^a-zA-Z],-,g" \
 							 | sed "s,--*,-,g" \
 							 | sed "s,^-,," | sed "s,-$$,,").md; \
-			FILE="kubesec.io/content/basics/$${FILE_NAME}"; \
+			FILE="$${HTML_PATH}/$${FILE_NAME}"; \
 			rm "$${FILE}" || true; \
 			touch "$${FILE}" html/basics/"$${FILE_NAME}"; \
 			WEIGHT=$$(echo "$${BLOB}" | jq -r ".weight | select(values)"); \
@@ -48,7 +50,7 @@ gen-html:
 			echo "title = \"$${SELECTOR_ESCAPED}\"" >> "$${FILE}"; \
 			echo "weight = $${WEIGHT:-5}" >> "$${FILE}"; \
 			echo "+++" >> "$${FILE}"; \
-			printf "\n## $${TITLE}\n" >> "$${FILE}"; \
+			printf "\n## $${TITLE}\n\n" >> "$${FILE}"; \
 			cat html/basics/$${FILE_NAME} >> $${FILE}; \
 		done \
 		) \
