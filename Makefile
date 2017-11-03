@@ -54,7 +54,9 @@ gen-html:
 		) \
 	'
 logs:
-	AWS_PROFILE=binslug-s3 up logs -f
+	bash -xc ' \
+		(cd up && AWS_PROFILE=binslug-s3 up logs -f) \
+	'
 
 test:
 	bash -xc ' \
