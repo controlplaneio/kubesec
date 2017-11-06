@@ -1,10 +1,3 @@
-+++
-title = "containers[] .resources .limits .cpu"
-weight = 5
-+++
-
-## Enforcing CPU limits prevents DOS via resource exhaustion
-
 When Containers have resource requests specified the scheduler can make better decisions about which nodes to place Pods on and how to deal with resource contention.
 
 Limits and requests for CPU resources are measured in cpu units. Kubernetes judges these as:
@@ -28,6 +21,3 @@ Limits and requests for CPU resources are measured in cpu units. Kubernetes judg
 - [Kubernetes Docs: Assign CPU Resources to Containers and Pods](https://kubernetes.io/docs/tasks/configure-pod-container/assign-cpu-resource/)
 - [Kubernetes Docs: Configure Memory and CPU Quotas for a Namespace](https://kubernetes.io/docs/tasks/administer-cluster/quota-memory-cpu-namespace/)
 - [Configure Quality of Service for Pods](https://kubernetes.io/docs/tasks/configure-pod-container/quality-service-pod/)
-
-
-{{% katacoda %}}

@@ -21,17 +21,18 @@ deploy:
 			&& make test-remote ; \
 	'
 hugo:
-	bash -exc ' \
+	bash -ec ' \
 		( \
 		(IS_KUBESEC=$$(wmctrl -l -x | grep -q kubesec.io && echo 1 || echo 0); cd kubesec.io && while read LINE; do echo "$${LINE}"; if [[ "$${IS_KUBESEC}" != 1 ]] && [[ "$${LINE}" =~ ^Web\ Server\ is\ available\ at ]]; then echo "$${LINE}" | sed -E "s,.*(localhost[^ ]*).*,\1,g" | xargs -I{} xdg-open "http://{}" || true; fi; done < <(hugo server --disableFastRender)); \
 		)'
 
 gen-html:
-	bash -exc ' \
+	bash -ec ' \
 		( \
-		HTML_PATH="kubesec.io/content/basics"; \
-		mkdir -p html/basics "$${HTML_PATH}"; \
-		find "$${HTML_PATH}" -type f | grep -v index.md | xargs --no-run-if-empty rm; \
+		OUTPUT_PATH="kubesec.io/content/basics"; \
+		INPUT_PATH="kubesec.io/_content/basics"; \
+		mkdir -p "$${INPUT_PATH}" "$${OUTPUT_PATH}"; \
+		find "$${OUTPUT_PATH}" -type f | grep -v index.md | xargs --no-run-if-empty rm; \
 		IFS="$$(printf "\n+")"; \
 		IFS="$${IFS%+}"; \
 		for BLOB in $$(cat k8s-rules.json  | jq -c ".rules[]"); do \
@@ -39,9 +40,9 @@ gen-html:
 			FILE_NAME=$$(echo "$$SELECTOR" | sed "s,[^a-zA-Z],-,g" \
 							 | sed "s,--*,-,g" \
 							 | sed "s,^-,," | sed "s,-$$,,").md; \
-			FILE="$${HTML_PATH}/$${FILE_NAME}"; \
+			FILE="$${OUTPUT_PATH}/$${FILE_NAME}"; \
 			rm "$${FILE}" || true; \
-			touch "$${FILE}" html/basics/"$${FILE_NAME}"; \
+			touch "$${FILE}" "$${INPUT_PATH}"/"$${FILE_NAME}"; \
 			WEIGHT=$$(echo "$${BLOB}" | jq -r ".weight | select(values)"); \
 			TITLE=$$(echo "$${BLOB}" | jq -r ".reason | select(values)"); \
 			SELECTOR_ESCAPED=$${SELECTOR//\"/\\\"}; \
@@ -51,7 +52,8 @@ gen-html:
 			echo "weight = $${WEIGHT:-5}" >> "$${FILE}"; \
 			echo "+++" >> "$${FILE}"; \
 			printf "\n## $${TITLE}\n\n" >> "$${FILE}"; \
-			cat html/basics/$${FILE_NAME} >> $${FILE}; \
+			cat "$${INPUT_PATH}"/"$${FILE_NAME}" >> "$${FILE}"; \
+			printf "\n\n{{%% katacoda %%}}\n" >> "$${FILE}"; \
 		done \
 		) \
 	'

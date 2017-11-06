@@ -1,10 +1,3 @@
-+++
-title = "containers[] .resources .limits .memory"
-weight = 5
-+++
-
-## Enforcing memory limits prevents DOS via resource exhaustion
-
 When Containers have resource requests specified the scheduler can make better decisions about which nodes to place Pods on and how to deal with resource contention.
 
 Limits and requests for memory are measured in bytes. You can express memory as a plain integer or as a fixed-point integer using one of these suffixes: E, P, T, G, M, K. You can also use the power-of-two equivalents: Ei, Pi, Ti, Gi, Mi, Ki. For example, the following represent roughly the same value:
@@ -38,6 +31,3 @@ resources:
 - [Kubernetes Docs: Assign Memory Resources to Containers and Pods](https://kubernetes.io/docs/tasks/configure-pod-container/assign-memory-resource/)
 - [Kubernetes Docs: Configure Memory and CPU Quotas for a Namespace](https://kubernetes.io/docs/tasks/administer-cluster/quota-memory-cpu-namespace/)
 - [Configure Quality of Service for Pods](https://kubernetes.io/docs/tasks/configure-pod-container/quality-service-pod/)
-
-
-{{% katacoda %}}

@@ -8,3 +8,7 @@ pre = "<b># </b>"
 # kubesec.io
 
 {{% children  %}}
+
+# Futher Reading
+
+- http://blog.kubernetes.io/2016/08/security-best-practices-kubernetes-deployment.html
