@@ -63,3 +63,5 @@ load '_helper'
 }
 
 
+# TODO deprecated alpha feature
+# https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/#opaque-integer-resources-alpha-feature

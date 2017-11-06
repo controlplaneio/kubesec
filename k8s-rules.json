@@ -104,14 +104,14 @@
 
     {
       "selector": "select(.metadata .annotations .\"seccomp.security.alpha.kubernetes.io/pod\" | index(\"unconfined\") == null) | .metadata .annotations .\"seccomp.security.alpha.kubernetes.io/pod\" | length > 0",
-      "title": ".metadata .annotations .\"container.seccomp.security.alpha.kubernetes.io/explorer\"",
+      "title": ".metadata .annotations .\"container.seccomp.security.alpha.kubernetes.io/pod\"",
       "reason": "Seccomp profiles set minimum privilege and secure against unknown threats",
       "points": 5,
       "href": null
     },
     {
-      "selector": "select(.metadata .annotations .\"container.seccomp.security.alpha.kubernetes.io/explorer\" | index(\"unconfined\") == null) | .metadata .annotations .\"container.seccomp.security.alpha.kubernetes.io/explorer\" | length > 0",
-      "title": ".metadata .annotations .\"container.seccomp.security.alpha.kubernetes.io/explorer\"",
+      "selector": "select(.metadata .annotations .\"container.seccomp.security.alpha.kubernetes.io/podName\" | index(\"unconfined\") == null) | .metadata .annotations .\"container.seccomp.security.alpha.kubernetes.io/podName\" | length > 0",
+      "title": ".metadata .annotations .\"container.seccomp.security.alpha.kubernetes.io/pod\"",
       "reason": "Seccomp profiles for OpenShift set minimum privilege and secure against unknown threats",
       "points": 5,
       "href": null
