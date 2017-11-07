@@ -28,6 +28,11 @@ kind: Deployment
               - NET_BIND_SERVICE
 ```
 
+## Notes
+
+- Drop all capabilities from a pod as above
+- Add only those required
+- Run a comprehensive test suite to ensure security extensions have not blocked functionality that your containers or pods require
 
 ## External Links
 - [Kubernetes Docs: Set capabilities for a Container](https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-capabilities-for-a-container)

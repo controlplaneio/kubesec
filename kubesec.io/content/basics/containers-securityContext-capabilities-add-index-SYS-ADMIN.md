@@ -5,6 +5,7 @@ weight = 5
 
 ## CAP_SYS_ADMIN is the most privileged capability and should always be avoided
 
+{{% include file="_content/basics/securityContext-capabilities.md" %}}
 
 
 {{% katacoda %}}
