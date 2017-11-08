@@ -12,7 +12,7 @@ theme = "hugo-theme-learn"
 home = [ "HTML", "RSS", "JSON"]
 
 [params]
-  editURL = "https://github.com/sublimino/kube-sec-check/edit/master/html/"
+  editURL = "https://github.com/sublimino/kube-sec-check/edit/master/kubesec.io/_content/"
   description = "kubesec.io"
   author = "control-plane.io"
   showVisitedLinks = false
