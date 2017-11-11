@@ -66,6 +66,10 @@ main() {
       || [[ $(echo "${JSON:0:1}") != '{' ]] \
       || ! get_kind &>/dev/null; then
 
+      if echo "${JSON}" | grep --quiet -E -- '^  "api_version":'; then
+        error "'api_version': invalid key, expected 'apiVersion'"
+      fi
+
       error "Invalid input"
     fi
 
@@ -400,7 +404,9 @@ read_json_resource_cache() {
 get_resource_cache_key() {
   local FILENAME="${1:-}"
   local CACHE_KEY=$(cat "${FILENAME}" | base64_fs_sanitise)
-  echo "${CACHE_KEY}"
+  if [[ "${#CACHE_KEY}" -lt 5000 ]]; then
+    echo "${CACHE_KEY}"
+  fi
 }
 
 write_json_resource_cache() {

@@ -1,0 +1,235 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  annotations:
+    alpha.istio.io/sidecar: injected
+    alpha.istio.io/version: jenkins@ubuntu-16-04-build-12ac793f80be71-0.1.6-dab2033
+    kubernetes.io/created-by: |
+      {"kind":"SerializedReference","apiVersion":"v1","reference":{"kind":"ReplicaSet","namespace":"default","name":"ghost-v9-2184080730","uid":"3a17590d-6a78-11e7-b41c-42010a840159","apiVersion":"extensions","resourceVersion":"25659753"}}
+    kubernetes.io/limit-ranger: 'LimitRanger plugin set: cpu request for container
+      ghost; cpu request for container proxy; cpu request for init container init;
+      cpu request for init container enable-core-dump'
+    pod.alpha.kubernetes.io/init-container-statuses: '[{"name":"init","state":{"terminated":{"exitCode":0,"reason":"Completed","startedAt":null,"finishedAt":"2017-11-09T12:14:44Z","containerID":"docker://71a965946be7e0485014cb175038ea61968935bf72500635c77338fb2b8a3311"}},"lastState":{},"ready":true,"restartCount":0,"image":"istio/init:0.1","imageID":"docker://sha256:0cbd83e9df59aa215fef67ce33ae37e550b0c5b436e86f39adb57c2176802564","containerID":"docker://71a965946be7e0485014cb175038ea61968935bf72500635c77338fb2b8a3311"},{"name":"enable-core-dump","state":{"terminated":{"exitCode":0,"reason":"Completed","startedAt":null,"finishedAt":"2017-11-09T12:15:02Z","containerID":"docker://9e8ca420d57e2a60051a88dcb1a55333395c4984ec09755fe985b3fa8efe8041"}},"lastState":{},"ready":true,"restartCount":0,"image":"alpine:latest","imageID":"docker://sha256:053cde6e8953ebd834df8f6382e68be83adb39bfc063e40b0fc61b4b333938f1","containerID":"docker://9e8ca420d57e2a60051a88dcb1a55333395c4984ec09755fe985b3fa8efe8041"}]'
+    pod.alpha.kubernetes.io/init-containers: '[{"name":"init","image":"docker.io/istio/init:0.1","args":["-p","15001","-u","1337","-i","10.20.0.0/14,10.23.240.0/20"],"resources":{"requests":{"cpu":"100m"}},"volumeMounts":[{"name":"default-token-knlhr","readOnly":true,"mountPath":"/var/run/secrets/kubernetes.io/serviceaccount"}],"terminationMessagePath":"/dev/termination-log","terminationMessagePolicy":"File","imagePullPolicy":"IfNotPresent","securityContext":{"capabilities":{"add":["NET_ADMIN"]}}},{"name":"enable-core-dump","image":"alpine","command":["/bin/sh"],"args":["-c","sysctl
+      -w kernel.core_pattern=/tmp/core.%e.%p.%t \u0026\u0026 ulimit -c unlimited"],"resources":{"requests":{"cpu":"100m"}},"volumeMounts":[{"name":"default-token-knlhr","readOnly":true,"mountPath":"/var/run/secrets/kubernetes.io/serviceaccount"}],"terminationMessagePath":"/dev/termination-log","terminationMessagePolicy":"File","imagePullPolicy":"IfNotPresent","securityContext":{"privileged":true}}]'
+    pod.beta.kubernetes.io/init-container-statuses: '[{"name":"init","state":{"terminated":{"exitCode":0,"reason":"Completed","startedAt":null,"finishedAt":"2017-11-09T12:14:44Z","containerID":"docker://71a965946be7e0485014cb175038ea61968935bf72500635c77338fb2b8a3311"}},"lastState":{},"ready":true,"restartCount":0,"image":"istio/init:0.1","imageID":"docker://sha256:0cbd83e9df59aa215fef67ce33ae37e550b0c5b436e86f39adb57c2176802564","containerID":"docker://71a965946be7e0485014cb175038ea61968935bf72500635c77338fb2b8a3311"},{"name":"enable-core-dump","state":{"terminated":{"exitCode":0,"reason":"Completed","startedAt":null,"finishedAt":"2017-11-09T12:15:02Z","containerID":"docker://9e8ca420d57e2a60051a88dcb1a55333395c4984ec09755fe985b3fa8efe8041"}},"lastState":{},"ready":true,"restartCount":0,"image":"alpine:latest","imageID":"docker://sha256:053cde6e8953ebd834df8f6382e68be83adb39bfc063e40b0fc61b4b333938f1","containerID":"docker://9e8ca420d57e2a60051a88dcb1a55333395c4984ec09755fe985b3fa8efe8041"}]'
+    pod.beta.kubernetes.io/init-containers: '[{"name":"init","image":"docker.io/istio/init:0.1","args":["-p","15001","-u","1337","-i","10.20.0.0/14,10.23.240.0/20"],"resources":{"requests":{"cpu":"100m"}},"volumeMounts":[{"name":"default-token-knlhr","readOnly":true,"mountPath":"/var/run/secrets/kubernetes.io/serviceaccount"}],"terminationMessagePath":"/dev/termination-log","terminationMessagePolicy":"File","imagePullPolicy":"IfNotPresent","securityContext":{"capabilities":{"add":["NET_ADMIN"]}}},{"name":"enable-core-dump","image":"alpine","command":["/bin/sh"],"args":["-c","sysctl
+      -w kernel.core_pattern=/tmp/core.%e.%p.%t \u0026\u0026 ulimit -c unlimited"],"resources":{"requests":{"cpu":"100m"}},"volumeMounts":[{"name":"default-token-knlhr","readOnly":true,"mountPath":"/var/run/secrets/kubernetes.io/serviceaccount"}],"terminationMessagePath":"/dev/termination-log","terminationMessagePolicy":"File","imagePullPolicy":"IfNotPresent","securityContext":{"privileged":true}}]'
+  creationTimestamp: 2017-11-09T12:12:32Z
+  generateName: ghost-v9-2184080730-
+  labels:
+    app: ghost
+    pod-template-hash: "2184080730"
+    version: v9
+  name: ghost-v9-2184080730-05sfz
+  namespace: default
+  ownerReferences:
+  - apiVersion: extensions/v1beta1
+    blockOwnerDeletion: true
+    controller: true
+    kind: ReplicaSet
+    name: ghost-v9-2184080730
+    uid: 3a17590d-6a78-11e7-b41c-42010a840159
+  resourceVersion: "25660853"
+  selfLink: /api/v1/namespaces/default/pods/ghost-v9-2184080730-05sfz
+  uid: 43c8adf9-c547-11e7-9ef1-42010a840026
+spec:
+  containers:
+  - env:
+    - name: NODE_ENV
+      value: production
+    - name: GHOST_URL
+      value: https://www.err.systems
+    image: registry.binarysludge.com/sublimino/ghost-k8s:1326
+    imagePullPolicy: IfNotPresent
+    name: ghost
+    ports:
+    - containerPort: 2368
+      protocol: TCP
+    resources:
+      requests:
+        cpu: 100m
+    terminationMessagePath: /dev/termination-log
+    terminationMessagePolicy: File
+    volumeMounts:
+    - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+      name: default-token-knlhr
+      readOnly: true
+  - args:
+    - proxy
+    - sidecar
+    - -v
+    - "2"
+    env:
+    - name: POD_NAME
+      valueFrom:
+        fieldRef:
+          apiVersion: v1
+          fieldPath: metadata.name
+    - name: POD_NAMESPACE
+      valueFrom:
+        fieldRef:
+          apiVersion: v1
+          fieldPath: metadata.namespace
+    - name: POD_IP
+      valueFrom:
+        fieldRef:
+          apiVersion: v1
+          fieldPath: status.podIP
+    image: docker.io/istio/proxy_debug:0.1
+    imagePullPolicy: IfNotPresent
+    name: proxy
+    resources:
+      requests:
+        cpu: 100m
+    securityContext:
+      runAsUser: 1337
+    terminationMessagePath: /dev/termination-log
+    terminationMessagePolicy: File
+    volumeMounts:
+    - mountPath: /etc/certs
+      name: istio-certs
+      readOnly: true
+    - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+      name: default-token-knlhr
+      readOnly: true
+  dnsPolicy: ClusterFirst
+  imagePullSecrets:
+  - name: private-docker-registry-secret
+  initContainers:
+  - args:
+    - -p
+    - "15001"
+    - -u
+    - "1337"
+    - -i
+    - 10.20.0.0/14,10.23.240.0/20
+    image: docker.io/istio/init:0.1
+    imagePullPolicy: IfNotPresent
+    name: init
+    resources:
+      requests:
+        cpu: 100m
+    securityContext:
+      capabilities:
+        add:
+        - NET_ADMIN
+    terminationMessagePath: /dev/termination-log
+    terminationMessagePolicy: File
+    volumeMounts:
+    - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+      name: default-token-knlhr
+      readOnly: true
+  - args:
+    - -c
+    - sysctl -w kernel.core_pattern=/tmp/core.%e.%p.%t && ulimit -c unlimited
+    command:
+    - /bin/sh
+    image: alpine
+    imagePullPolicy: IfNotPresent
+    name: enable-core-dump
+    resources:
+      requests:
+        cpu: 100m
+    securityContext:
+      privileged: true
+    terminationMessagePath: /dev/termination-log
+    terminationMessagePolicy: File
+    volumeMounts:
+    - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+      name: default-token-knlhr
+      readOnly: true
+  nodeName: gke-binslug-default-pool-4946c3fb-tnxm
+  restartPolicy: Always
+  schedulerName: default-scheduler
+  securityContext: {}
+  serviceAccount: default
+  serviceAccountName: default
+  terminationGracePeriodSeconds: 30
+  tolerations:
+  - effect: NoExecute
+    key: node.alpha.kubernetes.io/notReady
+    operator: Exists
+    tolerationSeconds: 300
+  - effect: NoExecute
+    key: node.alpha.kubernetes.io/unreachable
+    operator: Exists
+    tolerationSeconds: 300
+  volumes:
+  - name: istio-certs
+    secret:
+      defaultMode: 420
+      secretName: istio.default
+  - name: default-token-knlhr
+    secret:
+      defaultMode: 420
+      secretName: default-token-knlhr
+status:
+  conditions:
+  - lastProbeTime: null
+    lastTransitionTime: 2017-11-09T12:15:02Z
+    status: "True"
+    type: Initialized
+  - lastProbeTime: null
+    lastTransitionTime: 2017-11-09T12:16:41Z
+    status: "True"
+    type: Ready
+  - lastProbeTime: null
+    lastTransitionTime: 2017-11-09T12:14:35Z
+    status: "True"
+    type: PodScheduled
+  containerStatuses:
+  - containerID: docker://001d2f0e2109d75c4259195a61ae6046286e4e1a1ddd5c7a814250d5a66ba770
+    image: registry.binarysludge.com/sublimino/ghost-k8s:1326
+    imageID: docker://sha256:d83004fbf0289d2bb81ce5e73ce926651527a4b9bada6195437862ed290fbdc8
+    lastState: {}
+    name: ghost
+    ready: true
+    restartCount: 0
+    state:
+      running:
+        startedAt: 2017-11-09T12:15:42Z
+  - containerID: docker://ab684035c254cc308e390aa46556eb7767bb182412148567efb1b7ddc2ba8d4b
+    image: istio/proxy_debug:0.1
+    imageID: docker://sha256:5623de9317ff600fc3018a58c7949db74fc5e1a943efa72814aaab78da4d4b4c
+    lastState: {}
+    name: proxy
+    ready: true
+    restartCount: 0
+    state:
+      running:
+        startedAt: 2017-11-09T12:16:40Z
+  hostIP: 10.132.0.2
+  initContainerStatuses:
+  - containerID: docker://71a965946be7e0485014cb175038ea61968935bf72500635c77338fb2b8a3311
+    image: istio/init:0.1
+    imageID: docker://sha256:0cbd83e9df59aa215fef67ce33ae37e550b0c5b436e86f39adb57c2176802564
+    lastState: {}
+    name: init
+    ready: true
+    restartCount: 0
+    state:
+      terminated:
+        containerID: docker://71a965946be7e0485014cb175038ea61968935bf72500635c77338fb2b8a3311
+        exitCode: 0
+        finishedAt: 2017-11-09T12:14:44Z
+        reason: Completed
+        startedAt: null
+  - containerID: docker://9e8ca420d57e2a60051a88dcb1a55333395c4984ec09755fe985b3fa8efe8041
+    image: alpine:latest
+    imageID: docker://sha256:053cde6e8953ebd834df8f6382e68be83adb39bfc063e40b0fc61b4b333938f1
+    lastState: {}
+    name: enable-core-dump
+    ready: true
+    restartCount: 0
+    state:
+      terminated:
+        containerID: docker://9e8ca420d57e2a60051a88dcb1a55333395c4984ec09755fe985b3fa8efe8041
+        exitCode: 0
+        finishedAt: 2017-11-09T12:15:02Z
+        reason: Completed
+        startedAt: null
+  phase: Running
+  podIP: 10.20.17.6
+  qosClass: Burstable
+  startTime: 2017-11-09T12:14:35Z

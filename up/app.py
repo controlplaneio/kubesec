@@ -44,7 +44,8 @@ class myHandler(BaseHTTPRequestHandler):
 
     """
 
-    server_version = "SimpleHTTPWithUpload/" + __version__
+    # server_version = "SimpleHTTPWithUpload/" + __version__
+    server_version = ""
 
     def do_HEAD(self):
         """Serve a HEAD request."""
@@ -63,7 +64,7 @@ class myHandler(BaseHTTPRequestHandler):
 
         sys.stderr.write("POST LOG START\n")
         sys.stderr.write("  " + info + "\n")
-        sys.stderr.write(subprocess.check_output(["cat", info], stderr=subprocess.STDOUT))
+        # sys.stderr.write(subprocess.check_output(["cat", info], stderr=subprocess.STDOUT))
         sys.stderr.write("POST LOG END\n")
 
         status_code = 200
@@ -78,7 +79,7 @@ class myHandler(BaseHTTPRequestHandler):
         length = f.tell()
         f.seek(0)
         self.send_response(status_code)
-        self.send_header("Content-type", "text/html")
+        self.send_header("Content-type", "application/json")
         self.send_header("Content-Length", str(length))
         self.end_headers()
         if f:

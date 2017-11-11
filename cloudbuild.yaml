@@ -1,7 +1,7 @@
 ---
 steps:
   - name: 'docker.io/sublimino/alpine-base:latest'
-    args: ['make', 'alpine']
+    args: ['make', 'deploy']
     dir: '.'
     env:
       - 'BUILD=$BUILD_ID'

@@ -3,6 +3,7 @@ title = "index"
 chapter = true
 weight = 5
 pre = "<b># </b>"
+alwaysopen = true
 +++
 
 # kubesec.io

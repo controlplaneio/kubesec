@@ -18,7 +18,6 @@ home = [ "HTML", "RSS", "JSON"]
   showVisitedLinks = false
   themeVariant = "green"
 
-
 [Languages]
 [Languages.en]
 title = "kubesec.io"

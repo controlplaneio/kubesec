@@ -13,10 +13,14 @@ kseccheck.sh [options] <k8s resource file>
 
 ## TODO
 
-1. short form output behind `-o` option (default)
-1. long form output (details of problem, recommended fix, link to docs)
-1. JSON output
+1. log input files
+1. cloudbuild.yaml CD
+1. privacy policy a la https://www.redhat.com/en/about/privacy-policy
 1. More test cases
+1. github PR integration
+1. free cloud PR service, on-prem container $$$
+1. rename to securecube.io or some shit
+
 
 ## JSON struct
 

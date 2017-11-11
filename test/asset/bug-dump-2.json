@@ -1,0 +1,133 @@
+{
+    "apiVersion": "v1",
+    "kind": "Pod",
+    "metadata": {
+        "annotations": {
+            "kubernetes.io/created-by": "{\"kind\":\"SerializedReference\",\"apiVersion\":\"v1\",\"reference\":{\"kind\":\"ReplicaSet\",\"namespace\":\"default\",\"name\":\"my-consumer-app-2176727022\",\"uid\":\"e1c9d324-b832-11e7-b710-0800274145bd\",\"apiVersion\":\"extensions\",\"resourceVersion\":\"116348\"}}\n"
+        },
+        "creationTimestamp": "2017-10-23T20:43:53Z",
+        "generateName": "my-consumer-app-2176727022-",
+        "labels": {
+            "pod-template-hash": "2176727022",
+            "service": "my-consumer-service"
+        },
+        "name": "my-consumer-app-2176727022-58583",
+        "namespace": "default",
+        "ownerReferences": [
+            {
+                "apiVersion": "extensions/v1beta1",
+                "blockOwnerDeletion": true,
+                "controller": true,
+                "kind": "ReplicaSet",
+                "name": "my-consumer-app-2176727022",
+                "uid": "e1c9d324-b832-11e7-b710-0800274145bd"
+            }
+        ],
+        "resourceVersion": "117052",
+        "selfLink": "/api/v1/namespaces/default/pods/my-consumer-app-2176727022-58583",
+        "uid": "e1cb9310-b832-11e7-b710-0800274145bd"
+    },
+    "spec": {
+        "containers": [
+            {
+                "image": "chaostoolkit/simple-boot-feign-direct-microservice-consumer:before",
+                "imagePullPolicy": "Always",
+                "name": "my-consumer-app",
+                "ports": [
+                    {
+                        "containerPort": 8080,
+                        "name": "http",
+                        "protocol": "TCP"
+                    }
+                ],
+                "resources": {
+                    "limits": {
+                        "cpu": "2",
+                        "memory": "256Mi"
+                    },
+                    "requests": {
+                        "cpu": "200m",
+                        "memory": "256Mi"
+                    }
+                },
+                "terminationMessagePath": "/dev/termination-log",
+                "terminationMessagePolicy": "File",
+                "volumeMounts": [
+                    {
+                        "mountPath": "/var/run/secrets/kubernetes.io/serviceaccount",
+                        "name": "default-token-lxm1q",
+                        "readOnly": true
+                    }
+                ]
+            }
+        ],
+        "dnsPolicy": "ClusterFirst",
+        "nodeName": "minikube",
+        "restartPolicy": "Always",
+        "schedulerName": "default-scheduler",
+        "securityContext": {},
+        "serviceAccount": "default",
+        "serviceAccountName": "default",
+        "terminationGracePeriodSeconds": 30,
+        "volumes": [
+            {
+                "name": "default-token-lxm1q",
+                "secret": {
+                    "defaultMode": 420,
+                    "secretName": "default-token-lxm1q"
+                }
+            }
+        ]
+    },
+    "status": {
+        "conditions": [
+            {
+                "lastProbeTime": null,
+                "lastTransitionTime": "2017-10-23T20:43:53Z",
+                "status": "True",
+                "type": "Initialized"
+            },
+            {
+                "lastProbeTime": null,
+                "lastTransitionTime": "2017-11-10T15:10:33Z",
+                "status": "True",
+                "type": "Ready"
+            },
+            {
+                "lastProbeTime": null,
+                "lastTransitionTime": "2017-10-23T20:43:53Z",
+                "status": "True",
+                "type": "PodScheduled"
+            }
+        ],
+        "containerStatuses": [
+            {
+                "containerID": "docker://9c6bd119f29cb938f1d975f06be758580e1a64b7608b54709e06ebc1093aa356",
+                "image": "chaostoolkit/simple-boot-feign-direct-microservice-consumer:before",
+                "imageID": "docker-pullable://chaostoolkit/simple-boot-feign-direct-microservice-consumer@sha256:044e20e643221b6040a3ea88188065d75e131ad37cd55237075def608d5486f1",
+                "lastState": {
+                    "terminated": {
+                        "containerID": "docker://50bff7b586b69263107a6529cda58d1ad760386bb448bd0f573698ff6a28cb7a",
+                        "exitCode": 1,
+                        "finishedAt": "2017-11-10T15:10:02Z",
+                        "reason": "Error",
+                        "startedAt": "2017-10-23T20:43:56Z"
+                    }
+                },
+                "name": "my-consumer-app",
+                "ready": true,
+                "restartCount": 1,
+                "state": {
+                    "running": {
+                        "startedAt": "2017-11-10T15:10:31Z"
+                    }
+                }
+            }
+        ],
+        "hostIP": "192.168.99.100",
+        "phase": "Running",
+        "podIP": "172.17.0.2",
+        "qosClass": "Burstable",
+        "startTime": "2017-10-23T20:43:53Z"
+    }
+}
