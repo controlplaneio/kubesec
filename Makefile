@@ -1,7 +1,7 @@
 SHELL := /bin/bash
-PACKAGE = github.com/controlplane/theseus/cmd
+PACKAGE = none
 HAS_DEP := $(shell command -v dep 2>/dev/null)
-REMOTE_URL="https://kubesec.io/"
+REMOTE_URL ?="https://kubesec.io/"
 
 .PHONY: build container dep dev local test test test-acceptance test-unit
 .SILENT:
@@ -15,7 +15,8 @@ deploy:
 	bash -xec ' \
 		unalias make || true; \
 		make test \
-		&& make up-deploy-staging \
+      && make dep \
+      && make up-deploy-staging \
 			&& make test-remote-staging \
 			&& make up-deploy \
 			&& make test-remote ; \
@@ -121,20 +122,8 @@ test-go :
 dev:
 	make test && make build
 
-dep-safe:
-	bash -xc ' \
-		make dep && make test || { \
-			echo "Attempting to remedy gopkg.in/yaml.v2"; \
-			rm -rf $$(pwd)/vendor/gopkg.in/yaml.v2; \
-			go get -v gopkg.in/yaml.v2 && \
-				mkdir -p $$(pwd)/vendor/gopkg.in && \
-				ln -s $${GOPATH}/src/gopkg.in/yaml.v2 $$(pwd)/vendor/gopkg.in/ && \
-				make test; \
-		}; \
-	'
-
-dep: get-dep
-	dep ensure -v
+dep:
+	command -v up &>/dev/null || curl -sfL https://raw.githubusercontent.com/apex/up/master/install.sh | sh
 
 prune:
 	dep prune -v
