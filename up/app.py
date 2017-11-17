@@ -44,8 +44,8 @@ class myHandler(BaseHTTPRequestHandler):
 
     """
 
-    # server_version = "SimpleHTTPWithUpload/" + __version__
     server_version = ""
+    sys_version = "kubesec.io"
 
     def do_HEAD(self):
         """Serve a HEAD request."""
