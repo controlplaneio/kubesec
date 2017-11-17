@@ -23,58 +23,23 @@ load '_helper'
 #  assert_zero_points
 #}
 
-@test "does not error on very long file" {
-  run _app ${TEST_DIR}/asset/very-long-file
-
-  assert_success
-}
-
-@test "returns error for invalid JSON" {
-  run _app ${TEST_DIR}/asset/invalid-input-pod-dump.json
-
-  assert_output --regexp "'api_version': invalid key, expected 'apiVersion'"
-  assert_failure_local
-}
-
-@test "returns error YAML control characters" {
-  run _app ${TEST_DIR}/asset/invalid-input-no-control-characters.json
-
-  assert_failure
-}
-
-@test "passes production dump" {
-  run _app ${TEST_DIR}/asset/score-1-prod-dump.yaml
-
-  assert_non_zero_points
-}
-
-@test "passes bug dump twice [1/2]" {
-  run _app ${TEST_DIR}/asset/bug-dump-2.json
-  assert_success
-  assert_non_zero_points
-}
-
-@test "passes bug dump twice [2/2]" {
-  run _app ${TEST_DIR}/asset/bug-dump-2.json
-  assert_success
-  assert_non_zero_points
-}
-
-@test "returns content-type application/json" {
-  if _is_local; then
-    skip
-  fi
-
-   run _app ${TEST_DIR}/asset/score-0-daemonset-volume-host-docker-socket.yml -w '%{content_type}' -o /dev/null
-
-  assert_output --regexp "application/json"
-}
-
 @test "fails DaemonSet with host docker.socket" {
-  skip
   run _app ${TEST_DIR}/asset/score-0-daemonset-volume-host-docker-socket.yml
   assert_negative_points
 }
+
+@test "passes Deployment with serviceaccountname" {
+  run _app ${TEST_DIR}/asset/score-2-dep-serviceaccount.yml
+
+  assert_non_zero_points
+}
+
+# TODO: convert pods to deployments
+#@test "passes pod with serviceaccountname" {
+#  run _app ${TEST_DIR}/asset/score-2-pod-serviceaccount.yml
+#
+#  assert_non_zero_points
+#}
 
 
 
@@ -100,13 +65,6 @@ load '_helper'
 
 
 # ---
-
-# TODO: REQURIRES 1.8 deployment serviceAccountName pass
-@test "passes Deployment with serviceaccountname" {
-  skip
-  run _app ${TEST_DIR}/asset/score-2-dep-serviceaccount.yml
-  assert_non_zero_points
-}
 
 
 # TODO deprecated alpha feature
