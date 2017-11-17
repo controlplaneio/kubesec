@@ -142,10 +142,29 @@
       "href": null
     },
     {
+      "selector": ".spec .template .spec .hostAliases",
+      "reason": "Managing /etc/hosts aliases can prevent Docker from modifying the file after a pod's containers have already been started",
+      "points": 0,
+      "href": null
+    },
+    {
       "selector": ".metadata .annotations .\"container.apparmor.security.beta.kubernetes.io/nginx\"",
       "reason": "Well defined AppArmor policies may provide greater protection from unknown threats. WARNING: NOT PRODUCTION READY",
       "points": 3,
+      "href": null
+    },
+    {
+      "selector": "select(.spec .template) | select(.spec .template .spec .volumes) | .spec .template .spec .volumes[] .hostPath .path == \"/var/run/docker.sock\"",
+      "title": ".spec .template .spec .volumes[] .hostPath .path == \"/var/run/docker.sock\"",
+      "reason": "Mounting the docker.socket leaks information about other containers and can allow container breakout",
+      "points": -9,
       "weight": 0,
+      "href": null
+    },
+    {
+      "selector": "select(.spec .template) | .spec .template .spec .serviceAccountName",
+      "reason": "Using a service account ",
+      "points": 3,
       "href": null
     }
   ]
