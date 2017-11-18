@@ -1,6 +1,6 @@
 +++
 title = ".metadata .annotations .\"container.apparmor.security.beta.kubernetes.io/nginx\""
-weight = 0
+weight = 5
 +++
 
 ## Well defined AppArmor policies may provide greater protection from unknown threats. WARNING: NOT PRODUCTION READY

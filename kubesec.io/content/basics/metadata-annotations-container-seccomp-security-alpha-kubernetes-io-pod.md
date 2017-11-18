@@ -1,6 +1,6 @@
 +++
 title = ".metadata .annotations .\"container.seccomp.security.alpha.kubernetes.io/pod\""
-weight = 5
+weight = 0
 +++
 
 ## Seccomp profiles for OpenShift set minimum privilege and secure against unknown threats

@@ -1,5 +1,5 @@
 +++
-title = ".spec .template .spec .hostPID"
+title = ".spec .hostPID"
 weight = 5
 +++
 
