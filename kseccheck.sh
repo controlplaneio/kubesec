@@ -45,65 +45,13 @@ KIND=""
 KUBECTL='kubectl'
 JQ='jq'
 CACHE_DIR=""
-IS_CACHE=0
+IS_CACHE=1
 
 POINTS=0
 OUTPUT_ADVISE=()
 OUTPUT_CRITICAL=()
 OUTPUT_POSTITIVE=()
 OUTPUT_NEGATIVE=()
-
-DEPLOYMENT_TEMPLATE='
-{
-    "kind": "Deployment",
-    "apiVersion": "extensions/v1beta1",
-    "metadata": {
-        "name": "TEST",
-        "creationTimestamp": null,
-        "labels": {
-            "app": "TEST"
-        }
-    },
-    "spec": {
-        "replicas": 1,
-        "selector": {
-            "matchLabels": {
-                "app": "TEST"
-            }
-        },
-        "template": {
-            "metadata": {
-                "creationTimestamp": null,
-                "labels": {
-                    "app": "TEST"
-                }
-            },
-            "spec": {
-                "containers": [
-                    {
-                        "name": "nginx",
-                        "image": "nginx",
-                        "resources": {}
-                    }
-                ]
-            }
-        },
-        "strategy": {}
-    },
-    "status": {}
-}
-'
-
-convert_pod_to_deployment() {
-  local POD_JSON="${1}"
-
-  local METADATA=$(echo "${POD_JSON}" | ${JQ} .metadata)
-  local SPEC=$(echo "${POD_JSON}" | ${JQ} .spec)
-
-  echo "${DEPLOYMENT_TEMPLATE}" \
-    | ${JQ} ".spec .template .metadata |= ${METADATA}\
-      | .spec .template .spec |= ${SPEC} * ."
-}
 
 main() {
   handle_arguments "$@"
@@ -124,12 +72,6 @@ main() {
 
       error "Invalid input"
     fi
-
-#    if is_pod; then
-#      if ! JSON=$(convert_pod_to_deployment "${JSON}"); then
-#        error "Error converting pod to deployment"
-#      fi
-#    fi
 
     write_json_resource_cache "${FILENAME}"
   fi
@@ -342,59 +284,37 @@ is_key() {
   local KEY="${1}"
   local TEST_JSON="${JSON}"
 
+  # this moves .spec.template to the base of the object unless
+  # the query is outside this node
+  local NORMALISE="if .spec.template then .spec.template else . end"
+
   if [[ "${KEY:0:12}" == 'containers[]' ]]; then
     KEY=".spec .${KEY}"
   else
     TEST_JSON="${FULL_JSON}"
   fi
 
-#  info "${KEY}"
-#  if ! check_key_exists "${KEY}" "${TEST_JSON}"; then
-#    return 1
-#  fi
-
   # TODO: if debug read user input
 
-  local RESULT=$(echo "${TEST_JSON}" | ${JQ} "select(${KEY}) | ${KEY}" 2>&1)
+  if [[ "${KEY}" =~ ^\.spec[[:space:]]*\.volumeClaimTemplate ]]; then
+    NORMALISE="."
+  fi
+
+  # add `?` to prevent empty arrays being iterated
+  KEY=$(echo "${KEY}" | sed -E 's,(\[[0-9:-]*\]),\1?,g')
+
+  local QUERY="${NORMALISE} | select(${KEY}) | ${KEY}"
+
+  local RESULT=$(echo "${TEST_JSON}" \
+    | ${JQ} "${QUERY}" 2>&1)
+
   if [[ "${RESULT}" =~ ^jq:[[:space:]]error ]]; then
     warning "${RESULT}"
     warning "${TEST_JSON}"
-    error "${JQ} \"select(${KEY}) | ${KEY}\""
+    error "${JQ} \"${QUERY}\""
   fi
 
   [[ "${RESULT}" != 'null' ]] && [[ "${RESULT}" != '' ]]
-}
-
-check_key_exists() {
-  local KEY="${1}"
-  local TEST_JSON="${2}"
-
-
-  local RESULT
-  local QUERY=".";
-  local FULL="";
-  local OLDIFS="${IFS}"
-  IFS=" ";
-
-  for I in ${KEY}; do
-    if [[ "${KEY:0:6}" == 'select' ]]; then
-      info "Found select, success"
-      return 0
-    fi
-    I=$(echo "${I}" | sed -E 's,\[\],,g');
-    echo $I;
-    FULL="${FULL} ${I}";
-    QUERY="${QUERY} | select($FULL)";
-    echo "$FULL";
-    echo "${QUERY}";
-    RESULT=$(echo "${TEST_JSON}" | ${JQ} "${QUERY}")
-    if [[ "${RESULT}" == 'null' ]] || [[ "${RESULT}" == '' ]]; then
-      return 1
-    fi
-  done
-
-  IFS="${OLDIFS}";
-  return 0
 }
 
 # ---
@@ -473,6 +393,9 @@ configure_cache() {
       IS_CACHE=0
       CACHE_DIR=""
     fi
+  elif [[ "${IS_CACHE:-}" == 0 ]]; then
+    CACHE_DIR="/tmp/$(echo "${THIS_SCRIPT}" | base64_fs_sanitise)"
+    rm -rf "${CACHE_DIR}"
   fi
 }
 

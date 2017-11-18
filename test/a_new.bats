@@ -34,12 +34,11 @@ load '_helper'
   assert_non_zero_points
 }
 
-# TODO: convert pods to deployments
-#@test "passes pod with serviceaccountname" {
-#  run _app ${TEST_DIR}/asset/score-2-pod-serviceaccount.yml
-#
-#  assert_non_zero_points
-#}
+@test "passes pod with serviceaccountname" {
+  run _app ${TEST_DIR}/asset/score-2-pod-serviceaccount.yml
+
+  assert_non_zero_points
+}
 
 
 
