@@ -98,6 +98,7 @@
       "selector": ".metadata .annotations .\"seccomp.security.alpha.kubernetes.io/pod\" | index(\"unconfined\")",
       "title": ".metadata .annotations .\"seccomp.security.alpha.kubernetes.io/pod\"",
       "reason": "Seccomp profiles are unconfined by default. Add a profile to set minimum privilege and secure against unknown threats",
+      "weight": 0,
       "points": -1,
       "href": null
     },
@@ -107,6 +108,7 @@
       "title": ".metadata .annotations .\"container.seccomp.security.alpha.kubernetes.io/pod\"",
       "reason": "Seccomp profiles set minimum privilege and secure against unknown threats",
       "points": 5,
+      "weight": 0,
       "href": null
     },
     {
@@ -114,35 +116,29 @@
       "title": ".metadata .annotations .\"container.seccomp.security.alpha.kubernetes.io/pod\"",
       "reason": "Seccomp profiles for OpenShift set minimum privilege and secure against unknown threats",
       "points": 5,
+      "weight": 0,
       "href": null
     },
     {
-      "selector": ".spec .serviceaccountname",
-      "title": "Service Accounts",
-      "reason": "Service accounts restrict Kubernetes API access and should be configured with least privilege",
-      "points": 3,
-      "href": null
-    },
-    {
-      "selector": ".spec .template .spec .hostNetwork",
+      "selector": ".spec .hostNetwork",
       "reason": "Sharing the host's network namespace permits processes in the pod to communicate with processes bound to the host's loopback adapter",
       "points": -9,
       "href": null
     },
     {
-      "selector": ".spec .template .spec .hostPID",
+      "selector": ".spec .hostPID",
       "reason": "Sharing the host's PID namespace allows visibility of processes on the host, potentially leaking information such as environment variables and configuration",
       "points": -9,
       "href": null
     },
     {
-      "selector": ".spec .template .spec .hostIPC",
+      "selector": ".spec .hostIPC",
       "reason": "Sharing the host's IPC namespace allows container processes to communicate with processes on the host",
       "points": -9,
       "href": null
     },
     {
-      "selector": ".spec .template .spec .hostAliases",
+      "selector": ".spec .hostAliases",
       "reason": "Managing /etc/hosts aliases can prevent Docker from modifying the file after a pod's containers have already been started",
       "points": 0,
       "href": null
@@ -154,16 +150,17 @@
       "href": null
     },
     {
-      "selector": "select(.spec .template) | select(.spec .template .spec .volumes) | .spec .template .spec .volumes[] .hostPath .path == \"/var/run/docker.sock\"",
-      "title": ".spec .template .spec .volumes[] .hostPath .path == \"/var/run/docker.sock\"",
+      "selector": ".spec .volumes[] .hostPath .path == \"/var/run/docker.sock\"",
+      "title": ".spec .volumes[] .hostPath .path == \"/var/run/docker.sock\"",
       "reason": "Mounting the docker.socket leaks information about other containers and can allow container breakout",
       "points": -9,
       "weight": 0,
       "href": null
     },
     {
-      "selector": "select(.spec .template) | .spec .template .spec .serviceAccountName",
-      "reason": "Using a service account ",
+      "selector": ".spec .serviceAccountName",
+      "title": "Service Accounts",
+      "reason": "Service accounts restrict Kubernetes API access and should be configured with least privilege",
       "points": 3,
       "href": null
     }
