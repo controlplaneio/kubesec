@@ -1,6 +1,6 @@
 +++
 title = "containers[] .resources .limits .memory"
-weight = 5
+weight = 2
 +++
 
 ## Enforcing memory limits prevents DOS via resource exhaustion

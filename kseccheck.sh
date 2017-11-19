@@ -53,8 +53,23 @@ OUTPUT_CRITICAL=()
 OUTPUT_POSTITIVE=()
 OUTPUT_NEGATIVE=()
 
+log_payload() {
+  if [[ "${UP_STAGE:-}" == "staging" ]]; then
+
+    node firehose.js "${FILENAME}" >&2
+
+#    AWS_PROFILE=binslug-s3
+#    aws --region us-east-1 \
+#      firehose \
+#      put-record \
+#      --delivery-stream-name kubesec-staging \
+#      --record "{\"Data\":\"{\\\"filename\\\":\\\"${FILENAME:-unknown}\\\",\\\"date\\\":\\\"$(date)\\\",\\\"content\\\":\\\"$(cat "${FILENAME}" | awk '{printf "%s\\\\n", $0}' | sed -e 's,\",\\\",g'  -e 's,\",\\\",g' -e 's,\",\\\",g' )\\\"}\n\"}"
+  fi
+}
 main() {
   handle_arguments "$@"
+
+  log_payload &
 
   resolve_kubectl
   resolve_jq
@@ -120,6 +135,8 @@ main() {
   rule_resources
 
   print_output
+
+  wait
 }
 
 print_output() {
@@ -515,6 +532,7 @@ error() {
 
 json_error() {
   ${JQ} --null-input ".error |= \"${*//\"/\\\"}\"" 2>&1
+  wait
   exit 3
 }
 

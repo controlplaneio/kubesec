@@ -1,6 +1,6 @@
 +++
 title = "containers[] .securityContext .privileged == true"
-weight = 5
+weight = 2
 +++
 
 ## Privileged containers can allow almost completely unrestricted host access

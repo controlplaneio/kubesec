@@ -1,6 +1,6 @@
 +++
 title = ".spec .hostIPC"
-weight = 5
+weight = 0
 +++
 
 ## Sharing the host's IPC namespace allows container processes to communicate with processes on the host

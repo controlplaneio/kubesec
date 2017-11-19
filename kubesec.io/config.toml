@@ -6,7 +6,6 @@ defaultContentLanguageInSubdir= true
 title = "kubesec.io"
 theme = "hugo-theme-learn"
 
-
 # For search functionnality
 [outputs]
 home = [ "HTML", "RSS", "JSON"]
@@ -17,6 +16,8 @@ home = [ "HTML", "RSS", "JSON"]
   author = "control-plane.io"
   showVisitedLinks = false
   themeVariant = "green"
+  ordersectionsby = "weight"
+
 
 [Languages]
 [Languages.en]

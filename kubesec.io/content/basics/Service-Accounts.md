@@ -1,6 +1,6 @@
 +++
 title = "Service Accounts"
-weight = 5
+weight = 6
 +++
 
 ## Service accounts restrict Kubernetes API access and should be configured with least privilege

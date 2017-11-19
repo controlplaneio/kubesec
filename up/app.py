@@ -55,12 +55,16 @@ class myHandler(BaseHTTPRequestHandler):
 
     def do_POST(self):
         """Serve a POST request."""
+        debug = False
+        format = "--json"
+        std_err_redirect = None
+
+        if debug == True and os.environ['UP_STAGE'] != 'production':
+            std_err_redirect = subprocess.STDOUT
+            format = "--debug"
+
         r, info = self.deal_post_data()
         print r, info, "by: ", self.client_address
-
-        std_err_redirect = None
-        # if os.environ['UP_STAGE'] != 'production':
-        #     std_err_redirect = subprocess.STDOUT
 
         sys.stderr.write("POST LOG START\n")
         sys.stderr.write("  " + info + "\n")
@@ -69,7 +73,7 @@ class myHandler(BaseHTTPRequestHandler):
 
         status_code = 200
         try:
-            output = subprocess.check_output(["./kseccheck.sh", "--json", info], stderr=std_err_redirect)
+            output = subprocess.check_output(["./kseccheck.sh", format, info], stderr=std_err_redirect)
         except subprocess.CalledProcessError as e:
             output = e.output
             status_code = 200

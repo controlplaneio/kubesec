@@ -1,6 +1,6 @@
 +++
 title = "containers[] .resources .requests .cpu"
-weight = 5
+weight = 2
 +++
 
 ## Enforcing CPU requests aids a fair balancing of resources across the cluster

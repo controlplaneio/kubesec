@@ -1,6 +1,6 @@
 +++
 title = "securityContext capabilities"
-weight = 5
+weight = 2
 +++
 
 ## Reducing kernel capabilities available to a container limits its attack surface
