@@ -42,7 +42,7 @@ gen-html:
 							 | sed "s,--*,-,g" \
 							 | sed "s,^-,," | sed "s,-$$,,").md; \
 			FILE="$${OUTPUT_PATH}/$${FILE_NAME}"; \
-			rm "$${FILE}" || true; \
+			rm "$${FILE}" 2>/dev/null || true; \
 			touch "$${FILE}" "$${INPUT_PATH}"/"$${FILE_NAME}"; \
 			WEIGHT=$$(echo "$${BLOB}" | jq -r ".weight | select(values)"); \
 			TITLE=$$(echo "$${BLOB}" | jq -r ".reason | select(values)"); \
@@ -50,14 +50,16 @@ gen-html:
 			SELECTOR_ESCAPED=$${SELECTOR//\"/\\\"}; \
 			echo "+++" >> "$${FILE}"; \
 			echo "title = \"$${SELECTOR_ESCAPED}\"" >> "$${FILE}"; \
-			echo "weight = $${WEIGHT:-5}" >> "$${FILE}"; \
+			echo "weight = $${WEIGHT:-2}" >> "$${FILE}"; \
 			echo "+++" >> "$${FILE}"; \
 			printf "\n## $${TITLE}\n\n" >> "$${FILE}"; \
 			cat "$${INPUT_PATH}"/"$${FILE_NAME}" >> "$${FILE}"; \
 			printf "\n\n{{%% katacoda %%}}\n" >> "$${FILE}"; \
 		done \
-		) \
+		); \
+  touch . \
 	'
+
 logs:
 	bash -xc ' \
 		(cd up && AWS_PROFILE=binslug-s3 up logs -f) \
