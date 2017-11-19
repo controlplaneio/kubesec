@@ -122,24 +122,28 @@
     {
       "selector": ".spec .hostNetwork",
       "reason": "Sharing the host's network namespace permits processes in the pod to communicate with processes bound to the host's loopback adapter",
+      "weight": 0,
       "points": -9,
       "href": null
     },
     {
       "selector": ".spec .hostPID",
       "reason": "Sharing the host's PID namespace allows visibility of processes on the host, potentially leaking information such as environment variables and configuration",
+      "weight": 0,
       "points": -9,
       "href": null
     },
     {
       "selector": ".spec .hostIPC",
       "reason": "Sharing the host's IPC namespace allows container processes to communicate with processes on the host",
+      "weight": 0,
       "points": -9,
       "href": null
     },
     {
       "selector": ".spec .hostAliases",
       "reason": "Managing /etc/hosts aliases can prevent Docker from modifying the file after a pod's containers have already been started",
+      "weight": 0,
       "points": 0,
       "href": null
     },
@@ -147,6 +151,7 @@
       "selector": ".metadata .annotations .\"container.apparmor.security.beta.kubernetes.io/nginx\"",
       "reason": "Well defined AppArmor policies may provide greater protection from unknown threats. WARNING: NOT PRODUCTION READY",
       "points": 3,
+      "weight": 0,
       "href": null
     },
     {
@@ -162,6 +167,7 @@
       "title": "Service Accounts",
       "reason": "Service accounts restrict Kubernetes API access and should be configured with least privilege",
       "points": 3,
+      "weight": 6,
       "href": null
     }
   ]
