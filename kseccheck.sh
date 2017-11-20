@@ -54,16 +54,16 @@ OUTPUT_POSTITIVE=()
 OUTPUT_NEGATIVE=()
 
 log_payload() {
-  if [[ "${UP_STAGE:-}" == "staging" ]]; then
+  if [[ "${UP_STAGE:-}" != "" ]]; then
 
     node firehose.js "${FILENAME}" >&2
 
-#    AWS_PROFILE=binslug-s3
-#    aws --region us-east-1 \
-#      firehose \
-#      put-record \
-#      --delivery-stream-name kubesec-staging \
-#      --record "{\"Data\":\"{\\\"filename\\\":\\\"${FILENAME:-unknown}\\\",\\\"date\\\":\\\"$(date)\\\",\\\"content\\\":\\\"$(cat "${FILENAME}" | awk '{printf "%s\\\\n", $0}' | sed -e 's,\",\\\",g'  -e 's,\",\\\",g' -e 's,\",\\\",g' )\\\"}\n\"}"
+    #    AWS_PROFILE=binslug-s3
+    #    aws --region us-east-1 \
+    #      firehose \
+    #      put-record \
+    #      --delivery-stream-name kubesec-staging \
+    #      --record "{\"Data\":\"{\\\"filename\\\":\\\"${FILENAME:-unknown}\\\",\\\"date\\\":\\\"$(date)\\\",\\\"content\\\":\\\"$(cat "${FILENAME}" | awk '{printf "%s\\\\n", $0}' | sed -e 's,\",\\\",g'  -e 's,\",\\\",g' -e 's,\",\\\",g' )\\\"}\n\"}"
   fi
 }
 main() {

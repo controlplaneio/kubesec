@@ -14,12 +14,12 @@ all:
 deploy:
 	bash -xec ' \
 		unalias make || true; \
-		make test \
-      && make dep \
-      && make up-deploy-staging \
-			&& make test-remote-staging \
-			&& make up-deploy \
-			&& make test-remote ; \
+		time make test \
+      && time make dep \
+      && time make up-deploy-staging \
+			&& time make test-remote-staging \
+			&& time make up-deploy \
+			&& time make test-remote ; \
 	'
 hugo:
 	bash -ec ' \
