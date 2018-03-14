@@ -23,6 +23,43 @@ load '_helper'
 #  assert_zero_points
 #}
 
+
+#@test "webhook: admission control 100" {
+#  if _is_local; then
+#    skip
+#  fi
+#
+#  REMOTE_URL_STASH="${REMOTE_URL}"
+#
+#  REMOTE_URL+="?score=100"
+#  run _app ./test/asset/score-0-cap-sys-admin.yml \
+#    -w '%{content_type}' \
+#    -o /dev/null
+#
+#  assert_output --regexp "^HTTP/1.1 401 Unauthorized$"
+#  assert_negative_points
+#
+#  REMOTE_URL="${REMOTE_URL_STASH}"
+#}
+#
+#@test "webhook: admission control -100" {
+#  if _is_local; then
+#    skip
+#  fi
+#
+#  REMOTE_URL_STASH="${REMOTE_URL}"
+#
+#  REMOTE_URL+="?score=100"
+#  run _app ./test/asset/score-0-cap-sys-admin.yml \
+#    -w '%{content_type}' \
+#    -o /dev/null
+#
+#  assert_output --regexp "^HTTP/1.1 200"
+#  assert_negative_points
+#
+#  REMOTE_URL="${REMOTE_URL_STASH}"
+#}
+
 @test "fails DaemonSet with host docker.socket" {
   run _app ${TEST_DIR}/asset/score-0-daemonset-volume-host-docker-socket.yml
   assert_negative_points
