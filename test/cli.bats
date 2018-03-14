@@ -90,7 +90,10 @@ load '_helper'
     skip
   fi
 
-   run _app ${TEST_DIR}/asset/score-0-daemonset-volume-host-docker-socket.yml -w '%{content_type}' -o /dev/null
+   run _app \
+    ${TEST_DIR}/asset/score-0-daemonset-volume-host-docker-socket.yml \
+    -w '%{content_type}' \
+    -o /dev/null
 
   assert_output --regexp "application/json"
 }
