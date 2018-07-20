@@ -60,6 +60,22 @@ load '_helper'
 #  REMOTE_URL="${REMOTE_URL_STASH}"
 #}
 
+# ---
+
+# v1.11 tests
+
+@test "passes 1.11 format daemonset" {
+  run _app ${TEST_DIR}/asset/versioned/score-0-daemonset-v1.11.yml
+  assert_zero_points
+}
+
+@test "passes 1.11 format statefulset" {
+  run _app ${TEST_DIR}/asset/versioned/score-0-statefulset-v1.11.yml
+  assert_zero_points
+}
+
+# ---
+
 @test "fails DaemonSet with host docker.socket" {
   run _app ${TEST_DIR}/asset/score-0-daemonset-volume-host-docker-socket.yml
   assert_negative_points

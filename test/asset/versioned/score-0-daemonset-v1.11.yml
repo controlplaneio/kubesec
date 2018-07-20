@@ -1,0 +1,26 @@
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    run: daemonset
+  name: daemonset
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      run: daemonset
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        run: daemonset
+    spec:
+      containers:
+      - args:
+        - arse
+        image: arse
+        name: daemonset
+        resources: {}
+status: {}

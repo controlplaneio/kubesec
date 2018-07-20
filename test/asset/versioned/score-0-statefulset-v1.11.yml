@@ -1,0 +1,26 @@
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    run: statefulset
+  name: statefulset
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      run: statefulset
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        run: statefulset
+    spec:
+      containers:
+      - args:
+        - arse
+        image: arse
+        name: statefulset
+        resources: {}
+status: {}
