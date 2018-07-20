@@ -7,11 +7,14 @@ REMOTE_URL ?="https://kubesec.io/"
 .SILENT:
 
 all:
+	help
+
+all-go: ## golang toolchain
 	make dep
 	make test
 	make build
 
-deploy:
+deploy: ## deploy, test, promote to prod
 	bash -xec ' \
 		unalias make || true; \
 		time make test \
@@ -67,7 +70,8 @@ logs:
 
 test:
 	bash -xc ' \
-	  (cd test && ./bin/bats/bin/bats .) \
+	  (COMMAND=./bin/bats/bin/bats; \
+	  cd test && if command -v bats; then COMMAND=bats; fi && $${COMMAND} $(FLAGS) .) \
 	'
 test-remote:
 	bash -xc ' \
@@ -179,3 +183,11 @@ get-dep:
 ifndef HAS_DEP
 	go get -u github.com/golang/dep/cmd/dep
 endif
+
+.PHONY: help
+help: ## parse jobs and descriptions from this Makefile
+	set -x;
+	@grep -E '^[ a-zA-Z0-9_-]+:([^=]|$$)' $(MAKEFILE_LIST) \
+    | grep -Ev '^help\b[[:space:]]*:' \
+    | sort \
+    | awk 'BEGIN {FS = ":.*?##"}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
