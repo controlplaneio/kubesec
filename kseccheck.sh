@@ -383,22 +383,21 @@ resolve_binary() {
   local BINARY="${1}"
   local ORIGINAL_BINARY="${BINARY}"
 
-  if ! BINARY=$(command -v "${BINARY}" 2>/dev/null); then
+  BINARY=$(find . -regex ".*/${ORIGINAL_BINARY}$" -type f -executable -print -quit)
+  if [[ "${BINARY:-}" == "" ]]; then
     BINARY="./${ORIGINAL_BINARY}"
 
     if ! command -v "${BINARY}" &>/dev/null; then
-      BINARY=$(find . -regex ".*/${ORIGINAL_BINARY}$" -type f -executable -print -quit)
-
-      if [[ "${BINARY:-}" == "" ]]; then
-        BINARY=$(find ../ -regex ".*/${ORIGINAL_BINARY}$" -type f -executable -print -quit)
-
-        if [[ "${BINARY:-}" == "" ]]; then
-          error "${BINARY} not found"
-        fi
-      fi
+      BINARY=$(find ../ -regex ".*/${ORIGINAL_BINARY}$" -type f -executable -print -quit)
     fi
   fi
+  if [[ "${BINARY:-}" == "" ]]; then
+    error "${ORIGINAL_BINARY} not found"
+  fi
   echo "${BINARY}"
+  if false; then
+    echo "${BINARY}" >&2
+  fi
 }
 
 # ---
