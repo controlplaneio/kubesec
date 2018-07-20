@@ -415,8 +415,9 @@ configure_cache() {
   fi
 }
 
+# TODO: just md5
 base64_fs_sanitise() {
-  base64 -w0 | tr '/' '-' | sed -r 's,(.{200}),\1/,g'
+  base64 -w0 | tr '/' '-' | md5sum | cut -d ' ' -f1
 }
 
 read_json_resource_cache() {

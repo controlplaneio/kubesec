@@ -11,13 +11,15 @@ _is_local() {
 _is_remote() {
   ! _is_local
 }
-
+_get_remote_url() {
+  echo "${REMOTE_URL:-https://kubesec.io/}"
+}
 if _is_remote; then
 
   _app() {
     local FILE="${1:-}"
     shift
-    curl --fail -v "${REMOTE_URL:-https://kubesec.io/}" -F file=@"${FILE}" "${@}"
+    curl --fail -v "$(_get_remote_url)" -F file=@"${FILE}" "${@}"
   }
 
   assert_non_zero_points() {
