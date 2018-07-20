@@ -6,8 +6,7 @@ REMOTE_URL ?="https://kubesec.io/"
 .PHONY: build container dep dev local test test test-acceptance test-unit
 .SILENT:
 
-all:
-	help
+all: help
 
 all-go: ## golang toolchain
 	make dep
@@ -103,7 +102,7 @@ up-deploy-staging:
 
 up-url-staging:
 	bash -xc ' \
-		(cd up && AWS_PROFILE=binslug-s3 up url staging) \
+		(cd up && AWS_PROFILE=binslug-s3 up url --stage staging) \
 	'
 
 up-deploy:
@@ -113,7 +112,7 @@ up-deploy:
 
 up-url:
 	bash -xc ' \
-		(cd up && AWS_PROFILE=binslug-s3 up url production) \
+		(cd up && AWS_PROFILE=binslug-s3 up url --stage production) \
 	'
 
 test-acceptance-old:
