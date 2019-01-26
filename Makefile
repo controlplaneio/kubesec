@@ -1,18 +1,110 @@
+NAME := kubesec
+GITHUB_ORG = controlplaneio
+DOCKER_HUB_ORG = controlplane
+
+### github.com/controlplaneio/ensure-content.git makefile-header START ###
+ifeq ($(NAME),)
+  $(error NAME required, please add "NAME := project-name" to top of Makefile)
+else ifeq ($(GITHUB_ORG),)
+    $(error GITHUB_ORG required, please add "GITHUB_ORG := controlplaneio" to top of Makefile)
+else ifeq ($(DOCKER_HUB_ORG),)
+    $(error DOCKER_HUB_ORG required, please add "DOCKER_HUB_ORG := controlplane" to top of Makefile)
+endif
+
+PKG := github.com/$(GITHUB_ORG)/$(NAME)
+DOCKER_REGISTRY_FQDN ?= docker.io
+DOCKER_HUB_URL := $(DOCKER_REGISTRY_FQDN)/$(DOCKER_HUB_ORG)/$(NAME)
+
 SHELL := /bin/bash
+BUILD_DATE := $(shell date -u +%Y-%m-%dT%H:%M:%SZ)
+
+GIT_MESSAGE := $(shell git -c log.showSignature=false \
+	log --max-count=1 --pretty=format:"%H")
+GIT_SHA := $(shell git -c log.showSignature=false rev-parse HEAD)
+GIT_TAG := $(shell bash -c 'TAG=$$(git -c log.showSignature=false \
+	describe --tags --exact-match --abbrev=0 $(GIT_SHA) 2>/dev/null); echo "$${TAG:-dev}"')
+GIT_UNTRACKED_CHANGES := $(shell git -c log.showSignature=false \
+	status --porcelain)
+
+ifneq ($(GIT_UNTRACKED_CHANGES),)
+  GIT_COMMIT := $(GIT_COMMIT)-dirty
+  ifneq ($(GIT_TAG),dev)
+    GIT_TAG := $(GIT_TAG)-dirty
+  endif
+endif
+
+CONTAINER_TAG ?= $(GIT_TAG)
+CONTAINER_TAG_LATEST := $(CONTAINER_TAG)
+CONTAINER_NAME := $(REGISTRY)/$(NAME):$(CONTAINER_TAG)
+
+# if no untracked changes and tag is not dev, release `latest` tag
+ifeq ($(GIT_UNTRACKED_CHANGES),)
+  ifneq ($(GIT_TAG),dev)
+    CONTAINER_TAG_LATEST = latest
+  endif
+endif
+
+CONTAINER_NAME_LATEST := $(REGISTRY)/$(NAME):$(CONTAINER_TAG_LATEST)
+
+# golang buildtime, more at https://github.com/jessfraz/pepper/blob/master/Makefile
+CTIMEVAR=-X $(PKG)/version.GITCOMMIT=$(GITCOMMIT) -X $(PKG)/version.VERSION=$(VERSION)
+GO_LDFLAGS=-ldflags "-w $(CTIMEVAR)"
+GO_LDFLAGS_STATIC=-ldflags "-w $(CTIMEVAR) -extldflags -static"
+
+export NAME DOCKER_HUB_URL BUILD_DATE GIT_MESSAGE GIT_SHA GIT_TAG \
+  CONTAINER_TAG CONTAINER_NAME CONTAINER_NAME_LATEST CONTAINER_NAME_TESTING
+### github.com/controlplaneio/ensure-content.git makefile-header END ###
+
 PACKAGE = none
 HAS_DEP := $(shell command -v dep 2>/dev/null)
 REMOTE_URL ?="https://kubesec.io/"
 
-.PHONY: build container dep dev local test test test-acceptance test-unit
-.SILENT:
-
+.PHONY: all
 all: help
 
-all-go: ## golang toolchain
-	make dep
-	make test
+.PHONY: go
+go: ## golang toolchain
+	make test-go
 	make build
 
+.PHONY: test-go
+test-go: ## golang unit tests
+	go test $$(go list ./... | grep -v '/vendor/')
+
+.PHONY: test-go-acceptance
+test-go-acceptance: ## acceptance tests targeting golang build
+	export BIN_UNDER_TEST=kube-sec-check; make test
+
+.PHONY: dep
+dep: ## golang and deployment dependencies
+	command -v up &>/dev/null || curl -sfL https://raw.githubusercontent.com/apex/up/master/install.sh | sudo sh
+	dep ensure -v
+
+.PHONY: prune
+prune: ## golang dependency prune
+	dep prune -v
+
+.PHONY: build
+build: ## golang build
+	bash -xc ' \
+		PACKAGE="$(PACKAGE)"; \
+		STATUS=$$(git diff-index --quiet HEAD 2>/dev/null || echo "-dirty"); \
+		HASH="$$(git rev-parse --short HEAD 2>/dev/null)"; \
+		VERSION="$$(git describe --tags 2>/dev/null|| echo $${HASH})$${STATUS}"; \
+		go build -ldflags "\
+			-X $${PACKAGE}.buildStamp=$$(date -u '+%Y-%m-%d_%I:%M:%S%p') \
+			-X $${PACKAGE}.gitHash=$${HASH} \
+			-X $${PACKAGE}.buildVersion=$${VERSION} \
+		"; \
+	'
+
+.PHONY: dev
+dev: ## non-golang dev
+	make test && make build
+
+# --- deployment recipes
+
+.PHONY: deploy
 deploy: ## deploy, test, promote to prod
 	bash -xec ' \
 		unalias make || true; \
@@ -23,12 +115,14 @@ deploy: ## deploy, test, promote to prod
 			&& time make up-deploy \
 			&& time make test-remote ; \
 	'
+.PHONY: hugo
 hugo:
 	bash -ec ' \
 		( \
 		(IS_KUBESEC=$$(wmctrl -l -x | grep -q kubesec.io && echo 1 || echo 0); cd kubesec.io && while read LINE; do echo "$${LINE}"; if [[ "$${IS_KUBESEC}" != 1 ]] && [[ "$${LINE}" =~ ^Web\ Server\ is\ available\ at ]]; then echo "$${LINE}" | sed -E "s,.*(localhost[^ ]*).*,\1,g" | xargs -I{} xdg-open "http://{}" || true; fi; done < <(hugo server --disableFastRender)); \
 		)'
 
+.PHONY: gen-html
 gen-html:
 	bash -ec ' \
 		( \
@@ -62,32 +156,39 @@ gen-html:
   touch . \
 	'
 
+.PHONY: logs
 logs:
 	bash -xc ' \
 		(cd up && AWS_PROFILE=binslug-s3 up logs -f) \
 	'
 
+.PHONY: test
 test:
 	bash -xc ' \
 	  (COMMAND=./bin/bats/bin/bats; \
 	  cd test && if command -v bats; then COMMAND=bats; fi && $${COMMAND} $(FLAGS) .) \
 	'
+
+.PHONY: test-remote
 test-remote:
 	bash -xc ' \
 	  (cd test && TEST_REMOTE=1 REMOTE_URL=$(REMOTE_URL) ./bin/bats/bin/bats . )\
 	'
 
+.PHONY: test-remote-staging
 test-remote-staging:
 	bash -xc ' \
 		(REMOTE_URL=$$(\make up-url-staging 2>/dev/null); \
 	  cd test && TEST_REMOTE=1 REMOTE_URL=$${REMOTE_URL} ./bin/bats/bin/bats .) \
 	'
 
+.PHONY: test-new
 test-new:
 	bash -xc ' \
 	  (cd test && /usr/src/bats-core/bin/bats .) \
 	'
 
+.PHONY: up-start
 up-start:
 	bash -xc ' \
 		(cd up \
@@ -95,93 +196,29 @@ up-start:
 		&& AWS_PROFILE=binslug-s3 up start) \
 	'
 
+.PHONY: up-deploy-staging
 up-deploy-staging:
 	bash -xc ' \
 		(cd up && AWS_PROFILE=binslug-s3 up deploy staging) \
 	'
 
+.PHONY: up-url-staging
 up-url-staging:
 	bash -xc ' \
 		(cd up && AWS_PROFILE=binslug-s3 up url --stage staging) \
 	'
 
+.PHONY: up-deploy
 up-deploy:
 	bash -xc ' \
 		(cd up && AWS_PROFILE=binslug-s3 up deploy production) \
 	'
 
+.PHONY: up-url
 up-url:
 	bash -xc ' \
 		(cd up && AWS_PROFILE=binslug-s3 up url --stage production) \
 	'
-
-test-acceptance-old:
-	cd test && ./test-acceptance.sh
-
-test-unit-old:
-	cd test && ./test-theseus.sh
-
-test-go :
-	go test $$(go list ./... | grep -v '/vendor/')
-
-dev:
-	make test && make build
-
-dep:
-	command -v up &>/dev/null || curl -sfL https://raw.githubusercontent.com/apex/up/master/install.sh | sh
-
-prune:
-	dep prune -v
-
-build:
-	bash -c ' \
-		PACKAGE="$(PACKAGE)"; \
-		STATUS=$$(git diff-index --quiet HEAD 2>/dev/null || echo "-dirty"); \
-		HASH="$$(git rev-parse --short HEAD 2>/dev/null)"; \
-		VERSION="$$(git describe --tags 2>/dev/null|| echo $${HASH})$${STATUS}"; \
-		go build -ldflags "\
-			-X $${PACKAGE}.buildStamp=$$(date -u '+%Y-%m-%d_%I:%M:%S%p') \
-			-X $${PACKAGE}.gitHash=$${HASH} \
-			-X $${PACKAGE}.buildVersion=$${VERSION} \
-		"; \
-	'
-
-cloud:
-	cat cloudbuild.yaml
-	gcloud container builds submit --config cloudbuild.yaml .
-
-local:
-	bash -c "container-builder-local --config cloudbuild.yaml --dryrun=false . 2>&1"
-
-alpine:
-	bash -xc ' \
-		pwd; ls -lasp; \
-		mkdir -p /gocode/src/github.com/controlplane/; \
-		ln -s /workspace /gocode/src/github.com/controlplane/theseus; \
-		cd /gocode/src/github.com/controlplane/theseus; \
-		pwd; \
-		ls -lasp; \
-		\
-		make dep-safe && \
-		make build; \
-	'
-
-release:
-	hub release create \
-		-d \
-		-a $$(basename $$(pwd)) \
-		-m "Version $$(git describe --tags 2>/dev/null)" \
-		-m "$$(git log --format=oneline \
-			| cut -d' ' -f 2- \
-			| awk '!x[$$0]++' \
-			| grep -iE '^[^ :]*:' \
-			| grep -iEv '^(build|refactor):')" \
-		$$(git describe --tags)
-
-get-dep:
-ifndef HAS_DEP
-	go get -u github.com/golang/dep/cmd/dep
-endif
 
 .PHONY: help
 help: ## parse jobs and descriptions from this Makefile
