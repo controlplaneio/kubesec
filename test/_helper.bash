@@ -45,7 +45,7 @@ if _is_remote; then
 
 else
 
-  _app() { ./../kseccheck.sh "${@}"; }
+  _app() { ./../${BIN_UNDER_TEST:-kseccheck.sh} "${@}"; }
 
   assert_non_zero_points() {
     assert_output --regexp ".*with a score of [1-9]+ points.*"
