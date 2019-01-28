@@ -13,7 +13,7 @@
 
 package main
 
-import "github.com/sublimino/kube-sec-check/cmd"
+import "github.com/sublimino/kubesec/cmd"
 
 func main() {
 	cmd.Execute()
