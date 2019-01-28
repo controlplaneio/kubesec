@@ -34,7 +34,7 @@ var (
 
 // RootCmd represents the base command when called without any subcommands
 var RootCmd = &cobra.Command{
-	Use:   "kube-sec-check",
+	Use:   "kubesec",
 	Short: "Validate Kubernetes resource security policies",
 	Long: `Security
 Security
@@ -89,9 +89,9 @@ func initConfig() {
 			os.Exit(1)
 		}
 
-		// Search config in home directory with name ".kube-sec-check" (without extension).
+		// Search config in home directory with name ".kubesec" (without extension).
 		viper.AddConfigPath(home)
-		viper.SetConfigName(".kube-sec-check")
+		viper.SetConfigName(".kubesec")
 	}
 
 	viper.AutomaticEnv() // read in environment variables that match
