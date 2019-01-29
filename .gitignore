@@ -102,5 +102,5 @@ output/*/index.html
 # Sphinx
 docs/_build
 .scratch.md
-kubesec
+./kubesec
 
