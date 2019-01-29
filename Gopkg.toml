@@ -6,6 +6,14 @@
   name = "go.uber.org/zap"
   version = "1.9.1"
 
+[[constraint]]
+  name = "github.com/thedevsaddam/gojsonq"
+  version = "v2.0.0"
+
+[[constraint]]
+  name = "github.com/ghodss/yaml"
+  version = "v1.0.0"
+
 [prune]
   go-tests = true
   unused-packages = true
