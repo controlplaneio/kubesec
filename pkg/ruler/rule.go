@@ -6,6 +6,14 @@ import (
 	"github.com/thedevsaddam/gojsonq"
 )
 
+type NotSupportedError struct {
+	Kind string
+}
+
+func (e *NotSupportedError) Error() string {
+	return fmt.Sprintf("rule does not apply to kind %s", e.Kind)
+}
+
 type Rule struct {
 	Selector  string
 	Title     string
@@ -39,6 +47,6 @@ func (r *Rule) Eval(json []byte) (bool, error) {
 		count := r.Predicate(json)
 		return count < 1, nil
 	} else {
-		return true, fmt.Errorf("rule does not apply to kind %s", kind)
+		return true, &NotSupportedError{Kind: kind}
 	}
 }
