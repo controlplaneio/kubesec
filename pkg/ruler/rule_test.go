@@ -2,6 +2,7 @@ package ruler
 
 import (
 	"github.com/ghodss/yaml"
+	"github.com/sublimino/kubesec/pkg/rules"
 	"testing"
 )
 
@@ -24,7 +25,7 @@ spec:
 	}
 
 	rule := &Rule{
-		Predicate: hostNetwork,
+		Predicate: rules.HostNetwork,
 		Kinds:     []string{"Deployment"},
 	}
 
@@ -56,7 +57,7 @@ spec:
 	}
 
 	rule := &Rule{
-		Predicate: hostNetwork,
+		Predicate: rules.HostNetwork,
 		Kinds:     []string{"Deployment"},
 	}
 
@@ -84,7 +85,7 @@ spec:
 	}
 
 	rule := &Rule{
-		Predicate: hostNetwork,
+		Predicate: rules.HostNetwork,
 		Kinds:     []string{"Deployment"},
 	}
 
