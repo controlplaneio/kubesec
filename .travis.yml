@@ -1,0 +1,29 @@
+sudo: required
+language: go
+
+go:
+- 1.11.x
+
+services:
+- docker
+
+addons:
+  apt:
+    packages:
+    - docker-ce
+
+script:
+- set -e
+- curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
+- dep ensure -vendor-only
+- go test -v -race -coverprofile=coverage.txt -covermode=atomic ./pkg/...
+
+after_success:
+- go run cmd/kubesec/* version
+
+deploy:
+- provider: script
+  skip_cleanup: true
+  script: curl -sL http://git.io/goreleaser | bash
+  on:
+    tags: true
