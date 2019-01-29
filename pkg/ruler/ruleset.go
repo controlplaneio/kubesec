@@ -63,7 +63,11 @@ func (rs *Ruleset) Run(json []byte) Report {
 	}
 
 	for _, rule := range rs.Rules {
-		ok, _ := rule.Eval(json)
+		ok, err := rule.Eval(json)
+		switch err.(type) {
+		case *NotSupportedError:
+			continue
+		}
 		if !ok {
 			ref := RuleRef{
 				Reason:   rule.Reason,
