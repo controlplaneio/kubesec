@@ -7,6 +7,7 @@ import (
 )
 
 type Rule struct {
+	Selector  string
 	Title     string
 	Reason    string
 	Link      string
