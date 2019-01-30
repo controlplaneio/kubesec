@@ -23,6 +23,15 @@ func NewRuleset(logger *zap.SugaredLogger) *Ruleset {
 	}
 	list = append(list, hostNetworkRule)
 
+	hostPIDRule := Rule{
+		Predicate: rules.HostPID,
+		Selector:  ".spec .hostPID == true)",
+		Reason:    "Sharing the host's PID namespace allows visibility of processes on the host, potentially leaking information such as environment variables and configuration",
+		Kinds:     []string{"Pod", "Deployment", "StatefulSet", "DaemonSet"},
+		Points:    -9,
+	}
+	list = append(list, hostPIDRule)
+
 	readOnlyRootFilesystemRule := Rule{
 		Predicate: rules.ReadOnlyRootFilesystem,
 		Selector:  "containers[] .securityContext .readOnlyRootFilesystem == true",
