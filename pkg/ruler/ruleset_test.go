@@ -43,16 +43,16 @@ spec:
 	report := NewRuleset(zap.NewNop().Sugar()).Run(json)
 
 	critical := len(report.Scoring.Critical)
-	if critical != 1 {
-		t.Errorf("Got %v critical rules wanted %v", critical, 1)
+	if critical < 1 {
+		t.Errorf("Got %v critical rules wanted many", critical)
 	}
 
 	advise := len(report.Scoring.Advise)
-	if advise != 3 {
-		t.Errorf("Got %v advise rules wanted %v", advise, 3)
+	if advise < 1 {
+		t.Errorf("Got %v advise rules wanted many", advise)
 	}
 
-	if report.Score != -9 {
-		t.Errorf("Got score %v wanted %v", report.Score, -9)
+	if report.Score > 0 {
+		t.Errorf("Got score %v wanted a negative value", report.Score)
 	}
 }
