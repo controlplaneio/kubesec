@@ -19,11 +19,18 @@ script:
 - go test -v -race -coverprofile=coverage.txt -covermode=atomic ./pkg/...
 - docker build -t kubesec .
 - docker run -dp 9090:9090 kubesec
-
-after_success:
-- set -e
 - sleep 1
 - curl -sSX POST --data-binary @test/asset/score-0-daemonset-host-network.yml http://localhost:9090/scan
+
+after_success:
+- if [ -z "$DOCKER_USER" ]; then
+    echo "Skipping image push! Docker Hub credentials not found";
+  else
+    BRANCH_COMMIT=$(echo ${TRAVIS_COMMIT} | head -c7);
+    docker tag kubesec:latest kubesec/kubesec:${BRANCH_COMMIT};
+    echo $DOCKER_PASS | docker login -u=$DOCKER_USER --password-stdin;
+    docker push kubesec/kubesec:${BRANCH_COMMIT};
+  fi
 
 deploy:
 - provider: script
