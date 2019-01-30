@@ -16,7 +16,7 @@ func NewRuleset(logger *zap.SugaredLogger) *Ruleset {
 
 	hostNetworkRule := Rule{
 		Predicate: rules.HostNetwork,
-		Selector:  ".spec .hostNetwork",
+		Selector:  ".spec .hostNetwork == true",
 		Reason:    "Sharing the host's network namespace permits processes in the pod to communicate with processes bound to the host's loopback adapter",
 		Kinds:     []string{"Pod", "Deployment", "StatefulSet", "DaemonSet"},
 		Points:    -9,
@@ -61,6 +61,15 @@ func NewRuleset(logger *zap.SugaredLogger) *Ruleset {
 		Points:    -30,
 	}
 	list = append(list, privilegedRule)
+
+	capSysAdminRule := Rule{
+		Predicate: rules.CapSysAdmin,
+		Selector:  "containers[] .securityContext .capabilities .add == SYS_ADMIN)",
+		Reason:    "CAP_SYS_ADMIN is the most privileged capability and should always be avoided",
+		Kinds:     []string{"Pod", "Deployment", "StatefulSet", "DaemonSet"},
+		Points:    -30,
+	}
+	list = append(list, capSysAdminRule)
 
 	return &Ruleset{
 		Rules:  list,
