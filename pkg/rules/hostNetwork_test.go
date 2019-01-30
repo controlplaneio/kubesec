@@ -78,3 +78,26 @@ spec:
 		t.Errorf("Got %v containers wanted %v", containers, 0)
 	}
 }
+
+func Test_HostNetwork_Pod(t *testing.T) {
+
+	var data = `
+---
+apiVersion: v1
+kind: Pod
+spec:
+  hostNetwork: true
+  containers:
+  - name: c1
+`
+
+	json, err := yaml.YAMLToJSON([]byte(data))
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+
+	containers := HostNetwork(json)
+	if containers != 1 {
+		t.Errorf("Got %v containers wanted %v", containers, 1)
+	}
+}
