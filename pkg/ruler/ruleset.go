@@ -105,7 +105,6 @@ func NewRuleset(logger *zap.SugaredLogger) *Ruleset {
 		Kinds:     []string{"Pod", "Deployment", "StatefulSet", "DaemonSet"},
 		Points:    1,
 	}
-
 	list = append(list, requestsCPURule)
 
 	limitsCPURule := Rule{
@@ -115,8 +114,25 @@ func NewRuleset(logger *zap.SugaredLogger) *Ruleset {
 		Kinds:     []string{"Pod", "Deployment", "StatefulSet", "DaemonSet"},
 		Points:    1,
 	}
-
 	list = append(list, limitsCPURule)
+
+	requestsMemoryRule := Rule{
+		Predicate: rules.RequestsMemory,
+		Selector:  "containers[] .resources .requests .memory",
+		Reason:    "Enforcing memory requests aids a fair balancing of resources across the cluster",
+		Kinds:     []string{"Pod", "Deployment", "StatefulSet", "DaemonSet"},
+		Points:    1,
+	}
+	list = append(list, requestsMemoryRule)
+
+	limitsMemoryRule := Rule{
+		Predicate: rules.RequestsMemory,
+		Selector:  "containers[] .resources .limits .memory",
+		Reason:    "Enforcing memory limits prevents DOS via resource exhaustion",
+		Kinds:     []string{"Pod", "Deployment", "StatefulSet", "DaemonSet"},
+		Points:    1,
+	}
+	list = append(list, limitsMemoryRule)
 
 	return &Ruleset{
 		Rules:  list,
