@@ -1,12 +1,12 @@
 package main
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 	"github.com/ghodss/yaml"
 	"github.com/spf13/cobra"
 	"github.com/sublimino/kubesec/pkg/ruler"
+	"github.com/sublimino/kubesec/pkg/server"
 	"io/ioutil"
 	"path/filepath"
 )
@@ -51,13 +51,7 @@ var scanCmd = &cobra.Command{
 			return err
 		}
 
-		fmt.Println(prettyJSON(res))
+		fmt.Println(server.PrettyJSON(res))
 		return nil
 	},
-}
-
-func prettyJSON(b []byte) string {
-	var out bytes.Buffer
-	json.Indent(&out, b, "", "  ")
-	return string(out.Bytes())
 }
