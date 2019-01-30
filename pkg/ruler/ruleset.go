@@ -1,19 +1,24 @@
 package ruler
 
-import "github.com/sublimino/kubesec/pkg/rules"
+import (
+	"fmt"
+	"github.com/sublimino/kubesec/pkg/rules"
+	"go.uber.org/zap"
+)
 
 type Ruleset struct {
-	Rules []Rule
+	Rules  []Rule
+	logger *zap.SugaredLogger
 }
 
-func NewRuleset() *Ruleset {
+func NewRuleset(logger *zap.SugaredLogger) *Ruleset {
 	list := make([]Rule, 0)
 
 	hostNetworkRule := Rule{
 		Predicate: rules.HostNetwork,
 		Selector:  ".spec .hostNetwork",
 		Reason:    "Sharing the host's network namespace permits processes in the pod to communicate with processes bound to the host's loopback adapter",
-		Kinds:     []string{"Deployment", "StatefulSet", "DaemonSet"},
+		Kinds:     []string{"Pod", "Deployment", "StatefulSet", "DaemonSet"},
 		Points:    -9,
 	}
 	list = append(list, hostNetworkRule)
@@ -22,7 +27,7 @@ func NewRuleset() *Ruleset {
 		Predicate: rules.ReadOnlyRootFilesystem,
 		Selector:  "containers[] .securityContext .readOnlyRootFilesystem == true",
 		Reason:    "An immutable root filesystem can prevent malicious binaries being added to PATH and increase attack cost",
-		Kinds:     []string{"Deployment", "StatefulSet", "DaemonSet"},
+		Kinds:     []string{"Pod", "Deployment", "StatefulSet", "DaemonSet"},
 		Points:    1,
 		Advise:    3,
 	}
@@ -32,7 +37,7 @@ func NewRuleset() *Ruleset {
 		Predicate: rules.RunAsNonRoot,
 		Selector:  "containers[] .securityContext .runAsNonRoot == true",
 		Reason:    "Force the running image to run as a non-root user to ensure least privilege",
-		Kinds:     []string{"Deployment", "StatefulSet", "DaemonSet"},
+		Kinds:     []string{"Pod", "Deployment", "StatefulSet", "DaemonSet"},
 		Points:    1,
 		Advise:    10,
 	}
@@ -42,14 +47,15 @@ func NewRuleset() *Ruleset {
 		Predicate: rules.RunAsUser,
 		Selector:  "containers[] .securityContext .runAsUser -gt 10000",
 		Reason:    "Run as a high-UID user to avoid conflicts with the host's user table",
-		Kinds:     []string{"Deployment", "StatefulSet", "DaemonSet"},
+		Kinds:     []string{"Pod", "Deployment", "StatefulSet", "DaemonSet"},
 		Points:    1,
 		Advise:    4,
 	}
 	list = append(list, runAsUserRule)
 
 	return &Ruleset{
-		Rules: list,
+		Rules:  list,
+		logger: logger,
 	}
 }
 
@@ -62,27 +68,53 @@ func (rs *Ruleset) Run(json []byte) Report {
 		},
 	}
 
+	var applyedRules int
 	for _, rule := range rs.Rules {
-		ok, err := rule.Eval(json)
+		passed, err := rule.Eval(json)
+
+		// skip rule if it doesn't apply to object kind
 		switch err.(type) {
 		case *NotSupportedError:
 			continue
 		}
-		if !ok {
-			ref := RuleRef{
-				Reason:   rule.Reason,
-				Selector: rule.Selector,
-				Weight:   rule.Weight,
-				Link:     rule.Link,
+
+		applyedRules++
+		ref := RuleRef{
+			Reason:   rule.Reason,
+			Selector: rule.Selector,
+			Weight:   rule.Weight,
+			Link:     rule.Link,
+		}
+
+		if passed {
+			if rule.Points >= 0 {
+				rs.logger.Debugf("positive score rule passed %v", rule.Selector)
+				report.Score += rule.Points
 			}
 
+			if rule.Points < 0 {
+				rs.logger.Debugf("negative score rule passed %v", rule.Selector)
+			}
+		} else {
 			if rule.Points >= 0 {
+				rs.logger.Debugf("positive score rule failed %v", rule.Selector)
 				report.Scoring.Advise = append(report.Scoring.Advise, ref)
-			} else {
+			}
+
+			if rule.Points < 0 {
+				rs.logger.Debugf("negative score rule failed %v", rule.Selector)
 				report.Scoring.Critical = append(report.Scoring.Critical, ref)
+				report.Score += rule.Points
 			}
 		}
-		report.Score += rule.Points
+	}
+
+	if applyedRules < 1 {
+		report.Error = fmt.Sprintf("This resource kind is not supported")
+	} else if report.Score >= 0 {
+		report.Success = fmt.Sprintf("Passed with a score of %v points", report.Score)
+	} else {
+		report.Error = fmt.Sprintf("Failed with a score of %v points", report.Score)
 	}
 
 	return report

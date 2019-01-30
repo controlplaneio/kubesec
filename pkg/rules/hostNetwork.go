@@ -6,8 +6,10 @@ import (
 )
 
 func HostNetwork(json []byte) int {
+	spec := getSpecSelector(json)
+
 	res := gojsonq.New().Reader(bytes.NewReader(json)).
-		From("spec.template.spec.hostNetwork").Get()
+		From(spec + ".hostNetwork").Get()
 
 	if res != nil && res.(bool) {
 		return 1

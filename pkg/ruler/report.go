@@ -1,6 +1,7 @@
 package ruler
 
 type Report struct {
+	Success string      `json:"success,omitempty"`
 	Error   string      `json:"error,omitempty"`
 	Score   int         `json:"score"`
 	Scoring RuleScoring `json:"scoring"`
