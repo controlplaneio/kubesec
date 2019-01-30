@@ -10,7 +10,7 @@ import (
 )
 
 var (
-	logger *zap.Logger
+	logger *zap.SugaredLogger
 
 	// vars injected by goreleaser at build time
 	version = "unknown"
@@ -29,10 +29,11 @@ func main() {
 	var err error
 
 	// logger writes to stderr
-	logger, err = zap.NewDevelopment()
+	zlog, err := zap.NewDevelopment()
 	if err != nil {
 		log.Fatalf("can't initialize zap logger: %v", err)
 	}
+	logger = zlog.Sugar()
 	defer logger.Sync()
 
 	rootCmd.SetArgs(os.Args[1:])

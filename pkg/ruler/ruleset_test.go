@@ -2,6 +2,7 @@ package ruler
 
 import (
 	"github.com/ghodss/yaml"
+	"go.uber.org/zap"
 	"testing"
 )
 
@@ -39,7 +40,7 @@ spec:
 		t.Fatal(err.Error())
 	}
 
-	report := NewRuleset().Run(json)
+	report := NewRuleset(zap.NewNop().Sugar()).Run(json)
 
 	critical := len(report.Scoring.Critical)
 	if critical != 1 {
@@ -51,7 +52,7 @@ spec:
 		t.Errorf("Got %v advise rules wanted %v", advise, 3)
 	}
 
-	if report.Score != -6 {
-		t.Errorf("Got score %v wanted %v", report.Score, -6)
+	if report.Score != -9 {
+		t.Errorf("Got score %v wanted %v", report.Score, -9)
 	}
 }
