@@ -80,6 +80,15 @@ func NewRuleset(logger *zap.SugaredLogger) *Ruleset {
 	}
 	list = append(list, capSysAdminRule)
 
+	dockerSockRule := Rule{
+		Predicate: rules.DockerSock,
+		Selector:  "volumes[] .hostPath .path == /var/run/docker.sock",
+		Reason:    "Mounting the docker.socket leaks information about other containers and can allow container breakout",
+		Kinds:     []string{"Pod", "Deployment", "StatefulSet", "DaemonSet"},
+		Points:    -9,
+	}
+	list = append(list, dockerSockRule)
+
 	return &Ruleset{
 		Rules:  list,
 		logger: logger,
