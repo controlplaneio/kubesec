@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func Test_HostPID(t *testing.T) {
+func Test_HostIPC(t *testing.T) {
 
 	var data = `
 ---
@@ -14,7 +14,7 @@ kind: Deployment
 spec:
   template:
     spec:
-      hostPID: true
+      hostIPC: true
       containers:
         - name: c1
 `
@@ -24,13 +24,13 @@ spec:
 		t.Fatal(err.Error())
 	}
 
-	containers := HostPID(json)
+	containers := HostIPC(json)
 	if containers != 1 {
 		t.Errorf("Got %v containers wanted %v", containers, 1)
 	}
 }
 
-func Test_HostPID_Disabled(t *testing.T) {
+func Test_HostIPC_Disabled(t *testing.T) {
 
 	var data = `
 ---
@@ -39,7 +39,7 @@ kind: Deployment
 spec:
   template:
     spec:
-      hostPID: false
+      hostIPC: false
       containers:
         - name: c1
 `
@@ -49,13 +49,13 @@ spec:
 		t.Fatal(err.Error())
 	}
 
-	containers := HostPID(json)
+	containers := HostIPC(json)
 	if containers != 0 {
 		t.Errorf("Got %v containers wanted %v", containers, 0)
 	}
 }
 
-func Test_HostPID_Missing(t *testing.T) {
+func Test_HostIPC_Missing(t *testing.T) {
 
 	var data = `
 ---
@@ -73,7 +73,7 @@ spec:
 		t.Fatal(err.Error())
 	}
 
-	containers := HostPID(json)
+	containers := HostIPC(json)
 	if containers != 0 {
 		t.Errorf("Got %v containers wanted %v", containers, 0)
 	}
