@@ -45,7 +45,7 @@ var scanCmd = &cobra.Command{
 			}
 		}
 
-		report := ruler.NewRuleset().Run(data)
+		report := ruler.NewRuleset(logger).Run(data)
 		res, err := json.Marshal(report)
 		if err != nil {
 			return err
