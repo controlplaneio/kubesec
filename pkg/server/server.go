@@ -1,8 +1,13 @@
 package server
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
+	"github.com/ghodss/yaml"
+	"github.com/sublimino/kubesec/pkg/ruler"
 	"go.uber.org/zap"
+	"io/ioutil"
 	"net/http"
 	"os"
 	"os/signal"
@@ -19,6 +24,36 @@ func ListenAndServe(port string, timeout time.Duration, logger *zap.SugaredLogge
 	mux.HandleFunc("/healthz", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte("OK"))
+	})
+	mux.HandleFunc("/scan", func(w http.ResponseWriter, r *http.Request) {
+		body, err := ioutil.ReadAll(r.Body)
+		if err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+		defer r.Body.Close()
+
+		var data []byte
+		isJson := json.Valid(body)
+		if isJson {
+			data = body
+		} else {
+			data, err = yaml.YAMLToJSON(body)
+			if err != nil {
+				w.WriteHeader(http.StatusBadRequest)
+				return
+			}
+		}
+
+		report := ruler.NewRuleset(logger).Run(data)
+		res, err := json.Marshal(report)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte(PrettyJSON(res)))
 	})
 
 	srv := &http.Server{
@@ -66,4 +101,10 @@ func SetupSignalHandler() (stopCh <-chan struct{}) {
 	}()
 
 	return stop
+}
+
+func PrettyJSON(b []byte) string {
+	var out bytes.Buffer
+	json.Indent(&out, b, "", "  ")
+	return string(out.Bytes())
 }
