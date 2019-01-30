@@ -98,6 +98,26 @@ func NewRuleset(logger *zap.SugaredLogger) *Ruleset {
 	}
 	list = append(list, dockerSockRule)
 
+	requestsCPURule := Rule{
+		Predicate: rules.RequestsCPU,
+		Selector:  "containers[] .resources .requests .cpu",
+		Reason:    "Enforcing CPU requests aids a fair balancing of resources across the cluster",
+		Kinds:     []string{"Pod", "Deployment", "StatefulSet", "DaemonSet"},
+		Points:    1,
+	}
+
+	list = append(list, requestsCPURule)
+
+	limitsCPURule := Rule{
+		Predicate: rules.LimitsCPU,
+		Selector:  "containers[] .resources .limits .cpu",
+		Reason:    "Enforcing CPU limits prevents DOS via resource exhaustion",
+		Kinds:     []string{"Pod", "Deployment", "StatefulSet", "DaemonSet"},
+		Points:    1,
+	}
+
+	list = append(list, limitsCPURule)
+
 	return &Ruleset{
 		Rules:  list,
 		logger: logger,
