@@ -53,6 +53,15 @@ func NewRuleset(logger *zap.SugaredLogger) *Ruleset {
 	}
 	list = append(list, runAsUserRule)
 
+	privilegedRule := Rule{
+		Predicate: rules.Privileged,
+		Selector:  "containers[] .securityContext .privileged == true",
+		Reason:    "Privileged containers can allow almost completely unrestricted host access",
+		Kinds:     []string{"Pod", "Deployment", "StatefulSet", "DaemonSet"},
+		Points:    -30,
+	}
+	list = append(list, privilegedRule)
+
 	return &Ruleset{
 		Rules:  list,
 		logger: logger,
