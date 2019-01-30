@@ -32,6 +32,15 @@ func NewRuleset(logger *zap.SugaredLogger) *Ruleset {
 	}
 	list = append(list, hostPIDRule)
 
+	hostIPCRule := Rule{
+		Predicate: rules.HostIPC,
+		Selector:  ".spec .hostIPC == true)",
+		Reason:    "Sharing the host's IPC namespace allows container processes to communicate with processes on the host",
+		Kinds:     []string{"Pod", "Deployment", "StatefulSet", "DaemonSet"},
+		Points:    -9,
+	}
+	list = append(list, hostIPCRule)
+
 	readOnlyRootFilesystemRule := Rule{
 		Predicate: rules.ReadOnlyRootFilesystem,
 		Selector:  "containers[] .securityContext .readOnlyRootFilesystem == true",
