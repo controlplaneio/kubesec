@@ -6,7 +6,6 @@ builds:
   - main: ./cmd/kubesec
     binary: kubesec
     goos:
-      - windows
       - darwin
       - linux
     goarch:
@@ -15,8 +14,6 @@ builds:
       - CGO_ENABLED=0
     ignore:
       - goos: darwin
-        goarch: 386
-      - goos: windows
         goarch: 386
 
 archive:
