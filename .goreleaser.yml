@@ -1,0 +1,25 @@
+before:
+  hooks:
+    - dep ensure -vendor-only
+
+builds:
+  - main: ./cmd/kubesec
+    binary: kubesec
+    goos:
+      - darwin
+      - linux
+    goarch:
+      - amd64
+    env:
+      - CGO_ENABLED=0
+    ignore:
+      - goos: darwin
+        goarch: 386
+
+archive:
+  name_template: "{{ .Binary }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+  files:
+    - none*
+
+snapshot:
+  name_template: "{{ .Tag }}-next"
