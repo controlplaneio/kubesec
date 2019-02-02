@@ -80,16 +80,34 @@ func NewRuleset(logger *zap.SugaredLogger) *Ruleset {
 	}
 	list = append(list, privilegedRule)
 
-	capSysAdminRule := Rule{
-		Predicate: rules.CapSysAdmin,
-		Selector:  "containers[] .securityContext .capabilities .add == SYS_ADMIN)",
-		Reason:    "CAP_SYS_ADMIN is the most privileged capability and should always be avoided",
-		Kinds:     []string{"Pod", "Deployment", "StatefulSet", "DaemonSet"},
-		Points:    -30,
-	}
-	list = append(list, capSysAdminRule)
+  capSysAdminRule := Rule{
+    Predicate: rules.CapSysAdmin,
+    Selector:  "containers[] .securityContext .capabilities .add == SYS_ADMIN",
+    Reason:    "CAP_SYS_ADMIN is the most privileged capability and should always be avoided",
+    Kinds:     []string{"Pod", "Deployment", "StatefulSet", "DaemonSet"},
+    Points:    -30,
+  }
+  list = append(list, capSysAdminRule)
 
-	dockerSockRule := Rule{
+  capDropAnyRule := Rule{
+    Predicate: rules.CapDropAny,
+    Selector:  "containers[] .securityContext .capabilities .drop",
+    Reason:    "Reducing kernel capabilities available to a container limits its attack surface",
+    Kinds:     []string{"Pod", "Deployment", "StatefulSet", "DaemonSet"},
+    Points:    1,
+  }
+  list = append(list, capDropAnyRule)
+
+  capDropAllRule := Rule{
+    Predicate: rules.CapDropAll,
+    Selector:  "containers[] .securityContext .capabilities .drop | index(\"ALL\")",
+    Reason:    "Drop all capabilities and add only those required to reduce syscall attack surface",
+    Kinds:     []string{"Pod", "Deployment", "StatefulSet", "DaemonSet"},
+    Points:    1,
+  }
+  list = append(list, capDropAllRule)
+
+  dockerSockRule := Rule{
 		Predicate: rules.DockerSock,
 		Selector:  "volumes[] .hostPath .path == /var/run/docker.sock",
 		Reason:    "Mounting the docker.socket leaks information about other containers and can allow container breakout",
