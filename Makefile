@@ -71,9 +71,13 @@ go: ## golang toolchain
 test-go: ## golang unit tests
 	go test $$(go list ./... | grep -v '/vendor/')
 
+test-go-verbose: ## golang unit tests
+	go test -v $$(go list ./... | grep -v '/vendor/')
+
 .PHONY: test-go-acceptance
 test-go-acceptance: ## acceptance tests targeting golang build
-	export BIN_UNDER_TEST=kube-sec-check; make test
+	BIN_UNDER_TEST="./dist/linux_amd64/kubesec scan"\
+	  make test
 
 .PHONY: dep
 dep: ## golang and deployment dependencies
@@ -86,17 +90,7 @@ prune: ## golang dependency prune
 
 .PHONY: build
 build: ## golang build
-	bash -xc ' \
-		PACKAGE="$(PACKAGE)"; \
-		STATUS=$$(git diff-index --quiet HEAD 2>/dev/null || echo "-dirty"); \
-		HASH="$$(git rev-parse --short HEAD 2>/dev/null)"; \
-		VERSION="$$(git describe --tags 2>/dev/null|| echo $${HASH})$${STATUS}"; \
-		go build -ldflags "\
-			-X $${PACKAGE}.buildStamp=$$(date -u '+%Y-%m-%d_%I:%M:%S%p') \
-			-X $${PACKAGE}.gitHash=$${HASH} \
-			-X $${PACKAGE}.buildVersion=$${VERSION} \
-		"; \
-	'
+	goreleaser --snapshot --rm-dist
 
 .PHONY: dev
 dev: ## non-golang dev
