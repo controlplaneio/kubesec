@@ -15,7 +15,7 @@ func CapDropAny(json []byte) int {
 		From(spec + ".containers").
 		Only("securityContext.capabilities.drop")
 
-	if capDrop != nil && strings.Contains(fmt.Sprintf("%v", capDrop), "[map[drop:[") {
+	if capDrop != nil && strings.Contains(fmt.Sprintf("%v", capDrop), "[map[drop:[") && ! strings.Contains(fmt.Sprintf("%v", capDrop), "[map[drop:[<nil>]") {
 		containers++
 	}
 
