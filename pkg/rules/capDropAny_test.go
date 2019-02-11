@@ -115,3 +115,56 @@ spec:
 		t.Errorf("Got %v containers wanted %v", containers, 0)
 	}
 }
+
+func Test_CapDropAny_Malformed_Fail(t *testing.T) {
+  var data = `
+---
+apiVersion: v1
+kind: Pod
+spec:
+  initContainers:
+  - name: init1
+  containers:
+  - name: c1
+    securityContext:
+      capabilities:
+        drop: true
+`
+
+  json, err := yaml.YAMLToJSON([]byte(data))
+  if err != nil {
+    t.Fatal(err.Error())
+  }
+
+  containers := CapDropAny(json)
+  if containers != 0 {
+    t.Errorf("Got %v containers wanted %v", containers, 0)
+  }
+}
+
+func Test_CapDropAny_Malformed_Empty_List(t *testing.T) {
+  var data = `
+---
+apiVersion: v1
+kind: Pod
+spec:
+  initContainers:
+  - name: init1
+  containers:
+  - name: c1
+    securityContext:
+      capabilities:
+        drop: 
+        -
+`
+
+  json, err := yaml.YAMLToJSON([]byte(data))
+  if err != nil {
+    t.Fatal(err.Error())
+  }
+
+  containers := CapDropAny(json)
+  if containers != 0 {
+    t.Errorf("Got %v containers wanted %v", containers, 0)
+  }
+}
