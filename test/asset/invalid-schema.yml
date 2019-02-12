@@ -1,0 +1,16 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: demo
+spec:
+  replicas: "2"
+  template:
+    spec:
+      hostNetwork: "1"
+      containers:
+      - name: sec-ctx-demo
+        image: gcr.io/google-samples/node-hello:1.0
+        securityContext:
+          capabilities:
+            drop:
+              - ALL
