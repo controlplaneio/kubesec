@@ -18,6 +18,10 @@
   name = "github.com/prometheus/client_golang"
   version = "v0.8.0"
 
+[[constraint]]
+  name = "github.com/garethr/kubeval"
+  version = "0.7.3"
+
 [prune]
   go-tests = true
   unused-packages = true

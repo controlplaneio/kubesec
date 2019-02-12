@@ -3,6 +3,7 @@ package ruler
 import (
 	"github.com/ghodss/yaml"
 	"go.uber.org/zap"
+	"strings"
 	"testing"
 )
 
@@ -54,5 +55,96 @@ spec:
 
 	if report.Score > 0 {
 		t.Errorf("Got score %v wanted a negative value", report.Score)
+	}
+}
+
+func TestRuleset_Run_invalid_network(t *testing.T) {
+	var data = `
+---
+apiVersion: apps/v1
+kind: Deployment
+spec:
+  template:
+    spec:
+      hostNetwork: 
+      initContainers:
+        - name: init1
+      containers:
+        - name: c1
+        - name: c2
+`
+
+	json, err := yaml.YAMLToJSON([]byte(data))
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+
+	report := NewRuleset(zap.NewNop().Sugar()).Run(json)
+
+	// kubeval should error out with:
+	// spec.template.spec.hostNetwork: Invalid type. Expected: boolean, given: null
+	if len(report.Error) < 1 || !strings.Contains(report.Error, "Expected: boolean") {
+		t.Errorf("Got error %v ", report.Error)
+	}
+}
+
+func TestRuleset_Run_invalid_replicas(t *testing.T) {
+	var data = `
+---
+apiVersion: apps/v1
+kind: Deployment
+spec:
+  replicas: "2"
+  template:
+    spec:
+      initContainers:
+        - name: init1
+      containers:
+        - name: c1
+        - name: c2
+`
+
+	json, err := yaml.YAMLToJSON([]byte(data))
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+
+	report := NewRuleset(zap.NewNop().Sugar()).Run(json)
+
+	// kubeval should error out with:
+	// spec.replicas: Invalid type. Expected: integer, given: string
+	if len(report.Error) < 1 || !strings.Contains(report.Error, "Expected: integer") {
+		t.Errorf("Got error %v ", report.Error)
+	}
+}
+
+func TestRuleset_Run_invalid_kind(t *testing.T) {
+	var data = `
+---
+apiVersion: apps/v1
+kind: Deployment2
+spec:
+  template:
+    spec:
+      initContainers:
+        - name: init1
+      containers:
+        - name: c1
+        - name: c2
+`
+
+	json, err := yaml.YAMLToJSON([]byte(data))
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+
+	report := NewRuleset(zap.NewNop().Sugar()).Run(json)
+
+	// kubeval should error out with:
+	// Problem loading schema from the network at
+	// https://raw.githubusercontent.com/garethr/kubernetes-json-schema/master/master-standalone/deployment2.json:
+	// Could not read schema from HTTP, response status is 404 Not Found
+	if len(report.Error) < 1 || !strings.Contains(report.Error, "404 Not Found") {
+		t.Errorf("Got error %v ", report.Error)
 	}
 }
