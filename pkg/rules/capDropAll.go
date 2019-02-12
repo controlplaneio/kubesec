@@ -1,10 +1,10 @@
 package rules
 
 import (
-  "bytes"
-  "fmt"
-  "github.com/thedevsaddam/gojsonq"
-  "strings"
+	"bytes"
+	"fmt"
+	"github.com/thedevsaddam/gojsonq"
+	"strings"
 )
 
 func CapDropAll(json []byte) int {
@@ -15,7 +15,7 @@ func CapDropAll(json []byte) int {
 		From(spec + ".containers").
 		Only("securityContext.capabilities.drop")
 
-	if capDrop != nil && strings.Contains(fmt.Sprintf("%v", capDrop), "[map[drop:[ALL]") {
+	if capDrop != nil && strings.Contains(fmt.Sprintf("%v", capDrop), "ALL") {
 		containers++
 	}
 
@@ -23,7 +23,7 @@ func CapDropAll(json []byte) int {
 		From(spec + ".initContainers").
 		Only("securityContext.capabilities.drop")
 
-  if capDropInit != nil && strings.Contains(fmt.Sprintf("%v", capDropInit), "[map[drop:[ALL]") {
+	if capDropInit != nil && strings.Contains(fmt.Sprintf("%v", capDropInit), "ALL") {
 		containers++
 	}
 
