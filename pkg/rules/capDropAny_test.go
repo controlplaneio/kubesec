@@ -6,7 +6,7 @@ import (
 )
 
 func Test_CapDropAny_Pod(t *testing.T) {
-  var data = `
+	var data = `
 ---
 apiVersion: v1
 kind: Pod
@@ -23,19 +23,19 @@ spec:
   - name: c3
 `
 
-  json, err := yaml.YAMLToJSON([]byte(data))
-  if err != nil {
-    t.Fatal(err.Error())
-  }
+	json, err := yaml.YAMLToJSON([]byte(data))
+	if err != nil {
+		t.Fatal(err.Error())
+	}
 
-  containers := CapDropAny(json)
-  if containers != 1 {
-    t.Errorf("Got %v containers wanted %v", containers, 1)
-  }
+	containers := CapDropAny(json)
+	if containers != 1 {
+		t.Errorf("Got %v containers wanted %v", containers, 1)
+	}
 }
 
 func Test_CapDropAnyMissing_Pod(t *testing.T) {
-  var data = `
+	var data = `
 ---
 apiVersion: v1
 kind: Pod
@@ -51,15 +51,15 @@ spec:
   - name: c3
 `
 
-  json, err := yaml.YAMLToJSON([]byte(data))
-  if err != nil {
-    t.Fatal(err.Error())
-  }
+	json, err := yaml.YAMLToJSON([]byte(data))
+	if err != nil {
+		t.Fatal(err.Error())
+	}
 
-  containers := CapDropAny(json)
-  if containers != 0 {
-    t.Errorf("Got %v containers wanted %v", containers, 0)
-  }
+	containers := CapDropAny(json)
+	if containers != 0 {
+		t.Errorf("Got %v containers wanted %v", containers, 0)
+	}
 }
 
 func Test_CapDropAny_InitContainers(t *testing.T) {
@@ -117,7 +117,7 @@ spec:
 }
 
 func Test_CapDropAny_Malformed_Fail(t *testing.T) {
-  var data = `
+	var data = `
 ---
 apiVersion: v1
 kind: Pod
@@ -131,19 +131,19 @@ spec:
         drop: true
 `
 
-  json, err := yaml.YAMLToJSON([]byte(data))
-  if err != nil {
-    t.Fatal(err.Error())
-  }
+	json, err := yaml.YAMLToJSON([]byte(data))
+	if err != nil {
+		t.Fatal(err.Error())
+	}
 
-  containers := CapDropAny(json)
-  if containers != 0 {
-    t.Errorf("Got %v containers wanted %v", containers, 0)
-  }
+	containers := CapDropAny(json)
+	if containers != 0 {
+		t.Errorf("Got %v containers wanted %v", containers, 0)
+	}
 }
 
 func Test_CapDropAny_Malformed_Empty_List(t *testing.T) {
-  var data = `
+	var data = `
 ---
 apiVersion: v1
 kind: Pod
@@ -158,13 +158,13 @@ spec:
         -
 `
 
-  json, err := yaml.YAMLToJSON([]byte(data))
-  if err != nil {
-    t.Fatal(err.Error())
-  }
+	json, err := yaml.YAMLToJSON([]byte(data))
+	if err != nil {
+		t.Fatal(err.Error())
+	}
 
-  containers := CapDropAny(json)
-  if containers != 0 {
-    t.Errorf("Got %v containers wanted %v", containers, 0)
-  }
+	containers := CapDropAny(json)
+	if containers != 0 {
+		t.Errorf("Got %v containers wanted %v", containers, 0)
+	}
 }
