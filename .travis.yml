@@ -14,7 +14,7 @@ addons:
 
 script:
 - set -e
-- gofmt -l -s ./pkg | grep ".*\.go"; if [ "$$?" = "0" ]; then exit 1; fi
+- gofmt -l -s ./pkg | grep ".*\.go"; if [ "$?" = "0" ]; then exit 1; fi
 - curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
 - dep ensure -vendor-only
 - go test -v -race -coverprofile=coverage.txt -covermode=atomic ./pkg/...
