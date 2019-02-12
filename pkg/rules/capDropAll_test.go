@@ -6,7 +6,7 @@ import (
 )
 
 func Test_CapDropAll_Pod(t *testing.T) {
-  var data = `
+	var data = `
 ---
 apiVersion: v1
 kind: Pod
@@ -23,19 +23,19 @@ spec:
   - name: c3
 `
 
-  json, err := yaml.YAMLToJSON([]byte(data))
-  if err != nil {
-    t.Fatal(err.Error())
-  }
+	json, err := yaml.YAMLToJSON([]byte(data))
+	if err != nil {
+		t.Fatal(err.Error())
+	}
 
-  containers := CapDropAll(json)
-  if containers != 1 {
-    t.Errorf("Got %v containers wanted %v", containers, 1)
-  }
+	containers := CapDropAll(json)
+	if containers != 1 {
+		t.Errorf("Got %v containers wanted %v", containers, 1)
+	}
 }
 
 func Test_CapDropAllMissing_Pod(t *testing.T) {
-  var data = `
+	var data = `
 ---
 apiVersion: v1
 kind: Pod
@@ -51,15 +51,15 @@ spec:
   - name: c3
 `
 
-  json, err := yaml.YAMLToJSON([]byte(data))
-  if err != nil {
-    t.Fatal(err.Error())
-  }
+	json, err := yaml.YAMLToJSON([]byte(data))
+	if err != nil {
+		t.Fatal(err.Error())
+	}
 
-  containers := CapDropAll(json)
-  if containers != 0 {
-    t.Errorf("Got %v containers wanted %v", containers, 0)
-  }
+	containers := CapDropAll(json)
+	if containers != 0 {
+		t.Errorf("Got %v containers wanted %v", containers, 0)
+	}
 }
 
 func Test_CapDropAll_InitContainers(t *testing.T) {
