@@ -5,6 +5,7 @@ import (
 	"github.com/garethr/kubeval/kubeval"
 	"github.com/sublimino/kubesec/pkg/rules"
 	"go.uber.org/zap"
+	"os"
 )
 
 type Ruleset struct {
@@ -168,6 +169,11 @@ func (rs *Ruleset) Run(json []byte) Report {
 		},
 	}
 
+	// try set kubeval schemas to local path
+	if _, err := os.Stat("/schemas/kubernetes-json-schema/master/master-standalone"); !os.IsNotExist(err) {
+		kubeval.SchemaLocation = "file:///schemas"
+	}
+
 	results, err := kubeval.Validate(json, "resource.json")
 	if err != nil {
 		report.Error = err.Error()
@@ -182,7 +188,7 @@ func (rs *Ruleset) Run(json []byte) Report {
 				report.Error += desc.String()
 			}
 		} else if result.Kind == "" {
-			report.Error += "document is empty"
+			report.Error += "Document is invalid, no Kubernetes kind found"
 		}
 	}
 
