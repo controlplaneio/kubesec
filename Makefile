@@ -68,7 +68,7 @@ go: ## golang toolchain
 	make build
 
 .PHONY: test-go-fmt
-test-go: ## golang fmt check
+test-go-fmt: ## golang fmt check
 	gofmt -l -s ./pkg | grep ".*\.go"; if [ "$$?" = "0" ]; then exit 1; fi
 
 .PHONY: test-go
