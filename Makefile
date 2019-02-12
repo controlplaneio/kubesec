@@ -67,6 +67,10 @@ go: ## golang toolchain
 	make test-go
 	make build
 
+.PHONY: test-go-fmt
+test-go-fmt: ## golang fmt check
+	gofmt -l -s ./pkg | grep ".*\.go"; if [ "$$?" = "0" ]; then exit 1; fi
+
 .PHONY: test-go
 test-go: ## golang unit tests
 	go test $$(go list ./... | grep -v '/vendor/')

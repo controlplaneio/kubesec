@@ -2,8 +2,10 @@ package ruler
 
 import (
 	"fmt"
+	"github.com/garethr/kubeval/kubeval"
 	"github.com/sublimino/kubesec/pkg/rules"
 	"go.uber.org/zap"
+	"os"
 )
 
 type Ruleset struct {
@@ -80,34 +82,34 @@ func NewRuleset(logger *zap.SugaredLogger) *Ruleset {
 	}
 	list = append(list, privilegedRule)
 
-  capSysAdminRule := Rule{
-    Predicate: rules.CapSysAdmin,
-    Selector:  "containers[] .securityContext .capabilities .add == SYS_ADMIN",
-    Reason:    "CAP_SYS_ADMIN is the most privileged capability and should always be avoided",
-    Kinds:     []string{"Pod", "Deployment", "StatefulSet", "DaemonSet"},
-    Points:    -30,
-  }
-  list = append(list, capSysAdminRule)
+	capSysAdminRule := Rule{
+		Predicate: rules.CapSysAdmin,
+		Selector:  "containers[] .securityContext .capabilities .add == SYS_ADMIN",
+		Reason:    "CAP_SYS_ADMIN is the most privileged capability and should always be avoided",
+		Kinds:     []string{"Pod", "Deployment", "StatefulSet", "DaemonSet"},
+		Points:    -30,
+	}
+	list = append(list, capSysAdminRule)
 
-  capDropAnyRule := Rule{
-    Predicate: rules.CapDropAny,
-    Selector:  "containers[] .securityContext .capabilities .drop",
-    Reason:    "Reducing kernel capabilities available to a container limits its attack surface",
-    Kinds:     []string{"Pod", "Deployment", "StatefulSet", "DaemonSet"},
-    Points:    1,
-  }
-  list = append(list, capDropAnyRule)
+	capDropAnyRule := Rule{
+		Predicate: rules.CapDropAny,
+		Selector:  "containers[] .securityContext .capabilities .drop",
+		Reason:    "Reducing kernel capabilities available to a container limits its attack surface",
+		Kinds:     []string{"Pod", "Deployment", "StatefulSet", "DaemonSet"},
+		Points:    1,
+	}
+	list = append(list, capDropAnyRule)
 
-  capDropAllRule := Rule{
-    Predicate: rules.CapDropAll,
-    Selector:  "containers[] .securityContext .capabilities .drop | index(\"ALL\")",
-    Reason:    "Drop all capabilities and add only those required to reduce syscall attack surface",
-    Kinds:     []string{"Pod", "Deployment", "StatefulSet", "DaemonSet"},
-    Points:    1,
-  }
-  list = append(list, capDropAllRule)
+	capDropAllRule := Rule{
+		Predicate: rules.CapDropAll,
+		Selector:  "containers[] .securityContext .capabilities .drop | index(\"ALL\")",
+		Reason:    "Drop all capabilities and add only those required to reduce syscall attack surface",
+		Kinds:     []string{"Pod", "Deployment", "StatefulSet", "DaemonSet"},
+		Points:    1,
+	}
+	list = append(list, capDropAllRule)
 
-  dockerSockRule := Rule{
+	dockerSockRule := Rule{
 		Predicate: rules.DockerSock,
 		Selector:  "volumes[] .hostPath .path == /var/run/docker.sock",
 		Reason:    "Mounting the docker.socket leaks information about other containers and can allow container breakout",
@@ -165,6 +167,33 @@ func (rs *Ruleset) Run(json []byte) Report {
 			Advise:   make([]RuleRef, 0),
 			Critical: make([]RuleRef, 0),
 		},
+	}
+
+	// try set kubeval schemas to local path
+	if _, err := os.Stat("/schemas/kubernetes-json-schema/master/master-standalone"); !os.IsNotExist(err) {
+		kubeval.SchemaLocation = "file:///schemas"
+	}
+
+	results, err := kubeval.Validate(json, "resource.json")
+	if err != nil {
+		report.Error = err.Error()
+		return report
+	}
+
+	//fmt.Println(results)
+
+	for _, result := range results {
+		if len(result.Errors) > 0 {
+			for _, desc := range result.Errors {
+				report.Error += desc.String()
+			}
+		} else if result.Kind == "" {
+			report.Error += "Document is invalid, no Kubernetes kind found"
+		}
+	}
+
+	if len(report.Error) > 0 {
+		return report
 	}
 
 	var applyedRules int

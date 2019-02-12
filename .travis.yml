@@ -14,13 +14,15 @@ addons:
 
 script:
 - set -e
+- make test-go-fmt
 - curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
 - dep ensure -vendor-only
 - go test -v -race -coverprofile=coverage.txt -covermode=atomic ./pkg/...
 - docker build -t kubesec .
 - docker run -dp 9090:9090 kubesec
 - sleep 1
-- curl -sSX POST --data-binary @test/asset/score-0-daemonset-host-network.yml http://localhost:9090/scan
+- curl -sSX POST --data-binary @test/asset/score-0-daemonset-host-network.yml http://localhost:9090/scan | grep loopback
+- curl -sSX POST --data-binary @test/asset/invalid-schema.yml http://localhost:9090/scan | grep Invalid
 
 after_success:
 - if [ -z "$DOCKER_USER" ]; then
