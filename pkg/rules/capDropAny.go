@@ -13,17 +13,23 @@ func CapDropAny(json []byte) int {
 
 	capDrop := gojsonq.New().Reader(bytes.NewReader(json)).
 		From(spec + ".containers").
-		Only("securityContext.capabilities.drop")
+		Select("securityContext.capabilities.drop").
+		WhereNotNil("securityContext.capabilities.drop")
 
-	if capDrop != nil && strings.Contains(fmt.Sprintf("%v", capDrop), "[map[drop:[") && !strings.Contains(fmt.Sprintf("%v", capDrop), "[map[drop:[<nil>]") {
+	if capDrop != nil &&
+		capDrop.Count() > 0 &&
+		!strings.Contains(fmt.Sprintf("%v", capDrop.Get()), "<nil>") {
 		containers++
 	}
 
 	capDropInit := gojsonq.New().Reader(bytes.NewReader(json)).
 		From(spec + ".initContainers").
-		Only("securityContext.capabilities.drop")
+		Select("securityContext.capabilities.drop").
+		WhereNotNil("securityContext.capabilities.drop")
 
-	if capDropInit != nil && strings.Contains(fmt.Sprintf("%v", capDropInit), "[map[drop:[") {
+	if capDropInit != nil &&
+		capDropInit.Count() > 0 &&
+		!strings.Contains(fmt.Sprintf("%v", capDropInit.Get()), "<nil>") {
 		containers++
 	}
 

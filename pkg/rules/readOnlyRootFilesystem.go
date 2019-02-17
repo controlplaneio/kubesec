@@ -8,12 +8,6 @@ import (
 func ReadOnlyRootFilesystem(json []byte) int {
 	spec := getSpecSelector(json)
 
-	allContainers := gojsonq.New().Reader(bytes.NewReader(json)).
-		From(spec + ".containers").Count()
-
-	allInitContainers := gojsonq.New().Reader(bytes.NewReader(json)).
-		From(spec + ".initContainers").Count()
-
 	jqContainers := gojsonq.New().Reader(bytes.NewReader(json)).
 		From(spec+".containers").
 		Where("securityContext", "!=", nil).
@@ -26,5 +20,5 @@ func ReadOnlyRootFilesystem(json []byte) int {
 		Where("securityContext.readOnlyRootFilesystem", "!=", nil).
 		Where("securityContext.readOnlyRootFilesystem", "=", true)
 
-	return (allContainers + allInitContainers) - (jqContainers.Count() + jqInitContainers.Count())
+	return jqContainers.Count() + jqInitContainers.Count()
 }

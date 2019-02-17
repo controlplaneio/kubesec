@@ -26,5 +26,5 @@ func RunAsNonRoot(json []byte) int {
 		Where("securityContext.runAsNonRoot", "!=", nil).
 		Where("securityContext.runAsNonRoot", "=", true)
 
-	return (allContainers + allInitContainers) - (jqContainers.Count() + jqInitContainers.Count())
+	return jqContainers.Count() + jqInitContainers.Count()
 }
