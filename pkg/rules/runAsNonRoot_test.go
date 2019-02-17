@@ -31,8 +31,8 @@ spec:
 	}
 
 	containers := RunAsNonRoot(json)
-	if containers != 0 {
-		t.Errorf("Got %v containers wanted %v", containers, 0)
+	if containers != 3 {
+		t.Errorf("Got %v containers wanted %v", containers, 3)
 	}
 }
 
@@ -68,7 +68,7 @@ spec:
 	}
 
 	containers := RunAsNonRoot(json)
-	if containers != 4 {
-		t.Errorf("Got %v containers wanted %v", containers, 4)
+	if containers != 2 {
+		t.Errorf("Got %v containers wanted %v", containers, 2)
 	}
 }

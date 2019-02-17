@@ -8,12 +8,6 @@ import (
 func RunAsNonRoot(json []byte) int {
 	spec := getSpecSelector(json)
 
-	allContainers := gojsonq.New().Reader(bytes.NewReader(json)).
-		From(spec + ".containers").Count()
-
-	allInitContainers := gojsonq.New().Reader(bytes.NewReader(json)).
-		From(spec + ".initContainers").Count()
-
 	jqContainers := gojsonq.New().Reader(bytes.NewReader(json)).
 		From(spec+".containers").
 		Where("securityContext", "!=", nil).
@@ -26,5 +20,5 @@ func RunAsNonRoot(json []byte) int {
 		Where("securityContext.runAsNonRoot", "!=", nil).
 		Where("securityContext.runAsNonRoot", "=", true)
 
-	return (allContainers + allInitContainers) - (jqContainers.Count() + jqInitContainers.Count())
+	return jqContainers.Count() + jqInitContainers.Count()
 }
