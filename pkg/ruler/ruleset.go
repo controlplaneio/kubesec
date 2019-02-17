@@ -154,6 +154,15 @@ func NewRuleset(logger *zap.SugaredLogger) *Ruleset {
 	}
 	list = append(list, limitsMemoryRule)
 
+	serviceAccountNameRule := Rule{
+		Predicate: rules.ServiceAccountName,
+		Selector:  ".spec .serviceAccountName",
+		Reason:    "Service accounts restrict Kubernetes API access and should be configured with least privilege",
+		Kinds:     []string{"Pod", "Deployment", "StatefulSet", "DaemonSet"},
+		Points:    3,
+	}
+	list = append(list, serviceAccountNameRule)
+
 	return &Ruleset{
 		Rules:  list,
 		logger: logger,
