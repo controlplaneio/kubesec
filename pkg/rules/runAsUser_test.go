@@ -24,7 +24,7 @@ spec:
         - name: c1
         - name: c2
           securityContext:
-            runAsUser: 999
+            runAsUser: 99999
 `
 
 	json, err := yaml.YAMLToJSON([]byte(data))
@@ -33,8 +33,8 @@ spec:
 	}
 
 	containers := RunAsUser(json)
-	if containers != 3 {
-		t.Errorf("Got %v containers wanted %v", containers, 3)
+	if containers != 2 {
+		t.Errorf("Got %v containers wanted %v", containers, 2)
 	}
 }
 
@@ -48,6 +48,29 @@ spec:
   - name: c1
     securityContext:
       runAsUser: 999
+`
+
+	json, err := yaml.YAMLToJSON([]byte(data))
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+
+	containers := RunAsUser(json)
+	if containers != 0 {
+		t.Errorf("Got %v containers wanted %v", containers, 0)
+	}
+}
+
+func Test_RunAsUser_Pod_User_99999(t *testing.T) {
+	var data = `
+---
+apiVersion: v1
+kind: Pod
+spec:
+  containers:
+  - name: c1
+    securityContext:
+      runAsUser: 99999
 `
 
 	json, err := yaml.YAMLToJSON([]byte(data))

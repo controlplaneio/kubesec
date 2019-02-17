@@ -224,7 +224,7 @@ func (rs *Ruleset) Run(json []byte) Report {
 				rs.logger.Debugf("negative score rule matchedContainerCount %v", rule.Selector)
 				report.Score += rule.Points
 			}
-		  rs.logger.Debugf("points %v", report.Score)
+			rs.logger.Debugf("points %v", report.Score)
 		} else {
 			if rule.Points >= 0 {
 				rs.logger.Debugf("positive score rule failed %v", rule.Selector)
