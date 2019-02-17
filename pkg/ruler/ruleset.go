@@ -198,7 +198,7 @@ func (rs *Ruleset) Run(json []byte) Report {
 
 	var applyedRules int
 	for _, rule := range rs.Rules {
-		passed, err := rule.Eval(json)
+		matchedContainerCount, err := rule.Eval(json)
 
 		// skip rule if it doesn't apply to object kind
 		switch err.(type) {
@@ -214,15 +214,17 @@ func (rs *Ruleset) Run(json []byte) Report {
 			Link:     rule.Link,
 		}
 
-		if passed {
+		if matchedContainerCount > 0 {
 			if rule.Points >= 0 {
-				rs.logger.Debugf("positive score rule passed %v", rule.Selector)
+				rs.logger.Debugf("positive score rule matchedContainerCount %v", rule.Selector)
 				report.Score += rule.Points
 			}
 
 			if rule.Points < 0 {
-				rs.logger.Debugf("negative score rule passed %v", rule.Selector)
+				rs.logger.Debugf("negative score rule matchedContainerCount %v", rule.Selector)
+				report.Score += rule.Points
 			}
+		  rs.logger.Debugf("points %v", report.Score)
 		} else {
 			if rule.Points >= 0 {
 				rs.logger.Debugf("positive score rule failed %v", rule.Selector)
@@ -232,7 +234,6 @@ func (rs *Ruleset) Run(json []byte) Report {
 			if rule.Points < 0 {
 				rs.logger.Debugf("negative score rule failed %v", rule.Selector)
 				report.Scoring.Critical = append(report.Scoring.Critical, ref)
-				report.Score += rule.Points
 			}
 		}
 	}
