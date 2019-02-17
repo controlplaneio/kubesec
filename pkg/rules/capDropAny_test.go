@@ -17,6 +17,7 @@ spec:
       capabilities:
         drop:
           - SYS_ADMIN
+          - NET_ADMIN
   - name: c2
     securityContext:
       capabilities:
@@ -116,7 +117,7 @@ spec:
 	}
 }
 
-func Test_CapDropAny_Malformed_Fail(t *testing.T) {
+func Test_CapDropAny_Malformed_Empty_List(t *testing.T) {
 	var data = `
 ---
 apiVersion: v1
@@ -128,7 +129,8 @@ spec:
   - name: c1
     securityContext:
       capabilities:
-        drop: true
+        drop:
+        - 
 `
 
 	json, err := yaml.YAMLToJSON([]byte(data))
@@ -142,7 +144,7 @@ spec:
 	}
 }
 
-func Test_CapDropAny_Malformed_Empty_List(t *testing.T) {
+func Test_CapDropAny_Malformed_Empty_List_2(t *testing.T) {
 	var data = `
 ---
 apiVersion: v1
@@ -155,6 +157,89 @@ spec:
     securityContext:
       capabilities:
         drop: 
+        - 
+`
+
+	json, err := yaml.YAMLToJSON([]byte(data))
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+
+	containers := CapDropAny(json)
+	if containers != 0 {
+		t.Errorf("Got %v containers wanted %v", containers, 0)
+	}
+}
+
+func Test_CapDropAny_Malformed_Empty_List_3(t *testing.T) {
+	var data = `
+---
+apiVersion: v1
+kind: Pod
+spec:
+  initContainers:
+  - name: init1
+  containers:
+  - name: c1
+    securityContext:
+      capabilities:
+        drop:
+        -
+        - SOME_VALID_CAP
+`
+
+	json, err := yaml.YAMLToJSON([]byte(data))
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+
+	containers := CapDropAny(json)
+	if containers != 0 {
+		t.Errorf("Got %v containers wanted %v", containers, 0)
+	}
+}
+
+func Test_CapDropAny_Malformed_Empty_List_4(t *testing.T) {
+	var data = `
+---
+apiVersion: v1
+kind: Pod
+spec:
+  initContainers:
+  - name: init1
+  containers:
+  - name: c1
+    securityContext:
+      capabilities:
+        drop:
+        - SOME_VALID_CAP
+        -
+`
+
+	json, err := yaml.YAMLToJSON([]byte(data))
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+
+	containers := CapDropAny(json)
+	if containers != 0 {
+		t.Errorf("Got %v containers wanted %v", containers, 0)
+	}
+}
+
+func Test_CapDropAny_Malformed_Empty_List_5(t *testing.T) {
+	var data = `
+---
+apiVersion: v1
+kind: Pod
+spec:
+  initContainers:
+  - name: init1
+  containers:
+  - name: c1
+    securityContext:
+      capabilities:
+        drop:
         -
 `
 
