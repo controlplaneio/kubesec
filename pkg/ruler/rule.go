@@ -27,10 +27,10 @@ type Rule struct {
 }
 
 // Eval executes the predicate if the kind matches the rule
-func (r *Rule) Eval(json []byte) (bool, error) {
+func (r *Rule) Eval(json []byte) (int, error) {
 	jq := gojsonq.New().Reader(bytes.NewReader(json)).From("kind")
 	if jq.Error() != nil {
-		return true, jq.Error()
+		return 0, jq.Error()
 	}
 
 	kind := fmt.Sprintf("%s", jq.Get())
@@ -45,8 +45,8 @@ func (r *Rule) Eval(json []byte) (bool, error) {
 
 	if match {
 		count := r.Predicate(json)
-		return count < 1, nil
+		return count, nil
 	} else {
-		return true, &NotSupportedError{Kind: kind}
+		return 0, &NotSupportedError{Kind: kind}
 	}
 }
