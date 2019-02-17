@@ -11,6 +11,13 @@ import (
 	"path/filepath"
 )
 
+type ScanFailedValidationError struct {
+}
+
+func (e *ScanFailedValidationError) Error() string {
+	return fmt.Sprintf("Kubesec scan failed")
+}
+
 func init() {
 	rootCmd.AddCommand(scanCmd)
 }
@@ -52,6 +59,12 @@ var scanCmd = &cobra.Command{
 		}
 
 		fmt.Println(server.PrettyJSON(res))
-		return nil
+		if report.Score > 0 {
+			return nil
+		}
+
+		rootCmd.SilenceErrors = true
+		rootCmd.SilenceUsage = true
+		return &ScanFailedValidationError{}
 	},
 }
