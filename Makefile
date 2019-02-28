@@ -73,10 +73,10 @@ test-go-fmt: ## golang fmt check
 
 .PHONY: test-go
 test-go: ## golang unit tests
-	go test $$(go list ./... | grep -v '/vendor/')
+	go test -race $$(go list ./... | grep -v '/vendor/')
 
 test-go-verbose: ## golang unit tests
-	go test -v $$(go list ./... | grep -v '/vendor/')
+	go test -race -v $$(go list ./... | grep -v '/vendor/')
 
 .PHONY: test-go-acceptance
 test-go-acceptance: ## acceptance tests targeting golang build
