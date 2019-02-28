@@ -27,7 +27,7 @@ func NewRuleset(logger *zap.SugaredLogger) *Ruleset {
 
 	hostPIDRule := Rule{
 		Predicate: rules.HostPID,
-		Selector:  ".spec .hostPID == true)",
+		Selector:  ".spec .hostPID == true",
 		Reason:    "Sharing the host's PID namespace allows visibility of processes on the host, potentially leaking information such as environment variables and configuration",
 		Kinds:     []string{"Pod", "Deployment", "StatefulSet", "DaemonSet"},
 		Points:    -9,
@@ -36,7 +36,7 @@ func NewRuleset(logger *zap.SugaredLogger) *Ruleset {
 
 	hostIPCRule := Rule{
 		Predicate: rules.HostIPC,
-		Selector:  ".spec .hostIPC == true)",
+		Selector:  ".spec .hostIPC == true",
 		Reason:    "Sharing the host's IPC namespace allows container processes to communicate with processes on the host",
 		Kinds:     []string{"Pod", "Deployment", "StatefulSet", "DaemonSet"},
 		Points:    -9,
@@ -171,6 +171,15 @@ func NewRuleset(logger *zap.SugaredLogger) *Ruleset {
 		Points:    0,
 	}
 	list = append(list, hostAliasesRule)
+
+  seccompAnyRule := Rule{
+		Predicate: rules.SeccompAny,
+		Selector:  ".metadata .annotations .\"container.seccomp.security.alpha.kubernetes.io/pod\"",
+		Reason:    "Seccomp profiles set minimum privilege and secure against unknown threats",
+		Kinds:     []string{"Pod", "Deployment", "StatefulSet", "DaemonSet"},
+		Points:    1,
+	}
+	list = append(list, seccompAnyRule)
 
 	return &Ruleset{
 		Rules:  list,
