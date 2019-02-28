@@ -8,12 +8,6 @@ import (
 func RunAsUser(json []byte) int {
 	spec := getSpecSelector(json)
 
-	allContainers := gojsonq.New().Reader(bytes.NewReader(json)).
-		From(spec + ".containers").Count()
-
-	allInitContainers := gojsonq.New().Reader(bytes.NewReader(json)).
-		From(spec + ".initContainers").Count()
-
 	jqContainers := gojsonq.New().Reader(bytes.NewReader(json)).
 		From(spec+".containers").
 		Where("securityContext", "!=", nil).
@@ -26,9 +20,5 @@ func RunAsUser(json []byte) int {
 		Where("securityContext.runAsUser", "!=", nil).
 		Where("securityContext.runAsUser", ">", 10000)
 
-		//res := jqInitContainers.Get()
-		//err := jqInitContainers.Error()
-		//fmt.Printf("Error: %v\nResult: %#v\n", err, res)
-
-	return (allContainers + allInitContainers) - (jqContainers.Count() + jqInitContainers.Count())
+	return jqContainers.Count() + jqInitContainers.Count()
 }

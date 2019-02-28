@@ -1,6 +1,7 @@
 package ruler
 
 import (
+	"fmt"
 	"github.com/ghodss/yaml"
 	"github.com/sublimino/kubesec/pkg/rules"
 	"testing"
@@ -17,6 +18,7 @@ spec:
       containers:
         - name: alpine
           image: alpine
+          hostNetwork: false
 `
 
 	json, err := yaml.YAMLToJSON([]byte(data))
@@ -29,12 +31,12 @@ spec:
 		Kinds:     []string{"Deployment"},
 	}
 
-	ok, err := rule.Eval(json)
+	matchedContainerCount, err := rule.Eval(json)
 	if err != nil {
 		t.Fatal(err.Error())
 	}
-	if !ok {
-		t.Errorf("Rule failed when it shouldn't")
+	if matchedContainerCount != 0 {
+		t.Errorf(fmt.Sprintf("Rule failed when it shouldn't with count %d", matchedContainerCount))
 	}
 }
 

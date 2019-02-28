@@ -29,8 +29,8 @@ spec:
 	}
 
 	containers := ReadOnlyRootFilesystem(json)
-	if containers != 2 {
-		t.Errorf("Got %v containers wanted %v", containers, 2)
+	if containers != 1 {
+		t.Errorf("Got %v containers wanted %v", containers, 1)
 	}
 }
 
@@ -66,8 +66,8 @@ spec:
 	}
 
 	containers := ReadOnlyRootFilesystem(json)
-	if containers != 4 {
-		t.Errorf("Got %v containers wanted %v", containers, 4)
+	if containers != 2 {
+		t.Errorf("Got %v containers wanted %v", containers, 2)
 	}
 }
 
@@ -94,8 +94,8 @@ spec:
 	}
 
 	containers := ReadOnlyRootFilesystem(json)
-	if containers != 1 {
-		t.Errorf("Got %v containers wanted %v", containers, 1)
+	if containers != 0 {
+		t.Errorf("Got %v containers wanted %v", containers, 0)
 	}
 }
 
