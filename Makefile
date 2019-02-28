@@ -80,7 +80,7 @@ test-go-verbose: ## golang unit tests
 
 .PHONY: test-go-acceptance
 test-go-acceptance: ## acceptance tests targeting golang build
-	BIN_UNDER_TEST="./dist/linux_amd64/kubesec scan"\
+	BIN_UNDER_TEST="./dist/kubesec scan"\
 	  make test
 
 .PHONY: dep
@@ -94,7 +94,7 @@ prune: ## golang dependency prune
 
 .PHONY: build
 build: ## golang build
-	goreleaser --snapshot --rm-dist
+	go build -a -o ./dist/kubesec ./cmd/kubesec/*.go
 
 .PHONY: dev
 dev: ## non-golang dev
