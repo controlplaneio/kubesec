@@ -14,9 +14,6 @@ func SeccompAny(json []byte) int {
 	capDrop := gojsonq.New().Reader(bytes.NewReader(json)).
 		From("metadata.annotations").Get()
 
-	fmt.Println(fmt.Sprintf("%v", capDrop))
-	fmt.Println(fmt.Sprintf("%v", capDrop))
-
 	if capDrop != nil && strings.Contains(fmt.Sprintf("%v", capDrop), "seccomp.security.alpha.kubernetes.io/pod:") {
 		// TODO(ajm): tighten these matches, they could be "[seccomp..." or " seccomp...", and "unconfined]" or "unconfined "
 		// TODO(ajm): space delimiting matches is insufficient as this could be set to `unconfined blah`
