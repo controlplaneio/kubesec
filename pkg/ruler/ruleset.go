@@ -154,15 +154,6 @@ func NewRuleset(logger *zap.SugaredLogger) *Ruleset {
 	}
 	list = append(list, limitsMemoryRule)
 
-	seccompAnyRule := Rule{
-		Predicate: rules.SeccompAny,
-		Selector:  ".metadata .annotations .\"container.seccomp.security.alpha.kubernetes.io/pod\"",
-		Reason:    "Seccomp profiles set minimum privilege and secure against unknown threats",
-		Kinds:     []string{"Pod", "Deployment", "StatefulSet", "DaemonSet"},
-		Points:    1,
-	}
-	list = append(list, seccompAnyRule)
-
 	serviceAccountNameRule := Rule{
 		Predicate: rules.ServiceAccountName,
 		Selector:  ".spec .serviceAccountName",
@@ -180,6 +171,15 @@ func NewRuleset(logger *zap.SugaredLogger) *Ruleset {
 		Points:    0,
 	}
 	list = append(list, hostAliasesRule)
+
+	seccompAnyRule := Rule{
+		Predicate: rules.SeccompAny,
+		Selector:  ".metadata .annotations .\"container.seccomp.security.alpha.kubernetes.io/pod\"",
+		Reason:    "Seccomp profiles set minimum privilege and secure against unknown threats",
+		Kinds:     []string{"Pod", "Deployment", "StatefulSet", "DaemonSet"},
+		Points:    1,
+	}
+	list = append(list, seccompAnyRule)
 
 	return &Ruleset{
 		Rules:  list,
