@@ -172,7 +172,7 @@ func NewRuleset(logger *zap.SugaredLogger) *Ruleset {
 	}
 	list = append(list, hostAliasesRule)
 
-  seccompAnyRule := Rule{
+	seccompAnyRule := Rule{
 		Predicate: rules.SeccompAny,
 		Selector:  ".metadata .annotations .\"container.seccomp.security.alpha.kubernetes.io/pod\"",
 		Reason:    "Seccomp profiles set minimum privilege and secure against unknown threats",
