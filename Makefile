@@ -73,7 +73,7 @@ test-go-fmt: ## golang fmt check
 
 .PHONY: test-go
 test-go: ## golang unit tests
-	go test -race $$(go list ./... | grep -v '/vendor/')
+	go test -race $$(go list ./... | grep -v '/vendor/') -run "$${RUN:-.*}"
 
 test-go-verbose: ## golang unit tests
 	go test -race -v $$(go list ./... | grep -v '/vendor/')
