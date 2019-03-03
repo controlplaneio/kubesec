@@ -154,6 +154,24 @@ func NewRuleset(logger *zap.SugaredLogger) *Ruleset {
 	}
 	list = append(list, limitsMemoryRule)
 
+	serviceAccountNameRule := Rule{
+		Predicate: rules.ServiceAccountName,
+		Selector:  ".spec .serviceAccountName",
+		Reason:    "Service accounts restrict Kubernetes API access and should be configured with least privilege",
+		Kinds:     []string{"Pod", "Deployment", "StatefulSet", "DaemonSet"},
+		Points:    3,
+	}
+	list = append(list, serviceAccountNameRule)
+
+	hostAliasesRule := Rule{
+		Predicate: rules.HostAliases,
+		Selector:  ".spec .hostAliases",
+		Reason:    "Managing /etc/hosts aliases can prevent Docker from modifying the file after a pod's containers have already been started",
+		Kinds:     []string{"Pod", "Deployment", "StatefulSet", "DaemonSet"},
+		Points:    0,
+	}
+	list = append(list, hostAliasesRule)
+
 	seccompAnyRule := Rule{
 		Predicate: rules.SeccompAny,
 		Selector:  ".metadata .annotations .\"container.seccomp.security.alpha.kubernetes.io/pod\"",
