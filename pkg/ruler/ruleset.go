@@ -181,6 +181,15 @@ func NewRuleset(logger *zap.SugaredLogger) *Ruleset {
 	}
 	list = append(list, seccompAnyRule)
 
+	apparmorAnyRule := Rule{
+		Predicate: rules.ApparmorAny,
+		Selector:  ".metadata .annotations .\"container.apparmor.security.beta.kubernetes.io/nginx\"",
+		Reason:    "Well defined AppArmor policies may provide greater protection from unknown threats. WARNING: NOT PRODUCTION READY",
+		Kinds:     []string{"Pod", "Deployment", "StatefulSet", "DaemonSet"},
+		Points:    3,
+	}
+	list = append(list, apparmorAnyRule)
+
 	return &Ruleset{
 		Rules:  list,
 		logger: logger,
