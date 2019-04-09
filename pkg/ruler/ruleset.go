@@ -181,6 +181,15 @@ func NewRuleset(logger *zap.SugaredLogger) *Ruleset {
 	}
 	list = append(list, seccompAnyRule)
 
+	seccompUnconfinedRule := Rule{
+		Predicate: rules.SeccompUnconfined,
+		Selector:  ".metadata .annotations .\"container.seccomp.security.alpha.kubernetes.io/pod\"",
+		Reason:    "Unconfined Seccomp profiles have full system call access",
+		Kinds:     []string{"Pod", "Deployment", "StatefulSet", "DaemonSet"},
+		Points:    -1,
+	}
+	list = append(list, seccompUnconfinedRule)
+
 	apparmorAnyRule := Rule{
 		Predicate: rules.ApparmorAny,
 		Selector:  ".metadata .annotations .\"container.apparmor.security.beta.kubernetes.io/nginx\"",

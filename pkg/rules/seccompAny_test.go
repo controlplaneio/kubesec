@@ -38,12 +38,12 @@ func Test_SeccompAny_Pod_Unconfined(t *testing.T) {
 apiVersion: v1
 kind: Pod
 metadata:
- annotations:
-   seccomp.security.alpha.kubernetes.io/pod: unconfined
+  annotations:
+    seccomp.security.alpha.kubernetes.io/pod: unconfined
 spec:
- containers:
-   - name: trustworthy-container
-     image: sotrustworthy:latest
+  containers:
+    - name: trustworthy-container
+      image: sotrustworthy:latest
 `
 
 	json, err := yaml.YAMLToJSON([]byte(data))
@@ -63,15 +63,15 @@ func Test_SeccompAny_No_Seccomp(t *testing.T) {
 apiVersion: v1
 kind: Pod
 spec:
- containers:
- - name: c1
-   securityContext:
-     capabilities:
-       drop:
- - name: c2
-   securityContext:
-     capabilities:
- - name: c3
+  containers:
+  - name: c1
+    securityContext:
+      capabilities:
+        drop:
+  - name: c2
+    securityContext:
+      capabilities:
+  - name: c3
 `
 
 	json, err := yaml.YAMLToJSON([]byte(data))
@@ -116,12 +116,12 @@ func Test_SeccompAny_Named_Pod_Special_Chars(t *testing.T) {
 apiVersion: v1
 kind: Pod
 metadata:
- annotations:
-   seccomp.security.alpha.kubernetes.io/my-Named.Pod: runtime/default
+  annotations:
+    seccomp.security.alpha.kubernetes.io/my-Named.Pod: runtime/default
 spec:
- containers:
-   - name: trustworthy-container
-     image: sotrustworthy:latest
+  containers:
+    - name: trustworthy-container
+      image: sotrustworthy:latest
 `
 
 	json, err := yaml.YAMLToJSON([]byte(data))
@@ -141,12 +141,12 @@ func Test_SeccompAny_Named_Pod_Special_Chars_Unconfined(t *testing.T) {
 apiVersion: v1
 kind: Pod
 metadata:
- annotations:
-   seccomp.security.alpha.kubernetes.io/my-Named.Pod: unconfined
+  annotations:
+    seccomp.security.alpha.kubernetes.io/my-Named.Pod: unconfined
 spec:
- containers:
-   - name: trustworthy-container
-     image: sotrustworthy:latest
+  containers:
+    - name: trustworthy-container
+      image: sotrustworthy:latest
 `
 
 	json, err := yaml.YAMLToJSON([]byte(data))
@@ -166,12 +166,12 @@ func Test_SeccompAny_Named_Pod_Illegal_Name(t *testing.T) {
 apiVersion: v1
 kind: Pod
 metadata:
- annotations:
-   seccomp.security.alpha.kubernetes.io/my-Named.Pod(illegal name): runtime/default
+  annotations:
+    seccomp.security.alpha.kubernetes.io/my-Named.Pod(illegal name): runtime/default
 spec:
- containers:
-   - name: trustworthy-container
-     image: sotrustworthy:latest
+  containers:
+    - name: trustworthy-container
+      image: sotrustworthy:latest
 `
 
 	json, err := yaml.YAMLToJSON([]byte(data))

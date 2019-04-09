@@ -11,10 +11,10 @@ func LimitsMemory(json []byte) int {
 
 	paths := gojsonq.New().Reader(bytes.NewReader(json)).
 		From(spec + ".containers").
-		Only(".resources.limits.memory")
+		Only("resources.limits.memory")
 
 	if paths != nil {
-		found++
+		found += len(paths.([]interface{}))
 	}
 
 	return found
