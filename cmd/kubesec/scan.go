@@ -41,6 +41,8 @@ var scanCmd = &cobra.Command{
 			return err
 		}
 
+		logger.Debugf("scan filename is %v", filename)
+
 		var data []byte
 		isJson := json.Valid(fileBytes)
 		if isJson {
