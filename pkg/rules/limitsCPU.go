@@ -2,6 +2,7 @@ package rules
 
 import (
 	"bytes"
+
 	"github.com/thedevsaddam/gojsonq"
 )
 
@@ -11,10 +12,10 @@ func LimitsCPU(json []byte) int {
 
 	paths := gojsonq.New().Reader(bytes.NewReader(json)).
 		From(spec + ".containers").
-		Only(".resources.limits.cpu")
+		Only("resources.limits.cpu")
 
 	if paths != nil {
-		found++
+		found += len(paths.([]interface{}))
 	}
 
 	return found
