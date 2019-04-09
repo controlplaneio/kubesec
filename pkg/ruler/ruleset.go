@@ -252,12 +252,12 @@ func (rs *Ruleset) Run(json []byte) Report {
 
 		if matchedContainerCount > 0 {
 			if rule.Points >= 0 {
-				rs.logger.Debugf("positive score rule matchedContainerCount %v", rule.Selector)
+				rs.logger.Debugf("positive score rule matched %v", rule.Selector)
 				report.Score += rule.Points
 			}
 
 			if rule.Points < 0 {
-				rs.logger.Debugf("negative score rule matchedContainerCount %v", rule.Selector)
+				rs.logger.Debugf("negative score rule matched %v", rule.Selector)
 				report.Score += rule.Points
 				report.Scoring.Critical = append(report.Scoring.Critical, ref)
 			}
