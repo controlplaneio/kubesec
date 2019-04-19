@@ -199,6 +199,24 @@ func NewRuleset(logger *zap.SugaredLogger) *Ruleset {
 	}
 	list = append(list, apparmorAnyRule)
 
+	volumeClaimAccessModeReadWriteOnce := Rule{
+		Predicate: rules.VolumeClaimAccessModeReadWriteOnce,
+		Selector:  ".spec .volumeClaimTemplates[] .spec .accessModes | index(\"ReadWriteOnce\")",
+		Reason:    "",
+		Kinds:     []string{"StatefulSet", "DaemonSet"},
+		Points:    1,
+	}
+	list = append(list, volumeClaimAccessModeReadWriteOnce)
+
+	volumeClaimRequestsStorage := Rule{
+		Predicate: rules.VolumeClaimRequestsStorage,
+		Selector:  ".spec .volumeClaimTemplates[] .spec .resources .requests .storage",
+		Reason:    "",
+		Kinds:     []string{"StatefulSet", "DaemonSet"},
+		Points:    1,
+	}
+	list = append(list, volumeClaimRequestsStorage)
+
 	return &Ruleset{
 		Rules:  list,
 		logger: logger,
