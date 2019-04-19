@@ -5,6 +5,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/sublimino/kubesec/pkg/server"
 	"os"
+	"strconv"
 	"time"
 )
 
@@ -22,6 +23,10 @@ var httpCmd = &cobra.Command{
 
 		port := os.Getenv("PORT")
 		if port == "" {
+			port = args[0]
+		}
+
+		if _, err := strconv.Atoi(port); err != nil {
 			port = args[0]
 		}
 
