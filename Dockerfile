@@ -1,4 +1,4 @@
-FROM golang:1.11 AS builder
+FROM golang:1.12 AS builder
 
 RUN mkdir -p /go/src/github.com/sublimino/kubesec/
 
@@ -10,7 +10,7 @@ RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o kubesec ./cmd/kub
 
 # ===
 
-FROM golang:1.11 AS schemas
+FROM golang:1.12 AS schemas
 
 RUN mkdir -p /schemas
 WORKDIR /schemas
@@ -37,4 +37,4 @@ RUN chown -R app:app /schemas
 USER app
 
 ENTRYPOINT ["./kubesec"]
-CMD ["http", "9090"]
+CMD ["http", "8080"]
