@@ -20,6 +20,13 @@ import (
 // ListenAndServe starts a web server and waits for SIGTERM
 func ListenAndServe(port string, timeout time.Duration, logger *zap.SugaredLogger, stopCh <-chan struct{}) {
 	mux := http.DefaultServeMux
+	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == http.MethodGet {
+			http.Redirect(w, r, "https://kubesec.io", http.StatusSeeOther)
+			return
+		}
+		w.WriteHeader(http.StatusNotFound)
+	})
 	mux.Handle("/metrics", promhttp.Handler())
 	mux.HandleFunc("/healthz", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
