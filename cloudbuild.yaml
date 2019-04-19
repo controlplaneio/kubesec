@@ -1,15 +1,7 @@
----
 steps:
-  - name: 'docker.io/sublimino/alpine-base:latest'
-    args: ['make', 'deploy']
-    dir: '.'
-    env:
-      - 'BUILD=$BUILD_ID'
-      - 'GOPATH=/gocode'
-
-# - name: 'ubuntu'
-#  args: ['bash', './myscript.sh']
-#  env:
-#  - 'BUILD=$BUILD_ID'
-#  - 'PROJECT=$PROJECT_ID'
-#  - 'REV=$REVISION_ID'
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['build', '-t', 'gcr.io/$PROJECT_ID/kubesec:${SHORT_SHA}', '.']
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ["push", "gcr.io/$PROJECT_ID/kubesec:${SHORT_SHA}"]
+  - name: 'gcr.io/cloud-builders/gcloud'
+    args: ['beta', 'run', 'deploy', 'kubesec', '--image', 'gcr.io/$PROJECT_ID/kubesec:${SHORT_SHA}', '--region', 'us-central1']
