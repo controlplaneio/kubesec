@@ -203,7 +203,7 @@ func NewRuleset(logger *zap.SugaredLogger) *Ruleset {
 		Predicate: rules.VolumeClaimAccessModeReadWriteOnce,
 		Selector:  ".spec .volumeClaimTemplates[] .spec .accessModes | index(\"ReadWriteOnce\")",
 		Reason:    "",
-		Kinds:     []string{"StatefulSet", "DaemonSet"},
+		Kinds:     []string{"StatefulSet"},
 		Points:    1,
 	}
 	list = append(list, volumeClaimAccessModeReadWriteOnce)
@@ -212,7 +212,7 @@ func NewRuleset(logger *zap.SugaredLogger) *Ruleset {
 		Predicate: rules.VolumeClaimRequestsStorage,
 		Selector:  ".spec .volumeClaimTemplates[] .spec .resources .requests .storage",
 		Reason:    "",
-		Kinds:     []string{"StatefulSet", "DaemonSet"},
+		Kinds:     []string{"StatefulSet"},
 		Points:    1,
 	}
 	list = append(list, volumeClaimRequestsStorage)
@@ -242,9 +242,6 @@ func (rs *Ruleset) Run(json []byte) Report {
 		report.Error = err.Error()
 		return report
 	}
-
-	//fmt.Println(results)
-
 	for _, result := range results {
 		if len(result.Errors) > 0 {
 			for _, desc := range result.Errors {
@@ -259,7 +256,7 @@ func (rs *Ruleset) Run(json []byte) Report {
 		return report
 	}
 
-	var applyedRules int
+	var appliedRules int
 	for _, rule := range rs.Rules {
 		matchedContainerCount, err := rule.Eval(json)
 
@@ -269,7 +266,7 @@ func (rs *Ruleset) Run(json []byte) Report {
 			continue
 		}
 
-		applyedRules++
+		appliedRules++
 		ref := RuleRef{
 			Reason:   rule.Reason,
 			Selector: rule.Selector,
@@ -302,7 +299,7 @@ func (rs *Ruleset) Run(json []byte) Report {
 		}
 	}
 
-	if applyedRules < 1 {
+	if appliedRules < 1 {
 		report.Error = fmt.Sprintf("This resource kind is not supported")
 	} else if report.Score >= 0 {
 		report.Success = fmt.Sprintf("Passed with a score of %v points", report.Score)

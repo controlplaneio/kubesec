@@ -208,10 +208,10 @@ teardown() {
 }
 
 # TODO(ajm) golang fail - FIX BEFORE RELEASE
-#@test "passes StatefulSet with volumeClaimTemplate" {
-#  run _app ${TEST_DIR}/asset/score-1-statefulset-volumeclaimtemplate.yml
-#  assert_gt_zero_points
-#}
+@test "passes StatefulSet with volumeClaimTemplate" {
+  run _app ${TEST_DIR}/asset/score-1-statefulset-volumeclaimtemplate.yml
+  assert_gt_zero_points
+}
 
 @test "fails StatefulSet with no security" {
   run _app ${TEST_DIR}/asset/score-0-statefulset-no-sec.yml
