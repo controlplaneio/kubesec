@@ -11,10 +11,10 @@ func RequestsMemory(json []byte) int {
 
 	paths := gojsonq.New().Reader(bytes.NewReader(json)).
 		From(spec + ".containers").
-		Only(".resources.requests.memory")
+		Only("resources.requests.memory")
 
 	if paths != nil {
-		found++
+		found += len(paths.([]interface{}))
 	}
 
 	return found
