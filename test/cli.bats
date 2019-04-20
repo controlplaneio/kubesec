@@ -3,7 +3,7 @@
 load '_helper'
 
 setup() {
-    _global_setup
+  _global_setup
 }
 
 teardown() {
