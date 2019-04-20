@@ -18,6 +18,7 @@ script:
 - curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
 - dep ensure -vendor-only
 - go test -v -race -coverprofile=coverage.txt -covermode=atomic ./pkg/...
+- make build test-go-acceptance
 - docker build -t kubesec .
 - docker run -dp 8080:8080 kubesec
 - sleep 1
