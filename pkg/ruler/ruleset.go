@@ -5,7 +5,7 @@ import (
 	"github.com/garethr/kubeval/kubeval"
 	"github.com/sublimino/kubesec/pkg/rules"
 	"go.uber.org/zap"
-	"os"
+	"sync"
 )
 
 type Ruleset struct {
@@ -232,11 +232,7 @@ func (rs *Ruleset) Run(json []byte) Report {
 		},
 	}
 
-	// try set kubeval schemas to local path
-	if _, err := os.Stat("/schemas/kubernetes-json-schema/master/master-standalone"); !os.IsNotExist(err) {
-		kubeval.SchemaLocation = "file:///schemas"
-	}
-
+	// validate resource
 	results, err := kubeval.Validate(json, "resource.json")
 	if err != nil {
 		report.Error = err.Error()
@@ -256,45 +252,42 @@ func (rs *Ruleset) Run(json []byte) Report {
 		return report
 	}
 
-	var appliedRules int
+	// run rules in parallel
+	ch := make(chan RuleRef, len(rs.Rules))
+	var wg sync.WaitGroup
 	for _, rule := range rs.Rules {
-		matchedContainerCount, err := rule.Eval(json)
+		wg.Add(1)
+		go eval(json, rule, ch, &wg)
+	}
+	wg.Wait()
+	close(ch)
 
-		// skip rule if it doesn't apply to object kind
-		switch err.(type) {
-		case *NotSupportedError:
-			continue
-		}
-
+	// collect results
+	var appliedRules int
+	for ruleRef := range ch {
 		appliedRules++
-		ref := RuleRef{
-			Reason:   rule.Reason,
-			Selector: rule.Selector,
-			Weight:   rule.Weight,
-			Link:     rule.Link,
-		}
 
-		if matchedContainerCount > 0 {
-			if rule.Points >= 0 {
-				rs.logger.Debugf("positive score rule matched %v", rule.Selector)
-				report.Score += rule.Points
+		if ruleRef.Containers > 0 {
+			if ruleRef.Points >= 0 {
+				rs.logger.Debugf("positive score rule matched %v", ruleRef.Selector)
+				report.Score += ruleRef.Points
 			}
 
-			if rule.Points < 0 {
-				rs.logger.Debugf("negative score rule matched %v", rule.Selector)
-				report.Score += rule.Points
-				report.Scoring.Critical = append(report.Scoring.Critical, ref)
+			if ruleRef.Points < 0 {
+				rs.logger.Debugf("negative score rule matched %v", ruleRef.Selector)
+				report.Score += ruleRef.Points
+				report.Scoring.Critical = append(report.Scoring.Critical, ruleRef)
 			}
 			rs.logger.Debugf("points %v", report.Score)
 		} else {
-			if rule.Points >= 0 {
-				rs.logger.Debugf("positive score rule failed %v", rule.Selector)
-				report.Scoring.Advise = append(report.Scoring.Advise, ref)
+			if ruleRef.Points >= 0 {
+				rs.logger.Debugf("positive score rule failed %v", ruleRef.Selector)
+				report.Scoring.Advise = append(report.Scoring.Advise, ruleRef)
 			}
 
-			if rule.Points < 0 {
-				rs.logger.Debugf("negative score rule failed %v", rule.Selector)
-				report.Scoring.Critical = append(report.Scoring.Critical, ref)
+			if ruleRef.Points < 0 {
+				rs.logger.Debugf("negative score rule failed %v", ruleRef.Selector)
+				report.Scoring.Critical = append(report.Scoring.Critical, ruleRef)
 			}
 		}
 	}
@@ -308,4 +301,27 @@ func (rs *Ruleset) Run(json []byte) Report {
 	}
 
 	return report
+}
+
+func eval(json []byte, rule Rule, ch chan RuleRef, wg *sync.WaitGroup) {
+	defer wg.Done()
+
+	containers, err := rule.Eval(json)
+
+	// skip rule if it doesn't apply to object kind
+	switch err.(type) {
+	case *NotSupportedError:
+		return
+	}
+
+	result := RuleRef{
+		Containers: containers,
+		Points:     rule.Points,
+		Reason:     rule.Reason,
+		Selector:   rule.Selector,
+		Weight:     rule.Weight,
+		Link:       rule.Link,
+	}
+
+	ch <- result
 }
