@@ -13,8 +13,10 @@ type RuleScoring struct {
 }
 
 type RuleRef struct {
-	Selector string `json:"selector"`
-	Reason   string `json:"reason"`
-	Weight   int    `json:"weight"`
-	Link     string `json:"href,omitempty"`
+	Selector   string `json:"selector"`
+	Reason     string `json:"reason"`
+	Weight     int    `json:"weight"`
+	Link       string `json:"href,omitempty"`
+	Containers int    `json:"-"`
+	Points     int    `json:"-"`
 }
