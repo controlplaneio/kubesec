@@ -149,6 +149,29 @@ spec:
 	}
 }
 
+func TestRuleset_Run_not_supported(t *testing.T) {
+	var data = `
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: config
+data:
+  color: blue
+`
+
+	json, err := yaml.YAMLToJSON([]byte(data))
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+
+	report := NewRuleset(zap.NewNop().Sugar()).Run(json)
+
+	if len(report.Error) < 1 || !strings.Contains(report.Error, "not supported") {
+		t.Errorf("Got error %v ", report.Error)
+	}
+}
+
 //func Test_CapDropAny_Malformed_Fail(t *testing.T) {
 //	var data = `
 //---
