@@ -1,14 +1,18 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"github.com/ghodss/yaml"
 	"github.com/spf13/cobra"
 	"github.com/sublimino/kubesec/pkg/ruler"
 	"github.com/sublimino/kubesec/pkg/server"
+	"go.uber.org/zap"
 	"io/ioutil"
+	"log"
 	"path/filepath"
+	"runtime"
 )
 
 type ScanFailedValidationError struct {
@@ -18,7 +22,10 @@ func (e *ScanFailedValidationError) Error() string {
 	return fmt.Sprintf("Kubesec scan failed")
 }
 
+var debug bool
+
 func init() {
+	scanCmd.Flags().BoolVar(&debug, "debug", false, "turn on debug logs")
 	rootCmd.AddCommand(scanCmd)
 }
 
@@ -29,6 +36,14 @@ var scanCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		if len(args) < 1 {
 			return fmt.Errorf("file path is required")
+		}
+
+		if debug {
+			z, err := zap.NewDevelopment()
+			if err != nil {
+				log.Fatalf("can't initialize zap logger: %v", err)
+			}
+			logger = z.Sugar()
 		}
 
 		filename, err := filepath.Abs(args[0])
@@ -43,25 +58,50 @@ var scanCmd = &cobra.Command{
 
 		logger.Debugf("scan filename is %v", filename)
 
-		var data []byte
+		reports := make([]ruler.Report, 0)
 		isJson := json.Valid(fileBytes)
 		if isJson {
-			data = fileBytes
+			report := ruler.NewRuleset(logger).Run(fileBytes)
+			reports = append(reports, report)
 		} else {
-			data, err = yaml.YAMLToJSON(fileBytes)
-			if err != nil {
-				return err
+			bits := bytes.Split(fileBytes, []byte(detectLineBreak(fileBytes)+"---"+detectLineBreak(fileBytes)))
+			for _, doc := range bits {
+				if len(doc) > 0 {
+					data, err := yaml.YAMLToJSON(doc)
+					if err != nil {
+						return err
+					}
+
+					report := ruler.NewRuleset(logger).Run(data)
+					reports = append(reports, report)
+
+				}
 			}
 		}
 
-		report := ruler.NewRuleset(logger).Run(data)
-		res, err := json.Marshal(report)
-		if err != nil {
-			return err
+		var lowScore bool
+		for _, r := range reports {
+			if r.Score <= 0 {
+				lowScore = true
+				break
+			}
 		}
 
-		fmt.Println(server.PrettyJSON(res))
-		if report.Score > 0 {
+		if len(reports) > 1 {
+			res, err := json.Marshal(reports)
+			if err != nil {
+				return err
+			}
+			fmt.Println(server.PrettyJSON(res))
+		} else {
+			res, err := json.Marshal(reports[0])
+			if err != nil {
+				return err
+			}
+			fmt.Println(server.PrettyJSON(res))
+		}
+
+		if len(reports) > 0 && !lowScore {
 			return nil
 		}
 
@@ -69,4 +109,12 @@ var scanCmd = &cobra.Command{
 		rootCmd.SilenceUsage = true
 		return &ScanFailedValidationError{}
 	},
+}
+
+func detectLineBreak(haystack []byte) string {
+  windowsLineEnding := bytes.Contains(haystack, []byte("\r\n"))
+  if windowsLineEnding && runtime.GOOS == "windows" {
+    return "\r\n"
+  }
+  return "\n"
 }
