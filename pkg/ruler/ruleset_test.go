@@ -140,11 +140,7 @@ spec:
 
 	report := NewRuleset(zap.NewNop().Sugar()).Run(json)
 
-	// kubeval should error out with:
-	// Problem loading schema from the network at
-	// https://raw.githubusercontent.com/garethr/kubernetes-json-schema/master/master-standalone/deployment2.json:
-	// Could not read schema from HTTP, response status is 404 Not Found
-	if len(report.Error) < 1 || !strings.Contains(report.Error, "404 Not Found") {
+	if len(report.Error) < 1 || !strings.Contains(report.Error, "unknown schema") {
 		t.Errorf("Got error %v ", report.Error)
 	}
 }
@@ -171,97 +167,3 @@ data:
 		t.Errorf("Got error %v ", report.Error)
 	}
 }
-
-//func Test_CapDropAny_Malformed_Fail(t *testing.T) {
-//	var data = `
-//---
-//apiVersion: v1
-//kind: Pod
-//spec:
-//initContainers:
-//- name: init1
-//containers:
-//- name: c1
-//  securityContext:
-//    capabilities:
-//      drop: true
-//`
-//
-//	json, err := yaml.YAMLToJSON([]byte(data))
-//	if err != nil {
-//		t.Fatal(err.Error())
-//	}
-//
-//	report := NewRuleset(zap.NewNop().Sugar()).Run(json)
-//
-//	// kubeval should error out with:
-//	// spec.replicas: Invalid type. Expected: [array,null], given: boolean
-//	if len(report.Error) < 1 || !strings.Contains(report.Error, "Expected: [array,null]") {
-//		t.Errorf("Got incorrect error: %v ", report.Error)
-//	}
-//}
-
-//func Test_CapDropAny_Malformed_Empty_List(t *testing.T) {
-//	var data = `
-//---
-//apiVersion: v1
-//kind: Pod
-//spec:
-//initContainers:
-//- name: init1
-//containers:
-//- name: c1
-//  securityContext:
-//    capabilities:
-//       drop:
-//       -
-//
-//`
-//
-//	json, err := yaml.YAMLToJSON([]byte(data))
-//	if err != nil {
-//		t.Fatal(err.Error())
-//	}
-//
-//	report := NewRuleset(zap.NewNop().Sugar()).Run(json)
-//
-//	fmt.Println("ARSE " + report.Error)
-//
-//	// kubeval should error out with:
-//	// spec.replicas: Invalid type. Expected: integer, given: string
-//	if len(report.Error) < 1 || !strings.Contains(report.Error, "Expected: integer") {
-//		t.Errorf("Got error %v ", report.Error)
-//	}
-//}
-
-//func Test_CapDropAny_Malformed_Empty_List_2(t *testing.T) {
-//	var data = `
-//---
-//apiVersion: v1
-//kind: Pod
-//spec:
-// initContainers:
-// - name: init1
-// containers:
-// - name: c1
-//   securityContext:
-//     capabilities:
-//       drop:
-//       - THIS_SHOULD_FAIL
-//`
-//
-//	json, err := yaml.YAMLToJSON([]byte(data))
-//	if err != nil {
-//		t.Fatal(err.Error())
-//	}
-//
-//	report := NewRuleset(zap.NewNop().Sugar()).Run(json)
-//
-//	fmt.Println("ARSE " + report.Error)
-//
-//	// kubeval should error out with:
-//	// TODO: what should this be? Should we add CAPs to kubeval
-//	if len(report.Error) < 1 || !strings.Contains(report.Error, "Expected: SOMETHING VALID") {
-//		t.Errorf("Got error %v ", report.Error)
-//	}
-//}
