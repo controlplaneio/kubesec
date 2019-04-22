@@ -5,6 +5,7 @@ import (
 	"github.com/garethr/kubeval/kubeval"
 	"github.com/sublimino/kubesec/pkg/rules"
 	"go.uber.org/zap"
+	"strings"
 	"sync"
 )
 
@@ -235,7 +236,11 @@ func (rs *Ruleset) Run(json []byte) Report {
 	// validate resource
 	results, err := kubeval.Validate(json, "resource.json")
 	if err != nil {
-		report.Error = err.Error()
+		if strings.Contains(err.Error(), "Problem loading schema from the network") {
+      report.Error = "This resource is invalid, unknown schema"
+		} else {
+			report.Error = err.Error()
+		}
 		return report
 	}
 	for _, result := range results {
@@ -244,7 +249,7 @@ func (rs *Ruleset) Run(json []byte) Report {
 				report.Error += desc.String()
 			}
 		} else if result.Kind == "" {
-			report.Error += "Document is invalid, no Kubernetes kind found"
+			report.Error += "This resource is invalid, Kubernetes kind not found"
 		}
 	}
 
