@@ -83,8 +83,8 @@ spec:
 
 	// kubeval should error out with:
 	// spec.template.spec.hostNetwork: Invalid type. Expected: boolean, given: null
-	if len(report.Error) < 1 || !strings.Contains(report.Error, "Expected: boolean") {
-		t.Errorf("Got error %v ", report.Error)
+	if len(report.Message) < 1 || !strings.Contains(report.Message, "Expected: boolean") {
+		t.Errorf("Got error %v ", report.Message)
 	}
 }
 
@@ -113,8 +113,8 @@ spec:
 
 	// kubeval should error out with:
 	// spec.replicas: Invalid type. Expected: integer, given: string
-	if len(report.Error) < 1 || !strings.Contains(report.Error, "Expected: integer") {
-		t.Errorf("Got error %v ", report.Error)
+	if len(report.Message) < 1 || !strings.Contains(report.Message, "Expected: integer") {
+		t.Errorf("Got error %v ", report.Message)
 	}
 }
 
@@ -140,8 +140,8 @@ spec:
 
 	report := NewRuleset(zap.NewNop().Sugar()).Run(json)
 
-	if len(report.Error) < 1 || !strings.Contains(report.Error, "unknown schema") {
-		t.Errorf("Got error %v ", report.Error)
+	if len(report.Message) < 1 || !strings.Contains(report.Message, "unknown schema") {
+		t.Errorf("Got error %v ", report.Message)
 	}
 }
 
@@ -163,7 +163,7 @@ data:
 
 	report := NewRuleset(zap.NewNop().Sugar()).Run(json)
 
-	if len(report.Error) < 1 || !strings.Contains(report.Error, "not supported") {
-		t.Errorf("Got error %v ", report.Error)
+	if len(report.Message) < 1 || !strings.Contains(report.Message, "not supported") {
+		t.Errorf("Got error %v ", report.Message)
 	}
 }
