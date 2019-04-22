@@ -54,7 +54,8 @@ if _is_remote; then
 
   assert_file_not_found() {
     assert_output --regexp ".*couldn't open file \"somefile.yaml\".*" \
-     || assert_output --regexp ".*somefile.yaml: no such file or directory.*"
+     || assert_output --regexp ".*no such file or directory.*" \
+     || assert_output --regexp ".*Invalid input.*"
   }
 
   assert_invalid_input() {
