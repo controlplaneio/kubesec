@@ -44,3 +44,29 @@ spec:
           image: mongo
           securityContext:
             runAsNonRoot: true
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: flagger
+  namespace: istio-system
+  labels:
+    app: flagger
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: podinfo-config-vol
+  namespace: test
+data:
+  output: console
+  textmode: "true"
+---
+apiVersion: v1
+kind: ConfigMap2
+metadata:
+  name: podinfo-config-vol
+  namespace: test
+data:
+  output: console
+  textmode: "true"
