@@ -60,6 +60,7 @@ func ListenAndServe(port string, timeout time.Duration, logger *zap.SugaredLogge
 		}
 
 		w.WriteHeader(http.StatusOK)
+    w.Header().Set("Content-Type", "application/json")
 		w.Write([]byte(PrettyJSON(res)))
 	})
 
