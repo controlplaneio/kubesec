@@ -31,7 +31,9 @@ var httpCmd = &cobra.Command{
 		}
 
 		stopCh := server.SetupSignalHandler()
-		server.ListenAndServe(port, time.Minute, logger, stopCh)
+		jsonLogger, _ := NewLogger("info", "json")
+
+		server.ListenAndServe(port, time.Minute, jsonLogger, stopCh)
 		return nil
 	},
 }
