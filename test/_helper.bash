@@ -61,6 +61,7 @@ if _is_remote; then
   assert_invalid_input() {
     assert_output --regexp '  "message": "Invalid input"' \
      || assert_output --regexp ".*Invalid input.*" \
+     || assert_output --regexp ".*no such file or directory.*" \
      || assert_output --regexp ".*Kubernetes kind not found.*"
   }
 
@@ -95,13 +96,14 @@ else
 
   assert_file_not_found() {
     assert_output --regexp ".*File somefile.yaml does not exist.*" \
-     || assert_output --regexp ".*somefile.yaml: no such file or directory.*"  \
+     || assert_output --regexp ".*no such file or directory.*"  \
      || assert_output --regexp ".*Invalid input.*"
   }
 
   assert_invalid_input() {
     assert_output --regexp '  "message": "Invalid input"' \
      || assert_output --regexp ".*Kubernetes kind not found.*" \
+     || assert_output --regexp ".*no such file or directory.*" \
      || assert_output --regexp ".*Invalid input.*"
   }
 
