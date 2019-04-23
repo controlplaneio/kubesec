@@ -1,10 +1,13 @@
 package ruler
 
 import (
+	"bytes"
 	"fmt"
 	"github.com/garethr/kubeval/kubeval"
 	"github.com/sublimino/kubesec/pkg/rules"
+	"github.com/thedevsaddam/gojsonq"
 	"go.uber.org/zap"
+	"strings"
 	"sync"
 )
 
@@ -225,31 +228,41 @@ func NewRuleset(logger *zap.SugaredLogger) *Ruleset {
 
 func (rs *Ruleset) Run(json []byte) Report {
 	report := Report{
-		Score: 0,
+		Object: "Unknown",
+		Score:  0,
 		Scoring: RuleScoring{
 			Advise:   make([]RuleRef, 0),
 			Critical: make([]RuleRef, 0),
 		},
 	}
 
+	report.Object = getObjectName(json)
+
 	// validate resource
 	results, err := kubeval.Validate(json, "resource.json")
 	if err != nil {
-		report.Error = err.Error()
+		if strings.Contains(err.Error(), "Problem loading schema from the network") {
+			report.Message = "This resource is invalid, unknown schema"
+		} else {
+			report.Message = err.Error()
+		}
 		return report
 	}
+
 	for _, result := range results {
 		if len(result.Errors) > 0 {
 			for _, desc := range result.Errors {
-				report.Error += desc.String()
+				report.Message += desc.String() + " "
 			}
 		} else if result.Kind == "" {
-			report.Error += "Document is invalid, no Kubernetes kind found"
+			report.Message += "This resource is invalid, Kubernetes kind not found"
 		}
 	}
 
-	if len(report.Error) > 0 {
+	if len(report.Message) > 0 {
 		return report
+	} else {
+		report.Valid = true
 	}
 
 	// run rules in parallel
@@ -278,26 +291,20 @@ func (rs *Ruleset) Run(json []byte) Report {
 				report.Score += ruleRef.Points
 				report.Scoring.Critical = append(report.Scoring.Critical, ruleRef)
 			}
-			rs.logger.Debugf("points %v", report.Score)
 		} else {
 			if ruleRef.Points >= 0 {
 				rs.logger.Debugf("positive score rule failed %v", ruleRef.Selector)
 				report.Scoring.Advise = append(report.Scoring.Advise, ruleRef)
 			}
-
-			if ruleRef.Points < 0 {
-				rs.logger.Debugf("negative score rule failed %v", ruleRef.Selector)
-				report.Scoring.Critical = append(report.Scoring.Critical, ruleRef)
-			}
 		}
 	}
 
 	if appliedRules < 1 {
-		report.Error = fmt.Sprintf("This resource kind is not supported")
+		report.Message = fmt.Sprintf("This resource kind is not supported by kubesec")
 	} else if report.Score >= 0 {
-		report.Success = fmt.Sprintf("Passed with a score of %v points", report.Score)
+		report.Message = fmt.Sprintf("Passed with a score of %v points", report.Score)
 	} else {
-		report.Error = fmt.Sprintf("Failed with a score of %v points", report.Score)
+		report.Message = fmt.Sprintf("Failed with a score of %v points", report.Score)
 	}
 
 	return report
@@ -324,4 +331,30 @@ func eval(json []byte, rule Rule, ch chan RuleRef, wg *sync.WaitGroup) {
 	}
 
 	ch <- result
+}
+
+// getObjectName returns <kind>/<name>.<namespace>
+func getObjectName(json []byte) string {
+	jq := gojsonq.New().Reader(bytes.NewReader(json))
+	if len(jq.Errors()) > 0 {
+		return "Unknown"
+	}
+
+	kind := jq.Copy().From("kind").Get()
+	if kind == nil {
+		return "Unknown"
+	}
+	object := fmt.Sprintf("%v", kind)
+
+	name := jq.Copy().From("metadata.name").Get()
+	object += fmt.Sprintf("/%v", name)
+
+	namespace := jq.Copy().From("metadata.namespace").Get()
+	if namespace == nil {
+		object += ".default"
+	} else {
+		object += fmt.Sprintf(".%v", namespace)
+	}
+
+	return object
 }

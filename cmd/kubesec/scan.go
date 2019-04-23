@@ -51,6 +51,9 @@ var scanCmd = &cobra.Command{
 			return err
 		}
 
+    rootCmd.SilenceErrors = true
+    rootCmd.SilenceUsage = true
+
 		fileBytes, err := ioutil.ReadFile(filename)
 		if err != nil {
 			return err
@@ -79,6 +82,10 @@ var scanCmd = &cobra.Command{
 			}
 		}
 
+    if len(reports) == 0 {
+      return fmt.Errorf("invalid input %s", filename)
+    }
+
 		var lowScore bool
 		for _, r := range reports {
 			if r.Score <= 0 {
@@ -105,8 +112,6 @@ var scanCmd = &cobra.Command{
 			return nil
 		}
 
-		rootCmd.SilenceErrors = true
-		rootCmd.SilenceUsage = true
 		return &ScanFailedValidationError{}
 	},
 }

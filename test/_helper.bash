@@ -54,12 +54,15 @@ if _is_remote; then
 
   assert_file_not_found() {
     assert_output --regexp ".*couldn't open file \"somefile.yaml\".*" \
-     || assert_output --regexp ".*somefile.yaml: no such file or directory.*"
+     || assert_output --regexp ".*no such file or directory.*" \
+     || assert_output --regexp ".*Invalid input.*"
   }
 
   assert_invalid_input() {
-    assert_output --regexp '  "error": "Invalid input"' \
-     || assert_output --regexp ".*Document is invalid, no Kubernetes kind found.*"
+    assert_output --regexp '  "message": "Invalid input"' \
+     || assert_output --regexp ".*Invalid input.*" \
+     || assert_output --regexp ".*no such file or directory.*" \
+     || assert_output --regexp ".*Kubernetes kind not found.*"
   }
 
   assert_failure_local() { :; }
@@ -93,14 +96,15 @@ else
 
   assert_file_not_found() {
     assert_output --regexp ".*File somefile.yaml does not exist.*" \
-     || assert_output --regexp ".*somefile.yaml: no such file or directory.*"  \
-     || assert_output --regexp ".*no such file or directory.*"
+     || assert_output --regexp ".*no such file or directory.*"  \
+     || assert_output --regexp ".*Invalid input.*"
   }
 
   assert_invalid_input() {
-    assert_output --regexp '  "error": "Invalid input"' \
-     || assert_output --regexp ".*Document is invalid, no Kubernetes kind found.*" \
-     || assert_output --regexp ".*no such file or directory.*"
+    assert_output --regexp '  "message": "Invalid input"' \
+     || assert_output --regexp ".*Kubernetes kind not found.*" \
+     || assert_output --regexp ".*no such file or directory.*" \
+     || assert_output --regexp ".*Invalid input.*"
   }
 
   assert_failure_local() {
