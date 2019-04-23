@@ -291,16 +291,10 @@ func (rs *Ruleset) Run(json []byte) Report {
 				report.Score += ruleRef.Points
 				report.Scoring.Critical = append(report.Scoring.Critical, ruleRef)
 			}
-			rs.logger.Debugf("points %v", report.Score)
 		} else {
 			if ruleRef.Points >= 0 {
 				rs.logger.Debugf("positive score rule failed %v", ruleRef.Selector)
 				report.Scoring.Advise = append(report.Scoring.Advise, ruleRef)
-			}
-
-			if ruleRef.Points < 0 {
-				rs.logger.Debugf("negative score rule failed %v", ruleRef.Selector)
-				report.Scoring.Critical = append(report.Scoring.Critical, ruleRef)
 			}
 		}
 	}
