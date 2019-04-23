@@ -59,6 +59,7 @@ if _is_remote; then
 
   assert_invalid_input() {
     assert_output --regexp '  "error": "Invalid input"' \
+     || assert_output --regexp 'Error: Invalid input' \
      || assert_output --regexp ".*Document is invalid, no Kubernetes kind found.*"
   }
 
@@ -99,6 +100,7 @@ else
 
   assert_invalid_input() {
     assert_output --regexp '  "error": "Invalid input"' \
+     || assert_output --regexp 'Error: Invalid input' \
      || assert_output --regexp ".*Document is invalid, no Kubernetes kind found.*" \
      || assert_output --regexp ".*no such file or directory.*"
   }

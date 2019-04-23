@@ -87,7 +87,9 @@ var scanCmd = &cobra.Command{
 			}
 		}
 
-		if len(reports) > 1 {
+		if len(reports) < 1 {
+			return fmt.Errorf("Invalid input, no parseable JSON or YAML found in %v", filename)
+		} else if len(reports) > 1 {
 			res, err := json.Marshal(reports)
 			if err != nil {
 				return err
@@ -112,9 +114,9 @@ var scanCmd = &cobra.Command{
 }
 
 func detectLineBreak(haystack []byte) string {
-  windowsLineEnding := bytes.Contains(haystack, []byte("\r\n"))
-  if windowsLineEnding && runtime.GOOS == "windows" {
-    return "\r\n"
-  }
-  return "\n"
+	windowsLineEnding := bytes.Contains(haystack, []byte("\r\n"))
+	if windowsLineEnding && runtime.GOOS == "windows" {
+		return "\r\n"
+	}
+	return "\n"
 }
