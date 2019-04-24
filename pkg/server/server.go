@@ -1,20 +1,19 @@
 package server
 
 import (
-	"bytes"
-	"context"
-	"encoding/json"
-	"github.com/ghodss/yaml"
-	"github.com/sublimino/kubesec/pkg/ruler"
-	"go.uber.org/zap"
-	"io/ioutil"
-	"net/http"
-	"os"
-	"os/signal"
-	"syscall"
-	"time"
+  "bytes"
+  "context"
+  "encoding/json"
+  "github.com/sublimino/kubesec/pkg/ruler"
+  "go.uber.org/zap"
+  "io/ioutil"
+  "net/http"
+  "os"
+  "os/signal"
+  "syscall"
+  "time"
 
-	"github.com/prometheus/client_golang/prometheus/promhttp"
+  "github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 // ListenAndServe starts a web server and waits for SIGTERM
@@ -40,20 +39,13 @@ func ListenAndServe(port string, timeout time.Duration, logger *zap.SugaredLogge
 		}
 		defer r.Body.Close()
 
-		var data []byte
-		isJson := json.Valid(body)
-		if isJson {
-			data = body
-		} else {
-			data, err = yaml.YAMLToJSON(body)
-			if err != nil {
-				w.WriteHeader(http.StatusBadRequest)
-				return
-			}
-		}
+		reports, err := ruler.NewRuleset(logger).Run(body)
+    if err != nil {
+      w.WriteHeader(http.StatusBadRequest)
+      return
+    }
 
-		report := ruler.NewRuleset(logger).Run(data)
-		res, err := json.Marshal(report)
+		res, err := json.Marshal(reports)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			return
