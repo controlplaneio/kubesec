@@ -1,18 +1,15 @@
 package main
 
 import (
-	"bytes"
-	"encoding/json"
-	"fmt"
-	"github.com/ghodss/yaml"
-	"github.com/spf13/cobra"
-	"github.com/sublimino/kubesec/pkg/ruler"
-	"github.com/sublimino/kubesec/pkg/server"
-	"go.uber.org/zap"
-	"io/ioutil"
-	"log"
-	"path/filepath"
-	"runtime"
+  "encoding/json"
+  "fmt"
+  "github.com/spf13/cobra"
+  "github.com/sublimino/kubesec/pkg/ruler"
+  "github.com/sublimino/kubesec/pkg/server"
+  "go.uber.org/zap"
+  "io/ioutil"
+  "log"
+  "path/filepath"
 )
 
 type ScanFailedValidationError struct {
@@ -59,28 +56,10 @@ var scanCmd = &cobra.Command{
 			return err
 		}
 
-		logger.Debugf("scan filename is %v", filename)
-
-		reports := make([]ruler.Report, 0)
-		isJson := json.Valid(fileBytes)
-		if isJson {
-			report := ruler.NewRuleset(logger).Run(fileBytes)
-			reports = append(reports, report)
-		} else {
-			bits := bytes.Split(fileBytes, []byte(detectLineBreak(fileBytes)+"---"+detectLineBreak(fileBytes)))
-			for _, doc := range bits {
-				if len(doc) > 0 {
-					data, err := yaml.YAMLToJSON(doc)
-					if err != nil {
-						return err
-					}
-
-					report := ruler.NewRuleset(logger).Run(data)
-					reports = append(reports, report)
-
-				}
-			}
-		}
+		reports, err := ruler.NewRuleset(logger).Run(fileBytes)
+    if err != nil {
+      return err
+    }
 
     if len(reports) == 0 {
       return fmt.Errorf("invalid input %s", filename)
@@ -94,19 +73,11 @@ var scanCmd = &cobra.Command{
 			}
 		}
 
-		if len(reports) > 1 {
-			res, err := json.Marshal(reports)
-			if err != nil {
-				return err
-			}
-			fmt.Println(server.PrettyJSON(res))
-		} else {
-			res, err := json.Marshal(reports[0])
-			if err != nil {
-				return err
-			}
-			fmt.Println(server.PrettyJSON(res))
-		}
+    res, err := json.Marshal(reports)
+    if err != nil {
+      return err
+    }
+    fmt.Println(server.PrettyJSON(res))
 
 		if len(reports) > 0 && !lowScore {
 			return nil
@@ -116,10 +87,3 @@ var scanCmd = &cobra.Command{
 	},
 }
 
-func detectLineBreak(haystack []byte) string {
-  windowsLineEnding := bytes.Contains(haystack, []byte("\r\n"))
-  if windowsLineEnding && runtime.GOOS == "windows" {
-    return "\r\n"
-  }
-  return "\n"
-}
