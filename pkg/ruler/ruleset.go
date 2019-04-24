@@ -374,7 +374,11 @@ func getObjectName(json []byte) string {
 	object := fmt.Sprintf("%v", kind)
 
 	name := jq.Copy().From("metadata.name").Get()
-	object += fmt.Sprintf("/%v", name)
+	if name == nil {
+		object += "/undefined"
+	} else {
+		object += fmt.Sprintf("/%v", name)
+	}
 
 	namespace := jq.Copy().From("metadata.namespace").Get()
 	if namespace == nil {
