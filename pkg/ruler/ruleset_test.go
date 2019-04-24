@@ -41,7 +41,7 @@ spec:
 		t.Fatal(err.Error())
 	}
 
-	report := NewRuleset(zap.NewNop().Sugar()).Run(json)
+	report := NewRuleset(zap.NewNop().Sugar()).generateReport(json)
 
 	critical := len(report.Scoring.Critical)
 	if critical < 1 {
@@ -79,7 +79,7 @@ spec:
 		t.Fatal(err.Error())
 	}
 
-	report := NewRuleset(zap.NewNop().Sugar()).Run(json)
+	report := NewRuleset(zap.NewNop().Sugar()).generateReport(json)
 
 	// kubeval should error out with:
 	// spec.template.spec.hostNetwork: Invalid type. Expected: boolean, given: null
@@ -109,7 +109,7 @@ spec:
 		t.Fatal(err.Error())
 	}
 
-	report := NewRuleset(zap.NewNop().Sugar()).Run(json)
+	report := NewRuleset(zap.NewNop().Sugar()).generateReport(json)
 
 	// kubeval should error out with:
 	// spec.replicas: Invalid type. Expected: integer, given: string
@@ -138,7 +138,7 @@ spec:
 		t.Fatal(err.Error())
 	}
 
-	report := NewRuleset(zap.NewNop().Sugar()).Run(json)
+	report := NewRuleset(zap.NewNop().Sugar()).generateReport(json)
 
 	if len(report.Message) < 1 || !strings.Contains(report.Message, "unknown schema") {
 		t.Errorf("Got error %v ", report.Message)
@@ -161,7 +161,7 @@ data:
 		t.Fatal(err.Error())
 	}
 
-	report := NewRuleset(zap.NewNop().Sugar()).Run(json)
+	report := NewRuleset(zap.NewNop().Sugar()).generateReport(json)
 
 	if len(report.Message) < 1 || !strings.Contains(report.Message, "not supported") {
 		t.Errorf("Got error %v ", report.Message)
