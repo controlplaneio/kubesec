@@ -1,19 +1,19 @@
 package server
 
 import (
-  "bytes"
-  "context"
-  "encoding/json"
-  "github.com/sublimino/kubesec/pkg/ruler"
-  "go.uber.org/zap"
-  "io/ioutil"
-  "net/http"
-  "os"
-  "os/signal"
-  "syscall"
-  "time"
+	"bytes"
+	"context"
+	"encoding/json"
+	"github.com/sublimino/kubesec/pkg/ruler"
+	"go.uber.org/zap"
+	"io/ioutil"
+	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
 
-  "github.com/prometheus/client_golang/prometheus/promhttp"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 // ListenAndServe starts a web server and waits for SIGTERM
@@ -40,10 +40,10 @@ func ListenAndServe(port string, timeout time.Duration, logger *zap.SugaredLogge
 		defer r.Body.Close()
 
 		reports, err := ruler.NewRuleset(logger).Run(body)
-    if err != nil {
-      w.WriteHeader(http.StatusBadRequest)
-      return
-    }
+		if err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
 
 		res, err := json.Marshal(reports)
 		if err != nil {
