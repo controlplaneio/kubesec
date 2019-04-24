@@ -2,11 +2,14 @@ package ruler
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"github.com/garethr/kubeval/kubeval"
+	"github.com/ghodss/yaml"
 	"github.com/sublimino/kubesec/pkg/rules"
 	"github.com/thedevsaddam/gojsonq"
 	"go.uber.org/zap"
+	"runtime"
 	"strings"
 	"sync"
 )
@@ -226,7 +229,31 @@ func NewRuleset(logger *zap.SugaredLogger) *Ruleset {
 	}
 }
 
-func (rs *Ruleset) Run(json []byte) Report {
+func (rs *Ruleset) Run(fileBytes []byte) ([]Report, error) {
+	reports := make([]Report, 0)
+
+	isJson := json.Valid(fileBytes)
+	if isJson {
+		report := rs.generateReport(fileBytes)
+		reports = append(reports, report)
+	} else {
+		bits := bytes.Split(fileBytes, []byte(detectLineBreak(fileBytes)+"---"+detectLineBreak(fileBytes)))
+		for _, doc := range bits {
+			if len(doc) > 0 {
+				data, err := yaml.YAMLToJSON(doc)
+				if err != nil {
+					return reports, err
+				}
+				report := rs.generateReport(data)
+				reports = append(reports, report)
+			}
+		}
+	}
+
+	return reports, nil
+}
+
+func (rs *Ruleset) generateReport(json []byte) Report {
 	report := Report{
 		Object: "Unknown",
 		Score:  0,
@@ -347,7 +374,11 @@ func getObjectName(json []byte) string {
 	object := fmt.Sprintf("%v", kind)
 
 	name := jq.Copy().From("metadata.name").Get()
-	object += fmt.Sprintf("/%v", name)
+	if name == nil {
+		object += "/undefined"
+	} else {
+		object += fmt.Sprintf("/%v", name)
+	}
 
 	namespace := jq.Copy().From("metadata.namespace").Get()
 	if namespace == nil {
@@ -357,4 +388,12 @@ func getObjectName(json []byte) string {
 	}
 
 	return object
+}
+
+func detectLineBreak(haystack []byte) string {
+	windowsLineEnding := bytes.Contains(haystack, []byte("\r\n"))
+	if windowsLineEnding && runtime.GOOS == "windows" {
+		return "\r\n"
+	}
+	return "\n"
 }
