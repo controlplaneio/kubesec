@@ -19,6 +19,13 @@ type Ruleset struct {
 	logger *zap.SugaredLogger
 }
 
+type InvalidInputError struct {
+}
+
+func (e *InvalidInputError) Error() string {
+	return fmt.Sprintf("Invalid input")
+}
+
 func NewRuleset(logger *zap.SugaredLogger) *Ruleset {
 	list := make([]Rule, 0)
 
@@ -239,14 +246,15 @@ func (rs *Ruleset) Run(fileBytes []byte) ([]Report, error) {
 	} else {
 		bits := bytes.Split(fileBytes, []byte(detectLineBreak(fileBytes)+"---"+detectLineBreak(fileBytes)))
 		for _, doc := range bits {
-			if len(doc) > 0 {
-				data, err := yaml.YAMLToJSON(doc)
-				if err != nil {
-					return reports, err
-				}
-				report := rs.generateReport(data)
-				reports = append(reports, report)
+			if len(doc) < 1 {
+				return nil, &InvalidInputError{}
 			}
+			data, err := yaml.YAMLToJSON(doc)
+			if err != nil {
+				return reports, err
+			}
+			report := rs.generateReport(data)
+			reports = append(reports, report)
 		}
 	}
 
