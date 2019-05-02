@@ -29,12 +29,13 @@ func ListenAndServe(port string, timeout time.Duration, logger *zap.SugaredLogge
 	mux.Handle("/metrics", promhttp.Handler())
 	mux.HandleFunc("/healthz", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte("OK"))
+		w.Write([]byte("OK\n"))
 	})
 	mux.HandleFunc("/scan", func(w http.ResponseWriter, r *http.Request) {
 		body, err := ioutil.ReadAll(r.Body)
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
+			w.Write([]byte("Input error\n"))
 			return
 		}
 		defer r.Body.Close()
@@ -42,6 +43,7 @@ func ListenAndServe(port string, timeout time.Duration, logger *zap.SugaredLogge
 		reports, err := ruler.NewRuleset(logger).Run(body)
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
+			w.Write([]byte(err.Error() + "\n"))
 			return
 		}
 
@@ -51,9 +53,9 @@ func ListenAndServe(port string, timeout time.Duration, logger *zap.SugaredLogge
 			return
 		}
 
-		w.WriteHeader(http.StatusOK)
 		w.Header().Set("Content-Type", "application/json")
-		w.Write([]byte(PrettyJSON(res)))
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte(PrettyJSON(res) + "\n"))
 	})
 
 	srv := &http.Server{

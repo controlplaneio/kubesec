@@ -17,19 +17,19 @@ teardown() {
 
 @test "errors with no filename" {
   run _app
-  assert_failure
+  assert_failure_local
 }
 
 @test "errors with invalid file" {
   run _app somefile.yaml
+  assert_failure_local
   assert_file_not_found
-  assert_failure
 }
 
 @test "errors with empty file" {
   run _app ${TEST_DIR}/asset/empty-file
-  assert_invalid_input
   assert_failure_local
+  assert_invalid_input
 }
 
 @test "errors with empty file (json, local)" {
@@ -72,7 +72,7 @@ teardown() {
   assert_success
 }
 
-# TODO(ajm) golang fail - FIX BEFORE RELEASE
+# TODO(ajm) v2 fail - FIX BEFORE RELEASE
 #@test "succeeds with valid file (json, local)" {
 #  if _is_remote; then
 #    skip
@@ -83,7 +83,7 @@ teardown() {
 #  assert_success
 #}
 
-@test "returns content-type application/json" {
+@test "returns content-type application/json on pass" {
   if _is_local; then
     skip
   fi
@@ -95,6 +95,20 @@ teardown() {
 
   assert_output --regexp "application/json"
 }
+
+# TODO(ajm) v2 new behaviour- FIX BEFORE RELEASE
+#@test "returns content-type text/plain for failure" {
+#  if _is_local; then
+#    skip
+#  fi
+#
+#   run _app \
+#    arse \
+#    -w '%{content_type}' \
+#    -o /dev/null
+#
+#  assert_output --regexp "text/plain.*"
+#}
 
 # ---
 
@@ -283,7 +297,7 @@ teardown() {
 @test "returns error YAML control characters" {
   run _app ${TEST_DIR}/asset/invalid-input-no-control-characters.json
 
-  assert_failure
+  assert_invalid_input
 }
 
 # TODO(ajm) BEHAVIOURAL CHANGE (previous scan didn't account for all containers) - FIX BEFORE RELEASE
