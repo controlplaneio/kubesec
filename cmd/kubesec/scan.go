@@ -1,15 +1,15 @@
 package main
 
 import (
-  "encoding/json"
-  "fmt"
-  "github.com/spf13/cobra"
-  "github.com/sublimino/kubesec/pkg/ruler"
-  "github.com/sublimino/kubesec/pkg/server"
-  "go.uber.org/zap"
-  "io/ioutil"
-  "log"
-  "path/filepath"
+	"encoding/json"
+	"fmt"
+	"github.com/spf13/cobra"
+	"github.com/sublimino/kubesec/pkg/ruler"
+	"github.com/sublimino/kubesec/pkg/server"
+	"go.uber.org/zap"
+	"io/ioutil"
+	"log"
+	"path/filepath"
 )
 
 type ScanFailedValidationError struct {
@@ -48,8 +48,8 @@ var scanCmd = &cobra.Command{
 			return err
 		}
 
-    rootCmd.SilenceErrors = true
-    rootCmd.SilenceUsage = true
+		rootCmd.SilenceErrors = true
+		rootCmd.SilenceUsage = true
 
 		fileBytes, err := ioutil.ReadFile(filename)
 		if err != nil {
@@ -57,13 +57,13 @@ var scanCmd = &cobra.Command{
 		}
 
 		reports, err := ruler.NewRuleset(logger).Run(fileBytes)
-    if err != nil {
-      return err
-    }
+		if err != nil {
+			return err
+		}
 
-    if len(reports) == 0 {
-      return fmt.Errorf("invalid input %s", filename)
-    }
+		if len(reports) == 0 {
+			return fmt.Errorf("invalid input %s", filename)
+		}
 
 		var lowScore bool
 		for _, r := range reports {
@@ -73,11 +73,11 @@ var scanCmd = &cobra.Command{
 			}
 		}
 
-    res, err := json.Marshal(reports)
-    if err != nil {
-      return err
-    }
-    fmt.Println(server.PrettyJSON(res))
+		res, err := json.Marshal(reports)
+		if err != nil {
+			return err
+		}
+		fmt.Println(server.PrettyJSON(res))
 
 		if len(reports) > 0 && !lowScore {
 			return nil
@@ -86,4 +86,3 @@ var scanCmd = &cobra.Command{
 		return &ScanFailedValidationError{}
 	},
 }
-
