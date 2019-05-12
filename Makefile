@@ -156,35 +156,24 @@ gen-html:
 
 .PHONY: logs
 logs:
-	bash -xc ' \
-		(cd up && AWS_PROFILE=binslug-s3 up logs -f) \
-	'
+	bash -xc 'cd up && AWS_PROFILE=binslug-s3 up logs -f'
 
 .PHONY: test
 test:
-	bash -xc ' \
-	  (COMMAND=./bin/bats/bin/bats; \
-	  cd test && if command -v bats; then COMMAND=bats; fi && $${COMMAND} $(FLAGS) .) \
-	'
+	bash -xc 'cd test/ && ./bin/bats/bin/bats --jobs 20 .'
 
 .PHONY: test-remote
 test-remote:
-	bash -xc ' \
-	  (cd test && TEST_REMOTE=1 REMOTE_URL=$(REMOTE_URL) ./bin/bats/bin/bats --jobs 20 .)\
-	'
+	bash -xc 'cd test && REMOTE_URL=$(REMOTE_URL) ./bin/bats/bin/bats --jobs 20 .'
 
 .PHONY: test-remote-staging
 test-remote-staging:
-	bash -xc ' \
-		(REMOTE_URL=$$(\make up-url-staging 2>/dev/null); \
-	  cd test && TEST_REMOTE=1 REMOTE_URL=$${REMOTE_URL} ./bin/bats/bin/bats --jobs 20 .) \
-	'
+	bash -xc 'REMOTE_URL=$$(\make up-url-staging 2>/dev/null); \
+	  cd test && REMOTE_URL=$${REMOTE_URL} ./bin/bats/bin/bats --jobs 20 .'
 
 .PHONY: test-new
 test-new:
-	bash -xc ' \
-	  (cd test && /usr/src/bats-core/bin/bats .) \
-	'
+	bash -xc 'cd test && /usr/src/bats-core/bin/bats .'
 
 .PHONY: up-start
 up-start:
@@ -196,27 +185,19 @@ up-start:
 
 .PHONY: up-deploy-staging
 up-deploy-staging:
-	bash -xc ' \
-		(cd up && AWS_PROFILE=binslug-s3 up deploy staging) \
-	'
+	bash -xc 'cd up && AWS_PROFILE=binslug-s3 up deploy staging'
 
 .PHONY: up-url-staging
 up-url-staging:
-	bash -xc ' \
-		(cd up && AWS_PROFILE=binslug-s3 up url --stage staging) \
-	'
+	bash -xc 'cd up && AWS_PROFILE=binslug-s3 up url --stage staging'
 
 .PHONY: up-deploy
 up-deploy:
-	bash -xc ' \
-		(cd up && AWS_PROFILE=binslug-s3 up deploy production) \
-	'
+	bash -xc 'cd up && AWS_PROFILE=binslug-s3 up deploy production'
 
 .PHONY: up-url
 up-url:
-	bash -xc ' \
-		(cd up && AWS_PROFILE=binslug-s3 up url --stage production) \
-	'
+	bash -xc 'cd up && AWS_PROFILE=binslug-s3 up url --stage production'
 
 .PHONY: help
 help: ## parse jobs and descriptions from this Makefile
