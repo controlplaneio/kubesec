@@ -56,7 +56,7 @@ export NAME DOCKER_HUB_URL BUILD_DATE GIT_MESSAGE GIT_SHA GIT_TAG \
 ### github.com/controlplaneio/ensure-content.git makefile-header END ###
 
 PACKAGE = none
-HAS_DEP := $(shell command -v dep 2>/dev/null)
+BATS_PARALLEL_JOBS := $(shell command -v parallel 2>/dev/null && echo '--jobs 20')
 REMOTE_URL ?="https://kubesec.io/"
 
 .PHONY: all
@@ -64,46 +64,56 @@ all: help
 
 .PHONY: go
 go: ## golang toolchain
+	@echo "+ $@"
 	make test-go
 	make build
 
 .PHONY: test-go-fmt
 test-go-fmt: ## golang fmt check
+	@echo "+ $@"
 	gofmt -l -s ./pkg | grep ".*\.go"; if [ "$$?" = "0" ]; then exit 1; fi
 
 .PHONY: test-go
 test-go: ## golang unit tests
+	@echo "+ $@"
 	go test -race $$(go list ./... | grep -v '/vendor/') -run "$${RUN:-.*}"
 
 test-go-verbose: ## golang unit tests
+	@echo "+ $@"
 	go test -race -v $$(go list ./... | grep -v '/vendor/')
 
 .PHONY: test-go-acceptance
 test-go-acceptance: ## acceptance tests targeting golang build
+	@echo "+ $@"
 	BIN_UNDER_TEST="./dist/kubesec scan"\
-	  make test FLAGS='--jobs 20'
+	  make test
 
 .PHONY: dep
 dep: ## golang and deployment dependencies
+	@echo "+ $@"
 	command -v up &>/dev/null || curl -sfL https://raw.githubusercontent.com/apex/up/master/install.sh | sudo sh
 	dep ensure -v
 
 .PHONY: prune
 prune: ## golang dependency prune
+	@echo "+ $@"
 	dep prune -v
 
 .PHONY: build
 build: ## golang build
+	@echo "+ $@"
 	go build -a -o ./dist/kubesec ./cmd/kubesec/*.go
 
 .PHONY: dev
 dev: ## non-golang dev
+	@echo "+ $@"
 	make test && make build
 
 # --- deployment recipes
 
 .PHONY: deploy
 deploy: ## deploy, test, promote to prod
+	@echo "+ $@"
 	bash -xec ' \
 		unalias make || true; \
 		time make test \
@@ -115,6 +125,7 @@ deploy: ## deploy, test, promote to prod
 	'
 .PHONY: hugo
 hugo:
+	@echo "+ $@"
 	bash -ec ' \
 		( \
 		(IS_KUBESEC=$$(wmctrl -l -x | grep -q kubesec.io && echo 1 || echo 0); cd kubesec.io && while read LINE; do echo "$${LINE}"; if [[ "$${IS_KUBESEC}" != 1 ]] && [[ "$${LINE}" =~ ^Web\ Server\ is\ available\ at ]]; then echo "$${LINE}" | sed -E "s,.*(localhost[^ ]*).*,\1,g" | xargs -I{} xdg-open "http://{}" || true; fi; done < <(hugo server --disableFastRender)); \
@@ -122,6 +133,7 @@ hugo:
 
 .PHONY: gen-html
 gen-html:
+	@echo "+ $@"
 	bash -ec ' \
 		( \
 		OUTPUT_PATH="kubesec.io/content/basics"; \
@@ -156,27 +168,33 @@ gen-html:
 
 .PHONY: logs
 logs:
+	@echo "+ $@"
 	bash -xc 'cd up && AWS_PROFILE=binslug-s3 up logs -f'
 
 .PHONY: test
 test:
-	bash -xc 'cd test/ && ./bin/bats/bin/bats --jobs 20 .'
+	@echo "+ $@"
+	bash -xc 'cd test/ && ./bin/bats/bin/bats $(BATS_PARALLEL_JOBS) $(FLAGS) .'
 
 .PHONY: test-remote
 test-remote:
-	bash -xc 'cd test && REMOTE_URL=$(REMOTE_URL) ./bin/bats/bin/bats --jobs 20 .'
+	@echo "+ $@"
+	bash -xc 'cd test && REMOTE_URL=$(REMOTE_URL) ./bin/bats/bin/bats $(BATS_PARALLEL_JOBS) .'
 
 .PHONY: test-remote-staging
 test-remote-staging:
+	@echo "+ $@"
 	bash -xc 'REMOTE_URL=$$(\make up-url-staging 2>/dev/null); \
-	  cd test && REMOTE_URL=$${REMOTE_URL} ./bin/bats/bin/bats --jobs 20 .'
+	  cd test && REMOTE_URL=$${REMOTE_URL} ./bin/bats/bin/bats $(BATS_PARALLEL_JOBS) .'
 
 .PHONY: test-new
 test-new:
+	@echo "+ $@"
 	bash -xc 'cd test && /usr/src/bats-core/bin/bats .'
 
 .PHONY: up-start
 up-start:
+	@echo "+ $@"
 	bash -xc ' \
 		(cd up \
 		&& AWS_PROFILE=binslug-s3 up run build \
@@ -185,18 +203,22 @@ up-start:
 
 .PHONY: up-deploy-staging
 up-deploy-staging:
+	@echo "+ $@"
 	bash -xc 'cd up && AWS_PROFILE=binslug-s3 up deploy staging'
 
 .PHONY: up-url-staging
 up-url-staging:
+	@echo "+ $@"
 	bash -xc 'cd up && AWS_PROFILE=binslug-s3 up url --stage staging'
 
 .PHONY: up-deploy
 up-deploy:
+	@echo "+ $@"
 	bash -xc 'cd up && AWS_PROFILE=binslug-s3 up deploy production'
 
 .PHONY: up-url
 up-url:
+	@echo "+ $@"
 	bash -xc 'cd up && AWS_PROFILE=binslug-s3 up url --stage production'
 
 .PHONY: help
