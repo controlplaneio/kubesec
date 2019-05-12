@@ -12,7 +12,7 @@ teardown() {
 
 @test "fails Pod with unconfined seccomp" {
   run _app ${TEST_DIR}/asset/score-0-pod-seccomp-unconfined.yml
-  assert_negative_points
+  assert_lt_zero_points
 }
 
 @test "errors with no filename" {
@@ -168,7 +168,7 @@ teardown() {
 
 @test "fails with CAP_SYS_ADMIN" {
   run _app ${TEST_DIR}/asset/score-0-cap-sys-admin.yml
-  assert_negative_points
+  assert_lt_zero_points
 }
 
 @test "fails with CAP_CHOWN" {
@@ -178,7 +178,7 @@ teardown() {
 
 @test "fails with CAP_SYS_ADMIN and CAP_CHOWN" {
   run _app ${TEST_DIR}/asset/score-0-cap-sys-admin-and-cap-chown.yml
-  assert_negative_points
+  assert_lt_zero_points
 }
 
 @test "passes with securityContext capabilities drop all" {
@@ -234,13 +234,12 @@ teardown() {
 
 @test "fails DaemonSet with securityContext.privileged = true" {
   run _app ${TEST_DIR}/asset/score-0-daemonset-securitycontext-privileged.yml
-  assert_negative_points
+  assert_lt_zero_points
 }
 
 @test "fails DaemonSet with mounted host docker.sock" {
-  skip
   run _app ${TEST_DIR}/asset/score-0-daemonset-mount-docker-socket.yml
-  assert_zero_points
+  assert_lt_zero_points
 }
 
 @test "passes Pod with apparmor annotation" {
@@ -249,7 +248,7 @@ teardown() {
 }
 
 # TODO: tests for apparmor loaders
-@test "passes DaemonSet with apparmor loader" {
+@test "TODO: passes DaemonSet with apparmor loader" {
   skip
   https://github.com/kubernetes/contrib/blob/master/apparmor/loader/example-daemon.yaml
   run _app ${TEST_DIR}/asset/score-0-daemonset-
@@ -258,7 +257,7 @@ teardown() {
 
 @test "fails Pod with unconfined seccomp for all containers" {
   run _app ${TEST_DIR}/asset/score-0-pod-seccomp-unconfined.yml
-  assert_negative_points
+  assert_lt_zero_points
 }
 
 @test "passes Pod with non-unconfined seccomp for all containers" {
@@ -268,12 +267,12 @@ teardown() {
 
 @test "fails DaemonSet with hostNetwork" {
   run _app ${TEST_DIR}/asset/score-0-daemonset-host-network.yml
-  assert_negative_points
+  assert_lt_zero_points
 }
 
 @test "fails DaemonSet with hostPid" {
   run _app ${TEST_DIR}/asset/score-0-daemonset-host-pid.yml
-  assert_negative_points
+  assert_lt_zero_points
 }
 
 # ---
@@ -301,11 +300,11 @@ teardown() {
 }
 
 # TODO(ajm) BEHAVIOURAL CHANGE (previous scan didn't account for all containers) - FIX BEFORE RELEASE
-#@test "passes production dump" {
-#  run _app ${TEST_DIR}/asset/score-1-prod-dump.yaml
-#
-#  assert_gt_zero_points
-#}
+@test "passes production dump" {
+  run _app ${TEST_DIR}/asset/score-1-prod-dump.yaml
+
+  assert_lt_zero_points
+}
 
 @test "passes bug dump twice [1/2]" {
   run _app ${TEST_DIR}/asset/bug-dump-2.json
@@ -324,14 +323,14 @@ teardown() {
 # TODO: case sensitive check (use jq's ascii_downcase)
 
 # TODO: deployment serviceAccountName pass
-@test "passes Deployment with serviceaccountname" {
+@test "TODO: passes Deployment with serviceaccountname" {
   skip
   run _app ${TEST_DIR}/asset/score-2-dep-serviceaccount.yml
   assert_zero_points
 }
 
 # TODO: tests for all the permutations of this file
-@test "fails DaemonSet with loads o' permutations" {
+@test "TODO: fails DaemonSet with loads o' permutations" {
   skip
   run _app ${TEST_DIR}/asset/score-0-daemonset-
   assert_zero_points
