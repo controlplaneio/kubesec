@@ -2,8 +2,8 @@ package ruler
 
 import (
 	"fmt"
+	"github.com/controlplaneio/kubesec/pkg/rules"
 	"github.com/ghodss/yaml"
-	"github.com/sublimino/kubesec/pkg/rules"
 	"testing"
 )
 

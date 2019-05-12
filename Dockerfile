@@ -1,8 +1,8 @@
 FROM golang:1.12 AS builder
 
-RUN mkdir -p /go/src/github.com/sublimino/kubesec/
+RUN mkdir -p /go/src/github.com/controlplaneio/kubesec/
 
-WORKDIR /go/src/github.com/sublimino/kubesec
+WORKDIR /go/src/github.com/controlplaneio/kubesec
 
 COPY . .
 
@@ -18,7 +18,7 @@ RUN addgroup -S app \
 
 WORKDIR /home/app
 
-COPY --from=builder /go/src/github.com/sublimino/kubesec/kubesec .
+COPY --from=builder /go/src/github.com/controlplaneio/kubesec/kubesec .
 RUN chown -R app:app ./
 
 COPY --from=stefanprodan/kubernetes-json-schema:latest /schemas/master-standalone /schemas/kubernetes-json-schema/master/master-standalone
