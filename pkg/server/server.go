@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"github.com/sublimino/kubesec/pkg/ruler"
+	"github.com/controlplaneio/kubesec/pkg/ruler"
 	"go.uber.org/zap"
 	"io/ioutil"
 	"net/http"

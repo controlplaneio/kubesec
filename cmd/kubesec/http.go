@@ -2,8 +2,8 @@ package main
 
 import (
 	"fmt"
+	"github.com/controlplaneio/kubesec/pkg/server"
 	"github.com/spf13/cobra"
-	"github.com/sublimino/kubesec/pkg/server"
 	"os"
 	"strconv"
 	"time"
