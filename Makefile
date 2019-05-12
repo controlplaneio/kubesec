@@ -81,7 +81,7 @@ test-go-verbose: ## golang unit tests
 .PHONY: test-go-acceptance
 test-go-acceptance: ## acceptance tests targeting golang build
 	BIN_UNDER_TEST="./dist/kubesec scan"\
-	  make test
+	  make test FLAGS='--jobs 20'
 
 .PHONY: dep
 dep: ## golang and deployment dependencies
@@ -170,14 +170,14 @@ test:
 .PHONY: test-remote
 test-remote:
 	bash -xc ' \
-	  (cd test && TEST_REMOTE=1 REMOTE_URL=$(REMOTE_URL) ./bin/bats/bin/bats . )\
+	  (cd test && TEST_REMOTE=1 REMOTE_URL=$(REMOTE_URL) ./bin/bats/bin/bats --jobs 20 .)\
 	'
 
 .PHONY: test-remote-staging
 test-remote-staging:
 	bash -xc ' \
 		(REMOTE_URL=$$(\make up-url-staging 2>/dev/null); \
-	  cd test && TEST_REMOTE=1 REMOTE_URL=$${REMOTE_URL} ./bin/bats/bin/bats .) \
+	  cd test && TEST_REMOTE=1 REMOTE_URL=$${REMOTE_URL} ./bin/bats/bin/bats --jobs 20 .) \
 	'
 
 .PHONY: test-new
