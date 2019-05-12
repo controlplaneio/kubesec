@@ -317,18 +317,18 @@ func (rs *Ruleset) generateReport(json []byte) Report {
 
 		if ruleRef.Containers > 0 {
 			if ruleRef.Points >= 0 {
-				rs.logger.Debugf("positive score rule matched %v", ruleRef.Selector)
+				rs.logger.Debugf("positive score rule matched %v (%v points)", ruleRef.Selector, ruleRef.Points)
 				report.Score += ruleRef.Points
 			}
 
 			if ruleRef.Points < 0 {
-				rs.logger.Debugf("negative score rule matched %v", ruleRef.Selector)
+				rs.logger.Debugf("negative score rule matched %v (%v points)", ruleRef.Selector, ruleRef.Points)
 				report.Score += ruleRef.Points
 				report.Scoring.Critical = append(report.Scoring.Critical, ruleRef)
 			}
 		} else {
 			if ruleRef.Points >= 0 {
-				rs.logger.Debugf("positive score rule failed %v", ruleRef.Selector)
+				rs.logger.Debugf("positive score rule failed %v (%v points)", ruleRef.Selector, ruleRef.Points)
 				report.Scoring.Advise = append(report.Scoring.Advise, ruleRef)
 			}
 		}
