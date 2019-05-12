@@ -11,6 +11,7 @@ addons:
   apt:
     packages:
     - docker-ce
+    - parallel
 
 script:
 - set -e
@@ -40,4 +41,5 @@ deploy:
   skip_cleanup: true
   script: curl -sL http://git.io/goreleaser | bash
   on:
+    branch: master
     tags: true
