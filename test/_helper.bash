@@ -16,7 +16,7 @@ _global_teardown() {
 }
 
 _is_local() {
-  [[ "${TEST_REMOTE:-0}" != 1 ]]
+  [[ "${REMOTE_URL:-}" == "" ]]
 }
 
 _is_remote() {
@@ -44,12 +44,12 @@ if _is_remote; then
   }
 
   assert_zero_points() {
-    assert_output --regexp ".*\"score\": (0|\-[1-9][0-9]*),.*"
+    assert_output --regexp ".*\"score\": 0,.*"
     assert_success
   }
 
-  assert_negative_points() {
-    assert_output --regexp ".*\"score\": (\-[1-9][0-9]*),.*"
+  assert_lt_zero_points() {
+    assert_output --regexp ".*\"score\": \-[1-9][0-9]*,.*"
     assert_success
   }
 
@@ -76,7 +76,7 @@ else
       # remove --json flag for golang rewrite
       ARGS=$(echo "${ARGS}" | sed -E 's,--json,,g')
     fi
-    echo "# DEBUG: ARGS ${ARGS}" >&3
+    echo "# DEBUG: ./../${BIN_UNDER_TEST:-kseccheck.sh} ${ARGS}" >&3
     ./../${BIN_UNDER_TEST:-kseccheck.sh} "${ARGS}";
   }
 
@@ -90,7 +90,7 @@ else
     assert_failure
   }
 
-  assert_negative_points() {
+  assert_lt_zero_points() {
     assert_output --regexp ".*\with a score of \-[1-9][0-9]* points.*"
     assert_failure
   }
