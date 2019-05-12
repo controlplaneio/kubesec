@@ -57,20 +57,12 @@ teardown() {
   assert_gt_zero_points
 }
 
-# TODO: tests for apparmor loaders
-@test "passes DaemonSet with apparmor loader" {
-  skip
-  https://github.com/kubernetes/contrib/blob/master/apparmor/loader/example-daemon.yaml
-  run _app ${TEST_DIR}/asset/score-0-daemonset-
-  assert_zero_points
-}
-
 # TODO: test for pod-specific seccomp
 
 # TODO: case sensitive check (use jq's ascii_downcase)
 
 # TODO: tests for all the permutations of this file
-@test "fails DaemonSet with loads o' permutations" {
+@test "TODO: fails DaemonSet with loads o' permutations" {
   skip
   run _app ${TEST_DIR}/asset/score-0-daemonset-
   assert_zero_points
