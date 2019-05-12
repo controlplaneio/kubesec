@@ -3,9 +3,9 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/controlplaneio/kubesec/pkg/ruler"
+	"github.com/controlplaneio/kubesec/pkg/server"
 	"github.com/spf13/cobra"
-	"github.com/sublimino/kubesec/pkg/ruler"
-	"github.com/sublimino/kubesec/pkg/server"
 	"go.uber.org/zap"
 	"io/ioutil"
 	"log"
