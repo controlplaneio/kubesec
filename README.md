@@ -1,5 +1,7 @@
 # kubesec [![Build Status](https://travis-ci.com/controlplaneio/kubesec.svg?token=2zTFdbp4Jrcox4MuDKaD&branch=master)](https://travis-ci.com/controlplaneio/kubesec)
 
+![](http://casual-hosting.s3.amazonaws.com/kubesec-logo.png)
+
 Validate the security parameters of Kubernetes YAML resources.
 
 Currently supported types: Pod, Deployment, StatefulSet, DaemonSet
