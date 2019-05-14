@@ -1,6 +1,8 @@
 # kubesec [![Build Status](https://travis-ci.com/controlplaneio/kubesec.svg?token=2zTFdbp4Jrcox4MuDKaD&branch=master)](https://travis-ci.com/controlplaneio/kubesec)
 
-![](http://casual-hosting.s3.amazonaws.com/kubesec-logo.png)
+<p align="center">
+  <img src="http://casual-hosting.s3.amazonaws.com/kubesec-logo.png">
+</p>
 
 Validate the security parameters of Kubernetes YAML resources.
 
