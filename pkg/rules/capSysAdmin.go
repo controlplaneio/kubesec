@@ -16,7 +16,7 @@ func CapSysAdmin(json []byte) int {
 		Only("securityContext.capabilities.add")
 
 	if capAdd != nil && strings.Contains(fmt.Sprintf("%v", capAdd), "SYS_ADMIN") {
-		containers++
+		containers += len(capAdd.([]interface{}))
 	}
 
 	capAddInit := gojsonq.New().Reader(bytes.NewReader(json)).
@@ -24,7 +24,7 @@ func CapSysAdmin(json []byte) int {
 		Only("securityContext.capabilities.add")
 
 	if capAddInit != nil && strings.Contains(fmt.Sprintf("%v", capAddInit), "SYS_ADMIN") {
-		containers++
+		containers += len(capAddInit.([]interface{}))
 	}
 
 	return containers

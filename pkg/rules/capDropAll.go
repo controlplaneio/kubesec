@@ -16,7 +16,7 @@ func CapDropAll(json []byte) int {
 		Only("securityContext.capabilities.drop")
 
 	if capDrop != nil && strings.Contains(fmt.Sprintf("%v", capDrop), "ALL") {
-		containers++
+		containers += len(capDrop.([]interface{}))
 	}
 
 	capDropInit := gojsonq.New().Reader(bytes.NewReader(json)).
@@ -24,7 +24,7 @@ func CapDropAll(json []byte) int {
 		Only("securityContext.capabilities.drop")
 
 	if capDropInit != nil && strings.Contains(fmt.Sprintf("%v", capDropInit), "ALL") {
-		containers++
+		containers += len(capDrop.([]interface{}))
 	}
 
 	return containers

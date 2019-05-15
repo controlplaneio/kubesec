@@ -8,6 +8,8 @@ import (
 	"strings"
 )
 
+// TODO(ajm): reduce complexity
+
 // TODO(ajm): tighten these matches, they could be "[apparmor..." or " apparmor...", and "unconfined]" or "unconfined "
 // TODO(ajm): space delimiting matches is insufficient as this could be set to `unconfined blah`
 func ApparmorAny(json []byte) int {

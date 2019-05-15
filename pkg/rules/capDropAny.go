@@ -19,7 +19,7 @@ func CapDropAny(json []byte) int {
 	if capDrop != nil &&
 		capDrop.Count() > 0 &&
 		!strings.Contains(fmt.Sprintf("%v", capDrop.Get()), "<nil>") {
-		containers++
+		containers += capDrop.Count()
 	}
 
 	capDropInit := gojsonq.New().Reader(bytes.NewReader(json)).
@@ -30,7 +30,7 @@ func CapDropAny(json []byte) int {
 	if capDropInit != nil &&
 		capDropInit.Count() > 0 &&
 		!strings.Contains(fmt.Sprintf("%v", capDropInit.Get()), "<nil>") {
-		containers++
+		containers += capDropInit.Count()
 	}
 
 	return containers
