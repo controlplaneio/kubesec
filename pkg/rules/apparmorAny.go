@@ -1,5 +1,10 @@
 package rules
 
+/*
+type: top-level metadata
+boolean or cumulative: both (per-pod and global)
+*/
+
 import (
 	"bytes"
 	"fmt"

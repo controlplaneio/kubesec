@@ -7,6 +7,12 @@ import (
 	"strings"
 )
 
+/*
+type: container and initContainer
+full match in jsonq: no
+results per-container or per-spec: per-container
+*/
+
 func CapSysAdmin(json []byte) int {
 	spec := getSpecSelector(json)
 	containers := 0

@@ -31,6 +31,32 @@ spec:
 	}
 }
 
+func Test_DockerSock_Substring_Pod(t *testing.T) {
+	var data = `
+---
+apiVersion: v1
+kind: Pod
+spec:
+  volumes:
+    - name: docker
+      hostPath:
+        path: /var/run/docker.sock-SUBSTRING
+    - name: tmp
+      hostPath:
+        path: /tmp
+`
+
+	json, err := yaml.YAMLToJSON([]byte(data))
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+
+	containers := DockerSock(json)
+	if containers != 0 {
+		t.Errorf("Got %v volumes wanted %v", containers, 0)
+	}
+}
+
 func Test_DockerSock_DaemonSet(t *testing.T) {
 	var data = `
 ---
@@ -48,7 +74,7 @@ spec:
       volumes:
       - name: docker
         hostPath:
-         path: /var/run/docker.sock
+          path: /var/run/docker.sock
 `
 
 	json, err := yaml.YAMLToJSON([]byte(data))
@@ -96,6 +122,37 @@ spec:
       hostNetwork: false
       containers:
         - name: c1
+`
+
+	json, err := yaml.YAMLToJSON([]byte(data))
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+
+	containers := DockerSock(json)
+	if containers != 0 {
+		t.Errorf("Got %v volumes wanted %v", containers, 0)
+	}
+}
+
+func Test_DockerSock_Substring_Deployment(t *testing.T) {
+	var data = `
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+spec:
+  template:
+    spec:
+      containers:
+      - name: c1
+        volumeMounts:
+        - mountPath: /host/var/run/docker.sock
+          name: docker
+          readOnly: false
+      volumes:
+      - name: docker
+        hostPath:
+          path: /var/run/docker.sock.nonexistant
 `
 
 	json, err := yaml.YAMLToJSON([]byte(data))

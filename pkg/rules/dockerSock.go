@@ -7,6 +7,12 @@ import (
 	"strings"
 )
 
+/*
+type: container and initContainer
+full match in jsonq: no
+results per-container, per-spec, per-entity: per-spec
+*/
+
 func DockerSock(json []byte) int {
 	spec := getSpecSelector(json)
 	found := 0
@@ -15,7 +21,8 @@ func DockerSock(json []byte) int {
 		From(spec + ".volumes").
 		Only("hostPath.path")
 
-	if paths != nil && strings.Contains(fmt.Sprintf("%v", paths), "/var/run/docker.sock") {
+	if paths != nil &&
+		strings.Contains(fmt.Sprintf("%v", paths), "[path:/var/run/docker.sock]") {
 		found++
 	}
 

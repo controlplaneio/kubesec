@@ -18,3 +18,13 @@ func RunAsGroup(json []byte) int {
 
 	return jqContainers.Count() + jqInitContainers.Count()
 }
+
+// where() ->
+// .Count()
+// only() ->
+// containers += len(capDrop.([]interface{})) - this matches ALL the matches
+
+// to check:
+// TODO(ajm): no init containers test
+// TODO(ajm): count/len is not being used for iterable resource
+// TODO(ajm): reduce complexity
