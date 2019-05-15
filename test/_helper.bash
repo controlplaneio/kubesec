@@ -76,8 +76,8 @@ else
       # remove --json flag for golang rewrite
       ARGS=$(echo "${ARGS}" | sed -E 's,--json,,g')
     fi
-    echo "# DEBUG: ./../${BIN_UNDER_TEST:-kseccheck.sh} ${ARGS}" >&3
-    ./../${BIN_UNDER_TEST:-kseccheck.sh} "${ARGS}";
+#    echo "# DEBUG: ./../${BIN_UNDER_TEST:-false} ${ARGS}" >&3
+    ./../${BIN_UNDER_TEST:-false} "${ARGS}";
   }
 
   assert_gt_zero_points() {
