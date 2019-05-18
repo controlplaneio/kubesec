@@ -10,7 +10,11 @@ import (
 /*
 type: container and initContainer
 full match in jsonq: no
-results per-container, per-spec, per-entity: per-spec
+results per-container, per-spec, per-kind: per-spec (volume)
+
+per-kind: annotations
+per-spec: volumes
+per-container: security context, image name
 */
 
 func DockerSock(json []byte) int {

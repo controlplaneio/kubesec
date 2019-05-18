@@ -10,6 +10,18 @@
   revision = "3a771d992973f24aa725d07868b467d1ddfceafb"
 
 [[projects]]
+  branch = "master"
+  digest = "1:49286de22012994f2e20dd1d215ed1ba3df0e99f5903a99b2e2f8980c9cefbe4"
+  name = "github.com/controlplaneio/kubesec"
+  packages = [
+    "pkg/ruler",
+    "pkg/rules",
+    "pkg/server",
+  ]
+  pruneopts = "UT"
+  revision = "103790e6cfff302e9650e25963eaa0be422ae296"
+
+[[projects]]
   digest = "1:abeb38ade3f32a92943e5be54f55ed6d6e3b6602761d74b4aab4c9dd45c18abd"
   name = "github.com/fsnotify/fsnotify"
   packages = ["."]
@@ -309,6 +321,9 @@
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
+    "github.com/controlplaneio/kubesec/pkg/ruler",
+    "github.com/controlplaneio/kubesec/pkg/rules",
+    "github.com/controlplaneio/kubesec/pkg/server",
     "github.com/garethr/kubeval/kubeval",
     "github.com/ghodss/yaml",
     "github.com/prometheus/client_golang/prometheus/promhttp",

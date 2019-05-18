@@ -6,6 +6,17 @@ import (
 	"github.com/thedevsaddam/gojsonq"
 )
 
+/*
+type: container and initContainer
+full match in jsonq: no
+results per-container, per-spec, per-kind: per-spec (volume)
+
+per-kind: annotations
+per-spec: volumes
+per-container: security context, image name
+*/
+
+// TODO(ajm) is this relevant?
 func HostAliases(json []byte) int {
 	spec := getSpecSelector(json)
 
