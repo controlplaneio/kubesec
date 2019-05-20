@@ -5,6 +5,8 @@ load './bin/bats-assert/load'
 
 TEST_DIR="."
 
+BIN_UNDER_TEST='./dist/kubesec scan'
+
 _global_setup() {
     [ ! -f ${BATS_PARENT_TMPNAME}.skip ] || skip "skip remaining tests"
 }
@@ -24,7 +26,7 @@ _is_remote() {
 }
 
 _get_remote_url() {
-  echo "${REMOTE_URL:-https://kubesec.io/}"
+  echo "${REMOTE_URL:-https://v2.kubesec.io/scan}"
 }
 
 if _is_remote; then
@@ -73,10 +75,9 @@ else
   _app() {
     local ARGS="${@:-}"
     if [[ "${BIN_UNDER_TEST}" != "" ]]; then
-      # remove --json flag for golang rewrite
+      # remove --json flags
       ARGS=$(echo "${ARGS}" | sed -E 's,--json,,g')
     fi
-#    echo "# DEBUG: ./../${BIN_UNDER_TEST:-false} ${ARGS}" >&3
     ./../${BIN_UNDER_TEST:-false} "${ARGS}";
   }
 
