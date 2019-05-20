@@ -197,3 +197,17 @@ Kubesec returns a returns a JSON array, and can scan multiple YAML documents in 
 
 
 # Release Notes
+
+## 2.0.0
+
+- first open source release
+- passes same acceptance tests as Kubesec v1
+- more stringent analysis: scoring for a rule is multiplied by number of matches (previously the score was only applied 
+  once), initContainers are included in score, new securityContext directive support, seccomp and apparmor pod-targeting
+  tighter
+- CLI and HTTP server bundled in single binary
+
+## 1.0.0
+
+- initial release at https://kubesec.io
+- closed source
