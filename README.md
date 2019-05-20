@@ -18,6 +18,26 @@ This uses ControlPlane's hosted API at [v2.kubesec.io/scan](https://v2.kubesec.i
 
 ---
 
+* [Download Kubesec](#download-kubesec)
+    - [Command line usage](#command-line-usage-)
+    - [Usage example](#usage-example-)
+    - [Docker usage](#docker-usage-)
+* [Kubesec HTTP Server](#kubesec-http-server)
+    - [CLI usage example](#cli-usage-example-)
+    - [Docker usage example](#docker-usage-example-)
+* [Kubesec-as-a-Service](#kubesec-as-a-service)
+    - [Command line usage](#command-line-usage--1)
+    - [Usage example](#usage-example--1)
+* [Example output](#example-output)
+* [Contributors](#contributors)
+* [Contributing](#contributing)
+* [Getting Help](#getting-help)
+* [Release Notes](#release-notes)
+    - [2.0.0](#200)
+    - [1.0.0](#100)
+
+
+
 ## Download Kubesec
 
 Kubesec is available as a:
@@ -195,6 +215,32 @@ Kubesec returns a returns a JSON array, and can scan multiple YAML documents in 
 
 ---
 
+## Contributors
+
+Thanks to our awesome contributors!
+
+- [Andrew Martin](@sublimino)
+- [Stefan Prodan](@stefanprodan)
+
+## Contributing
+
+Kubesecis Apache 2.0 licensed and accepts contributions via GitHub pull requests.
+
+When submitting bug reports please include as much details as possible:
+
+- which Kubesec version
+- which Kubernetes version
+- what happened (Kubesec logs and expected output)
+
+## Getting Help
+
+If you have any questions about Kubesec and Kubernetes security:
+
+- Read the Kubesec docs
+- Reach out on Twitter to @sublimino or @controlplaneio
+- File an issue
+
+Your feedback is always welcome!
 
 # Release Notes
 
