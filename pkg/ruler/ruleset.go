@@ -179,9 +179,9 @@ func NewRuleset(logger *zap.SugaredLogger) *Ruleset {
 	hostAliasesRule := Rule{
 		Predicate: rules.HostAliases,
 		Selector:  ".spec .hostAliases",
-		Reason:    "Managing /etc/hosts aliases can prevent Docker from modifying the file after a pod's containers have already been started",
+		Reason:    "Managing /etc/hosts aliases can prevent the container from modifying the file after a pod's containers have already been started. DNS should be managed by the orchestrator",
 		Kinds:     []string{"Pod", "Deployment", "StatefulSet", "DaemonSet"},
-		Points:    0,
+		Points:    -3,
 	}
 	list = append(list, hostAliasesRule)
 
