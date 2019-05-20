@@ -237,7 +237,7 @@ When submitting bug reports please include as much details as possible:
 If you have any questions about Kubesec and Kubernetes security:
 
 - Read the Kubesec docs
-- Reach out on Twitter to @sublimino or @controlplaneio
+- Reach out on Twitter to [@sublimino](https://twitter.com/sublimino) or [@controlplaneio](https://twitter.com/controlplaneio)
 - File an issue
 
 Your feedback is always welcome!
