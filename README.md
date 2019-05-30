@@ -44,7 +44,7 @@ Kubesec is available as a:
 
 - [Docker container image](https://hub.docker.com/r/kubesec/kubesec/tags) at `docker.io/kubesec/kubesec:v2`
 - Linux/MacOS/Win binary (get the [latest release](https://github.com/controlaplaneio/kubesec/releases))
-- [Kubernetes Admission Controller](https://github.com/stefanprodan/kubectl-webhook)
+- [Kubernetes Admission Controller](https://github.com/stefanprodan/kubesec-webhook)
 - [Kubectl plugin](https://github.com/stefanprodan/kubectl-kubesec)
 
 #### Command line usage:
