@@ -19,43 +19,12 @@ import (
 // ListenAndServe starts a web server and waits for SIGTERM
 func ListenAndServe(port string, timeout time.Duration, logger *zap.SugaredLogger, stopCh <-chan struct{}) {
 	mux := http.DefaultServeMux
-	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodGet {
-			http.Redirect(w, r, "https://kubesec.io", http.StatusSeeOther)
-			return
-		}
-		w.WriteHeader(http.StatusNotFound)
-	})
+	mux.Handle("/", scanHandler(logger))
+	mux.Handle("/scan", scanHandler(logger))
 	mux.Handle("/metrics", promhttp.Handler())
 	mux.HandleFunc("/healthz", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte("OK\n"))
-	})
-	mux.HandleFunc("/scan", func(w http.ResponseWriter, r *http.Request) {
-		body, err := ioutil.ReadAll(r.Body)
-		if err != nil {
-			w.WriteHeader(http.StatusBadRequest)
-			w.Write([]byte("Input error\n"))
-			return
-		}
-		defer r.Body.Close()
-
-		reports, err := ruler.NewRuleset(logger).Run(body)
-		if err != nil {
-			w.WriteHeader(http.StatusBadRequest)
-			w.Write([]byte(err.Error() + "\n"))
-			return
-		}
-
-		res, err := json.Marshal(reports)
-		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			return
-		}
-
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusOK)
-		w.Write([]byte(PrettyJSON(res) + "\n"))
 	})
 
 	srv := &http.Server{
@@ -109,4 +78,38 @@ func PrettyJSON(b []byte) string {
 	var out bytes.Buffer
 	json.Indent(&out, b, "", "  ")
 	return string(out.Bytes())
+}
+
+func scanHandler(logger *zap.SugaredLogger) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == http.MethodGet {
+			http.Redirect(w, r, "https://kubesec.io", http.StatusSeeOther)
+			return
+		}
+
+		body, err := ioutil.ReadAll(r.Body)
+		if err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			w.Write([]byte("Input error\n"))
+			return
+		}
+		defer r.Body.Close()
+
+		reports, err := ruler.NewRuleset(logger).Run(body)
+		if err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			w.Write([]byte(err.Error() + "\n"))
+			return
+		}
+
+		res, err := json.Marshal(reports)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte(PrettyJSON(res) + "\n"))
+	})
 }
