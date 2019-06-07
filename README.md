@@ -75,7 +75,7 @@ $ kubesec scan kubesec-test.yaml
 
 Run the same command in Docker:
 ```bash
-$ docker run -i kubesec/kubesec:d432be9 scan /dev/stdin < kubesec-test.yaml 
+$ docker run -i kubesec/kubesec:512c5e0 scan /dev/stdin < kubesec-test.yaml 
 ```
 
 ## Kubesec HTTP Server
