@@ -15,7 +15,7 @@ func CapDropAll(json []byte) int {
 		From(spec + ".containers").
 		Only("securityContext.capabilities.drop")
 
-	if capDrop != nil && strings.Contains(fmt.Sprintf("%v", capDrop), "ALL") {
+	if capDrop != nil && strings.Contains(strings.ToUpper(fmt.Sprintf("%v", capDrop)), "ALL") {
 		containers++
 	}
 
@@ -23,7 +23,7 @@ func CapDropAll(json []byte) int {
 		From(spec + ".initContainers").
 		Only("securityContext.capabilities.drop")
 
-	if capDropInit != nil && strings.Contains(fmt.Sprintf("%v", capDropInit), "ALL") {
+	if capDropInit != nil && strings.Contains(strings.ToUpper(fmt.Sprintf("%v", capDropInit)), "ALL") {
 		containers++
 	}
 
