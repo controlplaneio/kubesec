@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: teamcity-server
+  namespace: deployer
+  labels:
+    app: teamcity-server
+spec:
+  selector:
+    matchLabels:
+      app: teamcity-server
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: teamcity-server
+    spec:
+      containers:
+        - image: jetbrains/teamcity-server:2019.1-linux
+          imagePullPolicy: IfNotPresent
+          name: teamcity-server
+          ports:
+            - containerPort: 8111
+              protocol: TCP
+          env:
+            - name: TEAMCITY_SERVER_MEM_OPTS
+              valueFrom:
+                configMapKeyRef:
+                  name: teamcity-server-env
+                  key: MEM_OPTS_VALUE
+          securityContext:
+            allowPrivilegeEscalation: true
+          volumeMounts:
+            - mountPath: /data/teamcity_server/datadir
+              name: teamcity-server-storage
+            - mountPath: /opt/teamcity/logs
+              name: logs
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      terminationGracePeriodSeconds: 30
+      volumes:
+        - name: teamcity-server-storage
+          persistentVolumeClaim:
+            claimName: teamcity-server-config
+        - hostPath:
+            path: /mnt/logs
+            type: DirectoryOrCreate
+          name: logs
+      serviceAccountName: teamcity-service-account
