@@ -43,7 +43,7 @@ This uses ControlPlane's hosted API at [v2.kubesec.io/scan](https://v2.kubesec.i
 Kubesec is available as a:
 
 - [Docker container image](https://hub.docker.com/r/kubesec/kubesec/tags) at `docker.io/kubesec/kubesec:v2`
-- Linux/MacOS/Win binary (get the [latest release](https://github.com/controlaplaneio/kubesec/releases))
+- Linux/MacOS/Win binary (get the [latest release](https://github.com/controlplaneio/kubesec/releases))
 - [Kubernetes Admission Controller](https://github.com/stefanprodan/kubesec-webhook)
 - [Kubectl plugin](https://github.com/stefanprodan/kubectl-kubesec)
 
@@ -75,7 +75,7 @@ $ kubesec scan kubesec-test.yaml
 
 Run the same command in Docker:
 ```bash
-$ docker run -i kubesec/kubesec:512c5e0 scan /dev/stdin < kubesec-test.yaml 
+$ docker run -i kubesec/kubesec:512c5e0 scan /dev/stdin < kubesec-test.yaml
 ```
 
 ## Kubesec HTTP Server
@@ -118,7 +118,7 @@ $ curl -sSX POST --data-binary @test/asset/score-0-cap-sys-admin.yml http://loca
 
 Finally, stop the Kubesec server by killing the background process
 ```bash
-$ kill % 
+$ kill %
 ```
 
 #### Docker usage example:
@@ -138,14 +138,14 @@ $ curl -sSX POST --data-binary @test/asset/score-0-cap-sys-admin.yml http://loca
 
 Don't forget to stop the server.
 
-## Kubesec-as-a-Service 
+## Kubesec-as-a-Service
 
 Kubesec is also available via HTTPS at [v2.kubesec.io/scan](https://v2.kubesec.io/scan)
 
 #### Command line usage:
 
 ```bash
-$ curl -sSX POST --data-binary @"k8s-deployment.yaml" https://v2.kubesec.io/scan 
+$ curl -sSX POST --data-binary @"k8s-deployment.yaml" https://v2.kubesec.io/scan
 ```
 
 
@@ -248,7 +248,7 @@ Your feedback is always welcome!
 
 - first open source release
 - passes same acceptance tests as Kubesec v1
-- more stringent analysis: scoring for a rule is multiplied by number of matches (previously the score was only applied 
+- more stringent analysis: scoring for a rule is multiplied by number of matches (previously the score was only applied
   once), initContainers are included in score, new securityContext directive support, seccomp and apparmor pod-targeting
   tighter
 - CLI and HTTP server bundled in single binary
