@@ -2,6 +2,7 @@ package ruler
 
 import (
 	"github.com/ghodss/yaml"
+	"github.com/in-toto/in-toto-golang/in_toto"
 	"go.uber.org/zap"
 	"strings"
 	"testing"
@@ -66,7 +67,7 @@ kind: Deployment
 spec:
   template:
     spec:
-      hostNetwork: 
+      hostNetwork:
       initContainers:
         - name: init1
       containers:
@@ -165,5 +166,53 @@ data:
 
 	if len(report.Message) < 1 || !strings.Contains(report.Message, "not supported") {
 		t.Errorf("Got error %v ", report.Message)
+	}
+}
+
+func TestRuleset_Get_intoto(t *testing.T) {
+	var data = `
+---
+apiVersion: apps/v1
+kind: Deployment
+spec:
+  template:
+    spec:
+      hostNetwork: true
+      initContainers:
+        - name: init1
+          securityContext:
+            readOnlyRootFilesystem: true
+        - name: init2
+          securityContext:
+            readOnlyRootFilesystem: false
+        - name: init3
+      containers:
+        - name: c1
+        - name: c2
+          securityContext:
+            readOnlyRootFilesystem: false
+            runAsNonRoot: true
+            runAsUser: 1001
+        - name: c3
+          securityContext:
+            readOnlyRootFilesystem: true
+
+`
+
+	json, err := yaml.YAMLToJSON([]byte(data))
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+
+	var reports []Report
+
+	report := NewRuleset(zap.NewNop().Sugar()).generateReport(json)
+	reports = append(reports, report)
+
+	link := GenerateInTotoLink(reports, []byte(data)).Signed.(in_toto.Link)
+
+	if len(link.Materials) < 1 || len(link.Products) < 1 {
+		t.Errorf("Should have generated a report with at least one material and a product %+v",
+			link)
 	}
 }

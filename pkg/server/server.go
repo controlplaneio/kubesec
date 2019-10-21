@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"github.com/controlplaneio/kubesec/pkg/ruler"
+	"github.com/in-toto/in-toto-golang/in_toto"
 	"go.uber.org/zap"
 	"io/ioutil"
 	"net/http"
@@ -17,10 +18,10 @@ import (
 )
 
 // ListenAndServe starts a web server and waits for SIGTERM
-func ListenAndServe(port string, timeout time.Duration, logger *zap.SugaredLogger, stopCh <-chan struct{}) {
+func ListenAndServe(port string, timeout time.Duration, logger *zap.SugaredLogger, stopCh <-chan struct{}, keypath string) {
 	mux := http.DefaultServeMux
-	mux.Handle("/", scanHandler(logger))
-	mux.Handle("/scan", scanHandler(logger))
+	mux.Handle("/", scanHandler(logger, keypath))
+	mux.Handle("/scan", scanHandler(logger, keypath))
 	mux.Handle("/metrics", promhttp.Handler())
 	mux.HandleFunc("/healthz", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
@@ -80,10 +81,17 @@ func PrettyJSON(b []byte) string {
 	return string(out.Bytes())
 }
 
-func scanHandler(logger *zap.SugaredLogger) http.Handler {
+func scanHandler(logger *zap.SugaredLogger, keypath string) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == http.MethodGet {
 			http.Redirect(w, r, "https://kubesec.io", http.StatusSeeOther)
+			return
+		}
+
+		// fail early if no in-toto signing key is configured for this server
+		if r.URL.Query().Get("in-toto") != "" && keypath == "" {
+			logger.Errorf("Attempted to serve an in-toto payload but no key is available")
+			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
 
@@ -95,6 +103,7 @@ func scanHandler(logger *zap.SugaredLogger) http.Handler {
 		}
 		defer r.Body.Close()
 
+		var payload interface{}
 		reports, err := ruler.NewRuleset(logger).Run(body)
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
@@ -102,7 +111,33 @@ func scanHandler(logger *zap.SugaredLogger) http.Handler {
 			return
 		}
 
-		res, err := json.Marshal(reports)
+		if r.URL.Query().Get("in-toto") != "" {
+			json_key, err := ioutil.ReadFile(keypath)
+			if err != nil {
+				logger.Errorf("Attempted to serve an in-toto payload but the key is unavailable: %v",
+					err.Error())
+				w.WriteHeader(http.StatusInternalServerError)
+				return
+			}
+			key, err := in_toto.ParseEd25519FromPrivateJSON(string(json_key))
+			if err != nil {
+				logger.Errorf("Attempted to serve an in-toto payload but the key is unavailable: %v",
+					err.Error())
+				w.WriteHeader(http.StatusInternalServerError)
+				return
+			}
+
+			link := ruler.GenerateInTotoLink(reports, body)
+			link.Sign(key)
+			payload = map[string]interface{}{
+				"reports": reports,
+				"link":    link,
+			}
+		} else {
+			payload = reports
+		}
+
+		res, err := json.Marshal(payload)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			return
