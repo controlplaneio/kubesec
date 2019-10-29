@@ -1,7 +1,5 @@
 FROM golang:1.12 AS builder
 
-RUN mkdir -p /go/src/github.com/controlplaneio/kubesec/
-
 WORKDIR /go/src/github.com/controlplaneio/kubesec
 
 RUN curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
