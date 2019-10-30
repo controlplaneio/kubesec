@@ -131,3 +131,22 @@ teardown() {
 
   assert_gt_zero_points
 }
+
+@test "returns a unordered point score for individual rules" {
+  # this test only validates that 1pts or 3pts comes back from test - this is to check points
+  # field presence in unordered (unsorted) rule listing - later test will be added when
+  # prioritised output is added. There are 10x 1s, and 1x 3.
+  run \
+    _app ${TEST_DIR}/asset/score-2-pod-serviceaccount.yml
+  assert_line --index 11 --regexp '^.*\"points\": [13]$'
+  assert_line --index 16 --regexp '^.*\"points\": [13]$'
+  assert_line --index 21 --regexp '^.*\"points\": [13]$'
+  assert_line --index 26 --regexp '^.*\"points\": [13]$'
+  assert_line --index 31 --regexp '^.*\"points\": [13]$'
+  assert_line --index 36 --regexp '^.*\"points\": [13]$'
+  assert_line --index 41 --regexp '^.*\"points\": [13]$'
+  assert_line --index 46 --regexp '^.*\"points\": [13]$'
+  assert_line --index 51 --regexp '^.*\"points\": [13]$'
+  assert_line --index 56 --regexp '^.*\"points\": [13]$'
+  assert_line --index 61 --regexp '^.*\"points\": [13]$'
+}
