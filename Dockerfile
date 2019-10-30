@@ -1,7 +1,5 @@
 FROM golang:1.12 AS builder
 
-RUN mkdir -p /go/src/github.com/controlplaneio/kubesec/
-
 WORKDIR /go/src/github.com/controlplaneio/kubesec
 
 RUN curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
@@ -22,10 +20,9 @@ RUN addgroup -S app \
 WORKDIR /home/app
 
 COPY --from=builder /go/src/github.com/controlplaneio/kubesec/kubesec .
-RUN chown -R app:app ./
-
 COPY --from=stefanprodan/kubernetes-json-schema:latest /schemas/master-standalone /schemas/kubernetes-json-schema/master/master-standalone
-RUN chown -R app:app /schemas
+
+RUN chown -R app:app ./ /schemas
 
 USER app
 
