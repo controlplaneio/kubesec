@@ -109,11 +109,13 @@ $ curl -sSX POST --data-binary @test/asset/score-0-cap-sys-admin.yml http://loca
       "critical": [
         {
           "selector": "containers[] .securityContext .capabilities .add == SYS_ADMIN",
-          "reason": "CAP_SYS_ADMIN is the most privileged capability and should always be avoided"
+          "reason": "CAP_SYS_ADMIN is the most privileged capability and should always be avoided",
+          "points": -30
         },
         {
           "selector": "containers[] .securityContext .runAsNonRoot == true",
-          "reason": "Force the running image to run as a non-root user to ensure least privilege"
+          "reason": "Force the running image to run as a non-root user to ensure least privilege",
+          "points": 1
         },
   // ...
 ```
@@ -198,13 +200,15 @@ Kubesec returns a returns a JSON array, and can scan multiple YAML documents in 
       "critical": [
         {
           "selector": "containers[] .securityContext .capabilities .add == SYS_ADMIN",
-          "reason": "CAP_SYS_ADMIN is the most privileged capability and should always be avoided"
+          "reason": "CAP_SYS_ADMIN is the most privileged capability and should always be avoided",
+          "points": -30
         }
       ],
       "advise": [
         {
           "selector": "containers[] .securityContext .runAsNonRoot == true",
-          "reason": "Force the running image to run as a non-root user to ensure least privilege"
+          "reason": "Force the running image to run as a non-root user to ensure least privilege",
+          "points": 1
         },
         {
           // ...
@@ -245,6 +249,12 @@ If you have any questions about Kubesec and Kubernetes security:
 Your feedback is always welcome!
 
 # Release Notes
+
+## 2.1.0
+
+- add rule for `allowPrivilegeEscalation: true` with a score of -7
+- add `points` field to each recommendation so the values that comprise the total score can be seen
+- fix case sensitivity bug in `.capabilities.drop | index("ALL")`
 
 ## 2.0.0
 
