@@ -137,3 +137,26 @@ teardown() {
 
   assert_lt_zero_points
 }
+
+@test "returns a unordered point score for specific response lines" {
+  # NB response from use of parallel results in different permutations of rule order
+  run \
+    _app ${TEST_DIR}/asset/score-2-pod-serviceaccount.yml
+  for LINE in 11 16 21 26 31 36 41 46 51 56 61
+  do
+    assert_line --index ${LINE} --regexp '^.*"points": [0-9]+$'
+  done
+}
+
+@test "returns a ordered point score present" {
+  # for #44 (later)
+  skip
+
+  run \
+    _app ${TEST_DIR}/asset/score-2-pod-serviceaccount.yml
+  assert_line --index 11 --regexp '^.*\"points\": 3$'
+  for LINE in 16 21 26 31 36 41 46 51 56 61
+  do 
+    assert_line --index ${LINE} --regexp '^.*\"points\": 1$'
+  done
+}
