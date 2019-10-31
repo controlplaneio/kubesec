@@ -36,8 +36,8 @@ if _is_remote; then
     shift
     local ARGS="${@:-}"
     ARGS=$(echo "${ARGS}" | sed 's,--json,,g')
-    echo curl -v -sSX POST --data-binary @"${FILE}" ${ARGS} "$(_get_remote_url)"
-    curl -v -sSX POST --data-binary @"${FILE}" ${ARGS} "$(_get_remote_url)"
+    # echo \# curl -sSX POST --data-binary @"${FILE}" ${ARGS} "$(_get_remote_url)" >&3
+    curl -sSX POST --data-binary @"${FILE}" ${ARGS} "$(_get_remote_url)"
   }
 
   assert_gt_zero_points() {
