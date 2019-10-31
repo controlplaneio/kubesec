@@ -19,5 +19,5 @@ type RuleRef struct {
 	Weight     int    `json:"weight,omitempty"`
 	Link       string `json:"href,omitempty"`
 	Containers int    `json:"-"`
-	Points     int    `json:"-"`
+	Points     int    `json:"points"`
 }
