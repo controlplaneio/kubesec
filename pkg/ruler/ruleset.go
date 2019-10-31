@@ -230,6 +230,15 @@ func NewRuleset(logger *zap.SugaredLogger) *Ruleset {
 	}
 	list = append(list, volumeClaimRequestsStorage)
 
+	allowPrivilegeEscalation := Rule{
+		Predicate: rules.AllowPrivilegeEscalation,
+		Selector:  "containers[] .securityContext .allowPrivilegeEscalation == true",
+		Reason:    "",
+		Kinds:     []string{"Pod", "Deployment", "StatefulSet", "DaemonSet"},
+		Points:    -7,
+	}
+	list = append(list, allowPrivilegeEscalation)
+
 	return &Ruleset{
 		Rules:  list,
 		logger: logger,

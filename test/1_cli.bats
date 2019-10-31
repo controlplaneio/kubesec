@@ -132,6 +132,12 @@ teardown() {
   assert_gt_zero_points
 }
 
+@test "fails deployment with allowPrivilegeEscalation" {
+  run _app ${TEST_DIR}/asset/allowPrivilegeEscalation.yaml
+
+  assert_lt_zero_points
+}
+
 @test "returns a unordered point score for specific response lines" {
   # NB response from use of parallel results in different permutations of rule order
   run \
