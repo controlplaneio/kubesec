@@ -6,10 +6,26 @@ steps:
     args:
       - '-c'
       - |
-        set -euxo pipefail; if [[ "${BRANCH_NAME}" == "master" ]]; then docker push gcr.io/${PROJECT_ID}/kubesec:${SHORT_SHA}; fi
+        set -euxo pipefail
+        docker build -t gcr.io/$PROJECT_ID/kubesec:${SHORT_SHA} .
+        if [[ "${BRANCH_NAME}" == "master" ]]; then
+          docker push gcr.io/${PROJECT_ID}/kubesec:${SHORT_SHA}
+        fi
   - name: 'gcr.io/cloud-builders/gcloud'
     entrypoint: 'bash'
     args:
       - '-c'
       - |
-        set -euxo pipefail; if [[ "${BRANCH_NAME}" == "master" ]]; then gcloud beta run deploy kubesec --image gcr.io/${PROJECT_ID}/kubesec:${SHORT_SHA} --platform managed --region us-central1; fi
+        set -euxo pipefail
+        if [[ "${BRANCH_NAME}" == "master" ]]; then
+          gcloud beta run deploy kubesec \
+            --image gcr.io/${PROJECT_ID}/kubesec:${SHORT_SHA} \
+            --platform managed \
+            --region us-central1
+        fi
+  - name: 'gcr.io/cloud-builders/docker'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        make test-remote
