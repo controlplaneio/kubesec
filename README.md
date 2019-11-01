@@ -250,7 +250,7 @@ Your feedback is always welcome!
 
 # Release Notes
 
-## 2.1.0
+## 2.1.0-dev (unreleased)
 
 - add rule for `allowPrivilegeEscalation: true` with a score of -7
 - add `points` field to each recommendation so the values that comprise the total score can be seen
