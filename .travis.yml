@@ -15,7 +15,7 @@ addons:
 
 script:
 - set -e
-- make test-go-fmt
+- make lint
 - curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
 - dep ensure -vendor-only
 - go test -v -race -coverprofile=coverage.txt -covermode=atomic ./pkg/...
