@@ -21,3 +21,22 @@ type RuleRef struct {
 	Containers int    `json:"-"`
 	Points     int    `json:"points"`
 }
+
+// This implements a custom sort interface (Len, Swap, Less) for the report listing.
+// Each scan can produce a different ordering of the reported tests. To have a single
+// deterministic report response for the same input requires sort to never draw.
+// Assumption below is: the combination of points, then selector text, should be unique
+// This is applied to the output of scan for each of the Critical and Advisory lists.
+
+type RuleRefCustomOrder []RuleRef
+
+func (rr RuleRefCustomOrder) Len() int { return len(rr) }
+
+func (rr RuleRefCustomOrder) Swap(i, j int) { rr[i], rr[j] = rr[j], rr[i] }
+
+func (rr RuleRefCustomOrder) Less(i, j int) bool {
+	if rr[i].Points != rr[j].Points {
+		return rr[i].Points < rr[j].Points
+	}
+	return rr[i].Selector < rr[j].Selector
+}
