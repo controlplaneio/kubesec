@@ -23,9 +23,14 @@ steps:
             --platform managed \
             --region us-central1
         fi
+
+  # TODO(ajm): `make test-remote` on branch
   - name: 'gcr.io/cloud-builders/docker'
     entrypoint: 'bash'
     args:
       - '-c'
       - |
-        make test-remote
+        set -euxo pipefail
+        if [[ "${BRANCH_NAME}" == "master" ]]; then
+          make test-remote
+        fi
