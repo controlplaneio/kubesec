@@ -1,7 +1,9 @@
 # kubesec [![Build Status](https://travis-ci.com/controlplaneio/kubesec.svg?token=2zTFdbp4Jrcox4MuDKaD&branch=master)](https://travis-ci.com/controlplaneio/kubesec)
 
-
+<!-- markdownlint-disable no-inline-html header-increment -->
+<!-- markdownlint-disable line-length -->
 #### <center>🚨 v1 API is deprecated, please read the <a href="https://github.com/controlplaneio/kubesec/blob/master/README.md#release-notes" target="_blank">release notes</a> 🚨</center>
+<!-- markdownlint-enable line-length -->
 
 ### Security risk analysis for Kubernetes resources
 
@@ -13,30 +15,27 @@
 
 [Visit Kubesec.io](https://kubesec.io)
 
-
 This uses ControlPlane's hosted API at [v2.kubesec.io/scan](https://v2.kubesec.io/scan)
 
 ---
 
-* [Download Kubesec](#download-kubesec)
-    - [Command line usage](#command-line-usage-)
-    - [Usage example](#usage-example-)
-    - [Docker usage](#docker-usage-)
-* [Kubesec HTTP Server](#kubesec-http-server)
-    - [CLI usage example](#cli-usage-example-)
-    - [Docker usage example](#docker-usage-example-)
-* [Kubesec-as-a-Service](#kubesec-as-a-service)
-    - [Command line usage](#command-line-usage--1)
-    - [Usage example](#usage-example--1)
-* [Example output](#example-output)
-* [Contributors](#contributors)
-* [Contributing](#contributing)
-* [Getting Help](#getting-help)
-* [Release Notes](#release-notes)
-    - [2.0.0](#200)
-    - [1.0.0](#100)
-
-
+- [Download Kubesec](#download-kubesec)
+  - [Command line usage](#command-line-usage-)
+  - [Usage example](#usage-example-)
+  - [Docker usage](#docker-usage-)
+- [Kubesec HTTP Server](#kubesec-http-server)
+  - [CLI usage example](#cli-usage-example-)
+  - [Docker usage example](#docker-usage-example-)
+- [Kubesec-as-a-Service](#kubesec-as-a-service)
+  - [Command line usage](#command-line-usage--1)
+  - [Usage example](#usage-example--1)
+- [Example output](#example-output)
+- [Contributors](#contributors)
+- [Contributing](#contributing)
+- [Getting Help](#getting-help)
+- [Release Notes](#release-notes)
+  - [2.0.0](#200)
+  - [1.0.0](#100)
 
 ## Download Kubesec
 
@@ -44,8 +43,8 @@ Kubesec is available as a:
 
 - [Docker container image](https://hub.docker.com/r/kubesec/kubesec/tags) at `docker.io/kubesec/kubesec:v2`
 - Linux/MacOS/Win binary (get the [latest release](https://github.com/controlplaneio/kubesec/releases))
-- [Kubernetes Admission Controller](https://github.com/stefanprodan/kubesec-webhook)
-- [Kubectl plugin](https://github.com/stefanprodan/kubectl-kubesec)
+- [Kubernetes Admission Controller](https://github.com/controlplaneio/kubesec-webhook)
+- [Kubectl plugin](https://github.com/controlplaneio/kubectl-kubesec)
 
 Or install the latest commit from Github with `go get -u github.com/controlplaneio/kubesec/cmd/kubesec`
 
@@ -76,6 +75,7 @@ $ kubesec scan kubesec-test.yaml
 #### Docker usage:
 
 Run the same command in Docker:
+
 ```bash
 $ docker run -i kubesec/kubesec:512c5e0 scan /dev/stdin < kubesec-test.yaml
 ```
@@ -84,17 +84,16 @@ $ docker run -i kubesec/kubesec:512c5e0 scan /dev/stdin < kubesec-test.yaml
 
 Kubesec includes a bundled HTTP server
 
-
 #### CLI usage example:
 
 Start the HTTP server in the background
-
+<!-- markdownlint-disable line-length -->
 ```bash
 $ kubesec http 8080 &
 [1] 12345
 {"severity":"info","timestamp":"2019-05-12T11:58:34.662+0100","caller":"server/server.go:69","message":"Starting HTTP server on port 8080"}
 ```
-
+<!-- markdownlint-enable line-length -->
 Use curl to POST a file to the server
 
 ```bash
@@ -121,6 +120,7 @@ $ curl -sSX POST --data-binary @test/asset/score-0-cap-sys-admin.yml http://loca
 ```
 
 Finally, stop the Kubesec server by killing the background process
+
 ```bash
 $ kill %
 ```
@@ -152,7 +152,6 @@ Kubesec is also available via HTTPS at [v2.kubesec.io/scan](https://v2.kubesec.i
 $ curl -sSX POST --data-binary @"k8s-deployment.yaml" https://v2.kubesec.io/scan
 ```
 
-
 #### Usage example:
 
 Define a BASH function
@@ -175,11 +174,13 @@ $ kubesec ()
 ```
 
 POST a Kubernetes resource to v2.kubesec.io/scan
+
 ```bash
 $ kubesec ./deployment.yml
 ```
 
 Return non-zero status code is the score is not greater than 10
+
 ```bash
 $ kubesec ./score-9-deployment.yml | jq --exit-status '.score > 10' >/dev/null
 # status code 1
