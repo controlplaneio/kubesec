@@ -148,7 +148,7 @@ teardown() {
   done
 }
 
-@test "returns a ordered point score present" {
+@test "returns an ordered point score for all responses" {
   run \
     _app ${TEST_DIR}/asset/score-2-pod-serviceaccount.yml
 
@@ -159,18 +159,27 @@ teardown() {
   done
 }
 
-@test "report deterministic - same output for 3 runs" {
+@test "returns deterministic report output" {
   run \
     _app ${TEST_DIR}/asset/score-2-pod-serviceaccount.yml
-  RUN_1_SIGNATURE=$(echo "$output" | sha1sum)
+
+  assert_success
+
+  RUN_1_SIGNATURE=$(echo "${output}" | sha1sum)
 
   run \
     _app ${TEST_DIR}/asset/score-2-pod-serviceaccount.yml
-  RUN_2_SIGNATURE=$(echo "$output" | sha1sum)
+
+  assert_success
+
+  RUN_2_SIGNATURE=$(echo "${output}" | sha1sum)
 
   run \
     _app ${TEST_DIR}/asset/score-2-pod-serviceaccount.yml
-  RUN_3_SIGNATURE=$(echo "$output" | sha1sum)
+
+  assert_success
+
+  RUN_3_SIGNATURE=$(echo "${output}" | sha1sum)
 
   [ "${RUN_1_SIGNATURE}" == "${RUN_2_SIGNATURE}" ]
   [ "${RUN_1_SIGNATURE}" == "${RUN_3_SIGNATURE}" ]
