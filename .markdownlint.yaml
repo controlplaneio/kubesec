@@ -1,0 +1,8 @@
+default: true
+no-trailing-punctuation: false
+commands-show-output: false
+no-duplicate-heading: false
+single-h1: false
+line-length:
+  line_length: 120
+no-bare-urls: false
