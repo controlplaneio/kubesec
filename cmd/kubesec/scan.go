@@ -10,6 +10,7 @@ import (
 	"io/ioutil"
 	"log"
 	"path/filepath"
+	"sort"
 )
 
 type ScanFailedValidationError struct {
@@ -70,6 +71,18 @@ var scanCmd = &cobra.Command{
 			if r.Score <= 0 {
 				lowScore = true
 				break
+			}
+		}
+
+		// Sort reports into custom order
+		for _, r := range reports {
+			if r.Valid {
+				if len(r.Scoring.Critical) > 1 {
+					sort.Sort(ruler.RuleRefCustomOrder(r.Scoring.Critical))
+				}
+				if len(r.Scoring.Advise) > 1 {
+					sort.Sort(ruler.RuleRefCustomOrder(r.Scoring.Advise))
+				}
 			}
 		}
 

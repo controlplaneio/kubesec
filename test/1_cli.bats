@@ -148,16 +148,39 @@ teardown() {
   done
 }
 
-@test "returns a ordered point score present" {
-  # for #44 (later)
-  skip
+@test "returns an ordered point score for all responses" {
+  run \
+    _app ${TEST_DIR}/asset/score-2-pod-serviceaccount.yml
+
+  assert_line --index 61 --regexp '^.*\"points\": 3$'
+
+  for LINE in 11 16 21 26 31 36 41 46 51 56; do
+    assert_line --index ${LINE} --regexp '^.*\"points\": 1$'
+  done
+}
+
+@test "returns deterministic report output" {
+  run \
+    _app ${TEST_DIR}/asset/score-2-pod-serviceaccount.yml
+
+  assert_success
+
+  RUN_1_SIGNATURE=$(echo "${output}" | sha1sum)
 
   run \
     _app ${TEST_DIR}/asset/score-2-pod-serviceaccount.yml
 
-  assert_line --index 11 --regexp '^.*\"points\": 3$'
+  assert_success
 
-  for LINE in 16 21 26 31 36 41 46 51 56 61; do
-    assert_line --index ${LINE} --regexp '^.*\"points\": 1$'
-  done
+  RUN_2_SIGNATURE=$(echo "${output}" | sha1sum)
+
+  run \
+    _app ${TEST_DIR}/asset/score-2-pod-serviceaccount.yml
+
+  assert_success
+
+  RUN_3_SIGNATURE=$(echo "${output}" | sha1sum)
+
+  [ "${RUN_1_SIGNATURE}" == "${RUN_2_SIGNATURE}" ]
+  [ "${RUN_1_SIGNATURE}" == "${RUN_3_SIGNATURE}" ]
 }
