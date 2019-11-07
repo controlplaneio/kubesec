@@ -256,6 +256,7 @@ Your feedback is always welcome!
 - add rule for `allowPrivilegeEscalation: true` with a score of -7
 - add `points` field to each recommendation so the values that comprise the total score can be seen
 - fix case sensitivity bug in `.capabilities.drop | index("ALL")`
+- output now sorted - lowest `points` first, and same rule reporting order across runs
 
 ## 2.0.0
 
