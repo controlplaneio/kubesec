@@ -164,15 +164,18 @@ teardown() {
     _app ${TEST_DIR}/asset/score-2-pod-serviceaccount.yml
 
   assert_success
-
   RUN_1_SIGNATURE=$(echo "${output}" | sha1sum)
-
+  echo "sig1 was ${RUN_1_SIGNATURE}"
+  echo "out1 was ${output}"
+  
   run \
     _app ${TEST_DIR}/asset/score-2-pod-serviceaccount.yml
 
   assert_success
 
   RUN_2_SIGNATURE=$(echo "${output}" | sha1sum)
+  echo "sig1 was ${RUN_2_SIGNATURE}"
+  echo "out2 was ${output}"
 
   run \
     _app ${TEST_DIR}/asset/score-2-pod-serviceaccount.yml
@@ -180,6 +183,8 @@ teardown() {
   assert_success
 
   RUN_3_SIGNATURE=$(echo "${output}" | sha1sum)
+  echo "sig1 was ${RUN_3_SIGNATURE}"
+  echo "out3 was ${output}"
 
   [ "${RUN_1_SIGNATURE}" == "${RUN_2_SIGNATURE}" ]
   [ "${RUN_1_SIGNATURE}" == "${RUN_3_SIGNATURE}" ]
