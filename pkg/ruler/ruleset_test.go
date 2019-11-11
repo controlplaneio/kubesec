@@ -13,7 +13,15 @@ func TestRuleset_Run(t *testing.T) {
 apiVersion: apps/v1
 kind: Deployment
 spec:
+  selector:
+    matchLabels:
+      app: podinfo
   template:
+    metadata:
+      annotations:
+        prometheus.io/scrape: "true"
+      labels:
+        app: podinfo
     spec:
       hostNetwork: true
       initContainers:
@@ -81,9 +89,7 @@ spec:
 
 	report := NewRuleset(zap.NewNop().Sugar()).generateReport(json)
 
-	// kubeval should error out with:
-	// spec.template.spec.hostNetwork: Invalid type. Expected: boolean, given: null
-	if len(report.Message) < 1 || !strings.Contains(report.Message, "Expected: boolean") {
+	if len(report.Message) < 1 || !strings.Contains(report.Message, "selector is required") {
 		t.Errorf("Got error %v ", report.Message)
 	}
 }
@@ -113,7 +119,7 @@ spec:
 
 	// kubeval should error out with:
 	// spec.replicas: Invalid type. Expected: integer, given: string
-	if len(report.Message) < 1 || !strings.Contains(report.Message, "Expected: integer") {
+	if len(report.Message) < 1 || !strings.Contains(report.Message, "Invalid type") {
 		t.Errorf("Got error %v ", report.Message)
 	}
 }
