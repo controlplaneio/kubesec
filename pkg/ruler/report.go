@@ -36,7 +36,12 @@ func (rr RuleRefCustomOrder) Swap(i, j int) { rr[i], rr[j] = rr[j], rr[i] }
 
 func (rr RuleRefCustomOrder) Less(i, j int) bool {
 	if rr[i].Points != rr[j].Points {
-		return rr[i].Points < rr[j].Points
+		// no integer absolute fn in golang
+		if rr[i].Points > 0 || rr[j].Points > 0 {
+			return rr[i].Points > rr[j].Points
+		} else {
+			return rr[i].Points < rr[j].Points
+		}
 	}
 	return rr[i].Selector < rr[j].Selector
 }
