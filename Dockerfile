@@ -1,4 +1,4 @@
-FROM golang:1.12 AS builder
+FROM golang:1.13 AS builder
 
 WORKDIR /go/src/github.com/controlplaneio/kubesec
 
@@ -11,7 +11,7 @@ RUN dep ensure -v -vendor-only \
 
 # ===
 
-FROM alpine:3.8
+FROM alpine:3.10
 
 RUN addgroup -S app \
     && adduser -S -g app app \

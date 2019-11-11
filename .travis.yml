@@ -2,7 +2,7 @@ sudo: required
 language: go
 
 go:
-- 1.12.x
+- 1.13.x
 
 services:
 - docker
@@ -17,7 +17,6 @@ script:
 - set -e
 - make lint
 - curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
-- dep ensure -vendor-only
 - go test -v -race -coverprofile=coverage.txt -covermode=atomic ./pkg/...
 - make build test-acceptance
 - docker build -t kubesec .
