@@ -1,15 +1,16 @@
 steps:
   - name: 'gcr.io/cloud-builders/docker'
-    args: ['build', '-t', 'gcr.io/$PROJECT_ID/kubesec:${SHORT_SHA}', '.']
-  - name: 'gcr.io/cloud-builders/docker'
     entrypoint: 'bash'
     args:
       - '-c'
       - |
         set -euxo pipefail
         docker build -t gcr.io/$PROJECT_ID/kubesec:${SHORT_SHA} .
+        docker push gcr.io/${PROJECT_ID}/kubesec:${SHORT_SHA}
+
         if [[ "${BRANCH_NAME}" == "master" ]]; then
-          docker push gcr.io/${PROJECT_ID}/kubesec:${SHORT_SHA}
+          docker tag gcr.io/${PROJECT_ID}/kubesec:${SHORT_SHA} gcr.io/${PROJECT_ID}/kubesec:latest
+          docker push gcr.io/${PROJECT_ID}/kubesec:latest
         fi
   - name: 'gcr.io/cloud-builders/gcloud'
     entrypoint: 'bash'
