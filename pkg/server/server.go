@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"sort"
 	"syscall"
 	"time"
 
@@ -100,6 +101,18 @@ func scanHandler(logger *zap.SugaredLogger) http.Handler {
 			w.WriteHeader(http.StatusBadRequest)
 			w.Write([]byte(err.Error() + "\n"))
 			return
+		}
+
+		// Sort reports into custom order (to be refactored!)
+		for _, r := range reports {
+			if r.Valid {
+				if len(r.Scoring.Critical) > 1 {
+					sort.Sort(ruler.RuleRefCustomOrder(r.Scoring.Critical))
+				}
+				if len(r.Scoring.Advise) > 1 {
+					sort.Sort(ruler.RuleRefCustomOrder(r.Scoring.Advise))
+				}
+			}
 		}
 
 		res, err := json.Marshal(reports)
