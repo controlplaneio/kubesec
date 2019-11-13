@@ -62,7 +62,7 @@ teardown() {
 @test "returns error for invalid JSON" {
   run _app ${TEST_DIR}/asset/invalid-input-pod-dump.json
 
-  assert_output --regexp "'api_version': invalid key, expected 'apiVersion'" \
+  assert_output --regexp "Missing 'apiVersion' key" \
     || assert_output --regexp ".*: Invalid type\. .*"
 
   assert_failure_local
