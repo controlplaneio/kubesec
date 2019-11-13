@@ -138,7 +138,7 @@ teardown() {
   assert_lt_zero_points
 }
 
-@test "returns a unordered point score for specific response lines" {
+@test "returns integer point score for specific response lines" {
   # ordering of scoring rules output currently non-determinstic, to be ordered in #44
   run \
     _app ${TEST_DIR}/asset/score-2-pod-serviceaccount.yml
@@ -152,11 +152,48 @@ teardown() {
   run \
     _app ${TEST_DIR}/asset/score-2-pod-serviceaccount.yml
 
-  assert_line --index 61 --regexp '^.*\"points\": 3$'
+  assert_line --index 11 --regexp '^.*\"points\": 3$'
 
-  for LINE in 11 16 21 26 31 36 41 46 51 56; do
+  for LINE in 16 21 26 31 36 41 46 51 56 61; do
     assert_line --index ${LINE} --regexp '^.*\"points\": 1$'
   done
+}
+
+@test "check critical and advisory points listed by magnitude" {
+  run \
+    _app ${TEST_DIR}/asset/critical-double.yml
+
+  # criticals - magnitude sort/lowest number first
+  assert_line --index 11 --regexp '^.*\"points\": -30$'
+  assert_line --index 16 --regexp '^.*\"points\": -7$'
+
+  # advisories - magnitude sort/highest number first
+  assert_line --index 23 --regexp '^.*\"points\": 3$'
+  assert_line --index 28 --regexp '^.*\"points\": 3$'
+  assert_line --index 33 --regexp '^.*\"points\": 1$'  
+}
+
+@test "check critical and advisory points as multi-yaml" {
+  run \
+    _app ${TEST_DIR}/asset/critical-double-multiple.yml
+
+  # report 1 - criticals - magnitude sort/lowest number first
+  assert_line --index 11 --regexp '^.*\"points\": -30$'
+  assert_line --index 16 --regexp '^.*\"points\": -7$'
+
+  # report 1 - advisories - magnitude sort/highest number first
+  assert_line --index 23 --regexp '^.*\"points\": 3$'
+  assert_line --index 28 --regexp '^.*\"points\": 3$'
+  assert_line --index 33 --regexp '^.*\"points\": 1$'  
+
+  # report 2 - criticals - magnitude sort/lowest number first
+  assert_line --index 93 --regexp '^.*\"points\": -30$'
+  assert_line --index 98 --regexp '^.*\"points\": -7$'
+
+  # report 2 - advisories - magnitude sort/highest number first
+  assert_line --index 105 --regexp '^.*\"points\": 3$'
+  assert_line --index 110 --regexp '^.*\"points\": 3$'
+  assert_line --index 115 --regexp '^.*\"points\": 1$'  
 }
 
 @test "returns deterministic report output" {
@@ -180,7 +217,6 @@ teardown() {
   assert_success
 
   RUN_3_SIGNATURE=$(echo "${output}" | sha1sum)
-
   [ "${RUN_1_SIGNATURE}" == "${RUN_2_SIGNATURE}" ]
   [ "${RUN_1_SIGNATURE}" == "${RUN_3_SIGNATURE}" ]
 }

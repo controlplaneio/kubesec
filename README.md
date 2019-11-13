@@ -34,6 +34,7 @@ This uses ControlPlane's hosted API at [v2.kubesec.io/scan](https://v2.kubesec.i
 - [Contributing](#contributing)
 - [Getting Help](#getting-help)
 - [Release Notes](#release-notes)
+  - [2.1.0](#210)
   - [2.0.0](#200)
   - [1.0.0](#100)
 
@@ -251,12 +252,12 @@ Your feedback is always welcome!
 
 # Release Notes
 
-## 2.1.0-dev (unreleased)
+## 2.1.0
 
 - add rule for `allowPrivilegeEscalation: true` with a score of -7
 - add `points` field to each recommendation so the values that comprise the total score can be seen
 - fix case sensitivity bug in `.capabilities.drop | index("ALL")`
-- output now sorted - lowest `points` first, and same rule reporting order across runs
+- rules in `critical` and `advise` lists prioritised and returned in same order across runs
 
 ## 2.0.0
 
