@@ -16,7 +16,6 @@ addons:
 script:
 - set -e
 - make lint
-- curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
 - go test -v -race -coverprofile=coverage.txt -covermode=atomic ./pkg/...
 - make build test-acceptance
 - docker build -t kubesec .
