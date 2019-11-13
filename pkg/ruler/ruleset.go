@@ -10,6 +10,7 @@ import (
 	"github.com/thedevsaddam/gojsonq"
 	"go.uber.org/zap"
 	"runtime"
+	"sort"
 	"strings"
 	"sync"
 )
@@ -350,6 +351,10 @@ func (rs *Ruleset) generateReport(json []byte) Report {
 	} else {
 		report.Message = fmt.Sprintf("Failed with a score of %v points", report.Score)
 	}
+
+	// sort results into priority order
+	sort.Sort(RuleRefCustomOrder(report.Scoring.Critical))
+	sort.Sort(RuleRefCustomOrder(report.Scoring.Advise))
 
 	return report
 }
