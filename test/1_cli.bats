@@ -60,6 +60,11 @@ teardown() {
   assert_zero_points
 }
 
+@test "fails deployment with invalid security context" {
+  run _app ${TEST_DIR}/asset/score-1-dep-invalid-security-context.yml
+  assert_line --index 4 --regexp 'fake: Additional property fake is not allowed'
+}
+
 @test "passes deployment with cgroup resource limits" {
   run _app ${TEST_DIR}/asset/score-1-dep-resource-limit-cpu.yml
   assert_gt_zero_points
