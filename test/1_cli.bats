@@ -173,6 +173,29 @@ teardown() {
   assert_line --index 33 --regexp '^.*\"points\": 1$'  
 }
 
+@test "check critical and advisory points as multi-yaml" {
+  run \
+    _app ${TEST_DIR}/asset/critical-double-multiple.yml
+
+  # report 1 - criticals - magnitude sort/lowest number first
+  assert_line --index 11 --regexp '^.*\"points\": -30$'
+  assert_line --index 16 --regexp '^.*\"points\": -7$'
+
+  # report 1 - advisories - magnitude sort/highest number first
+  assert_line --index 23 --regexp '^.*\"points\": 3$'
+  assert_line --index 28 --regexp '^.*\"points\": 3$'
+  assert_line --index 33 --regexp '^.*\"points\": 1$'  
+
+  # report 2 - criticals - magnitude sort/lowest number first
+  assert_line --index 93 --regexp '^.*\"points\": -30$'
+  assert_line --index 98 --regexp '^.*\"points\": -7$'
+
+  # report 2 - advisories - magnitude sort/highest number first
+  assert_line --index 105 --regexp '^.*\"points\": 3$'
+  assert_line --index 110 --regexp '^.*\"points\": 3$'
+  assert_line --index 115 --regexp '^.*\"points\": 1$'  
+}
+
 @test "returns deterministic report output" {
   run \
     _app ${TEST_DIR}/asset/score-2-pod-serviceaccount.yml
