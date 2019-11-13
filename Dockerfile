@@ -1,13 +1,10 @@
 FROM golang:1.13 AS builder
 
-WORKDIR /go/src/github.com/controlplaneio/kubesec
-
-RUN curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
+WORKDIR /kubesec
 
 COPY . .
 
-RUN dep ensure -v -vendor-only \
-  && CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o kubesec ./cmd/kubesec/*
+RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o kubesec ./cmd/kubesec/*
 
 # ===
 
@@ -19,8 +16,8 @@ RUN addgroup -S app \
 
 WORKDIR /home/app
 
-COPY --from=builder /go/src/github.com/controlplaneio/kubesec/kubesec .
-COPY --from=stefanprodan/kubernetes-json-schema:latest /schemas/master-standalone /schemas/kubernetes-json-schema/master/master-standalone
+COPY --from=builder /kubesec/kubesec .
+COPY --from=stefanprodan/kubernetes-json-schema:latest /schemas/master-standalone /schemas/master-standalone-strict
 
 RUN chown -R app:app ./ /schemas
 
