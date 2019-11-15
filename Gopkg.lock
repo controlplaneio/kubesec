@@ -77,6 +77,14 @@
   version = "v1.0.0"
 
 [[projects]]
+  branch = "master"
+  digest = "1:4959330ba7cf8c93dbbfdeb7e724e27273f736e6fb77261d3ad14533c8f2c293"
+  name = "github.com/in-toto/in-toto-golang"
+  packages = ["in_toto"]
+  pruneopts = "UT"
+  revision = "857cd1cfa826f39ecdf9bd98815eb3e5a312cdb9"
+
+[[projects]]
   digest = "1:870d441fe217b8e689d7949fef6e43efbc787e50f200cb1e70dbca9204a1d6be"
   name = "github.com/inconshreveable/mousetrap"
   packages = ["."]
@@ -276,6 +284,17 @@
 
 [[projects]]
   branch = "master"
+  digest = "1:cd7e85fc3687e062714febdee3e8efeb00a413a2a620d28908fd0258261d2353"
+  name = "golang.org/x/crypto"
+  packages = [
+    "ed25519",
+    "ed25519/internal/edwards25519",
+  ]
+  pruneopts = "UT"
+  revision = "bd318be0434a57050ed475e0f45c3dbb16c09c2e"
+
+[[projects]]
+  branch = "master"
   digest = "1:8b466798e96432c23185ca32826702885299f94eb644c9a8dedb79771dff383a"
   name = "golang.org/x/sys"
   packages = ["unix"]
@@ -311,6 +330,7 @@
   input-imports = [
     "github.com/garethr/kubeval/kubeval",
     "github.com/ghodss/yaml",
+    "github.com/in-toto/in-toto-golang/in_toto",
     "github.com/prometheus/client_golang/prometheus/promhttp",
     "github.com/spf13/cobra",
     "github.com/thedevsaddam/gojsonq",

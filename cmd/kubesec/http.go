@@ -10,6 +10,10 @@ import (
 )
 
 func init() {
+	// FIXME: I don't understand why I need a reference to keypath here,
+	// and the cobra docs don't make it exactly clear.
+	var keypath string
+	httpCmd.Flags().StringVarP(&keypath, "keypath", "k", "", "Path to in-toto link signing key")
 	rootCmd.AddCommand(httpCmd)
 }
 
@@ -33,7 +37,9 @@ var httpCmd = &cobra.Command{
 		stopCh := server.SetupSignalHandler()
 		jsonLogger, _ := NewLogger("info", "json")
 
-		server.ListenAndServe(port, time.Minute, jsonLogger, stopCh)
+		keypath := cmd.Flag("keypath").Value.String()
+
+		server.ListenAndServe(port, time.Minute, jsonLogger, stopCh, keypath)
 		return nil
 	},
 }

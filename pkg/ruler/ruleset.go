@@ -2,11 +2,13 @@ package ruler
 
 import (
 	"bytes"
+	"crypto/sha256"
 	"encoding/json"
 	"fmt"
 	"github.com/controlplaneio/kubesec/pkg/rules"
 	"github.com/garethr/kubeval/kubeval"
 	"github.com/ghodss/yaml"
+	"github.com/in-toto/in-toto-golang/in_toto"
 	"github.com/thedevsaddam/gojsonq"
 	"go.uber.org/zap"
 	"runtime"
@@ -269,6 +271,38 @@ func (rs *Ruleset) Run(fileBytes []byte) ([]Report, error) {
 	}
 
 	return reports, nil
+}
+
+func GenerateInTotoLink(reports []Report, fileBytes []byte) in_toto.Metablock {
+
+	var linkMb in_toto.Metablock
+
+	materials := make(map[string]interface{})
+	request := make(map[string]interface{})
+	request["sha256"] = fmt.Sprintf("%x", sha256.Sum256([]uint8(fileBytes)))
+	materials["request"] = request
+
+	products := make(map[string]interface{})
+	for _, report := range reports {
+		reportArtifact := make(map[string]interface{})
+		// FIXME: encoding as json now for integrity check, this is the wrong way
+		// to compute the hash over the result. Also, some error checking would be
+		// more than ideal.
+		reportValue, _ := json.Marshal(report)
+		reportArtifact["sha256"] =
+			fmt.Sprintf("%x", sha256.Sum256([]uint8(reportValue)))
+		products[report.Object] = reportArtifact
+	}
+
+	linkMb.Signatures = []in_toto.Signature{}
+	linkMb.Signed = in_toto.Link{
+		Type:      "link",
+		Name:      "kubesec",
+		Materials: materials,
+		Products:  products,
+	}
+
+	return linkMb
 }
 
 func (rs *Ruleset) generateReport(json []byte) Report {
