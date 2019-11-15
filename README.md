@@ -34,6 +34,7 @@ This uses ControlPlane's hosted API at [v2.kubesec.io/scan](https://v2.kubesec.i
 - [Contributing](#contributing)
 - [Getting Help](#getting-help)
 - [Release Notes](#release-notes)
+  - [2.3.0](#230)
   - [2.2.0](#220)
   - [2.1.0](#210)
   - [2.0.0](#200)
@@ -252,6 +253,10 @@ If you have any questions about Kubesec and Kubernetes security:
 Your feedback is always welcome!
 
 # Release Notes
+
+## 2.3.0
+
+- moved everything to go modules
 
 ## 2.2.0
 
