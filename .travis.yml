@@ -36,10 +36,3 @@ after_success:
     docker push kubesec/kubesec:${BRANCH_COMMIT};
   fi
 
-deploy:
-- provider: script
-  skip_cleanup: true
-  script: curl -sL http://git.io/goreleaser | bash
-  on:
-    branch: master
-    tags: true
