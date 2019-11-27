@@ -8,15 +8,10 @@ metadata:
   namespace: sock-shop
 spec:
   replicas: 1
-  selector:
-    matchLabels:
-      app: carts-db
   template:
-    metadata:
-      labels:
-        app: carts-db
     spec:
       containers:
       - name: carts-db
         image: mongo
         securityContext:
+          fake: entry

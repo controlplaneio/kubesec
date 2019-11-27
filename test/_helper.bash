@@ -65,7 +65,7 @@ if _is_remote; then
     assert_output --regexp '  "message": "Invalid input"' \
      || assert_output --regexp ".*Invalid input.*" \
      || assert_output --regexp ".*no such file or directory.*" \
-     || assert_output --regexp ".*Kubernetes kind not found.*"
+     || assert_output --regexp ".*Missing 'kind' key.*"
   }
 
   assert_failure_local() { :; }

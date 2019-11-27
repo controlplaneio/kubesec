@@ -116,16 +116,10 @@ build: ## golang build
 	@echo "+ $@"
 	go build -a -o ./dist/kubesec ./cmd/kubesec/*.go
 
-.PHONY: dep
-dep: ## golang and deployment dependencies
-	@echo "+ $@"
-	command -v up &>/dev/null || curl -sfL https://raw.githubusercontent.com/apex/up/master/install.sh | sudo sh
-	dep ensure -v
-
 .PHONY: prune
 prune: ## golang dependency prune
 	@echo "+ $@"
-	dep prune -v
+	go mod tidy
 
 # ---
 

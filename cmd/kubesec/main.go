@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"github.com/garethr/kubeval/kubeval"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -37,12 +36,6 @@ func main() {
 	}
 
 	defer logger.Sync()
-
-	// try set kubeval schemas to local path
-	if _, err := os.Stat("/schemas/kubernetes-json-schema/master/master-standalone"); !os.IsNotExist(err) {
-		kubeval.SchemaLocation = "file:///schemas"
-	}
-	logger.Debugf("Using Kubernetes schema location %s", kubeval.SchemaLocation)
 
 	rootCmd.SetArgs(os.Args[1:])
 	if err := rootCmd.Execute(); err != nil {

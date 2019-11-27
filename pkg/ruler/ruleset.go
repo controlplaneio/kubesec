@@ -6,11 +6,12 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/controlplaneio/kubesec/pkg/rules"
-	"github.com/garethr/kubeval/kubeval"
 	"github.com/ghodss/yaml"
 	"github.com/in-toto/in-toto-golang/in_toto"
+	"github.com/instrumenta/kubeval/kubeval"
 	"github.com/thedevsaddam/gojsonq"
 	"go.uber.org/zap"
+	"os"
 	"runtime"
 	"sort"
 	"strings"
@@ -317,10 +318,19 @@ func (rs *Ruleset) generateReport(json []byte) Report {
 
 	report.Object = getObjectName(json)
 
-	// validate resource
-	results, err := kubeval.Validate(json, "resource.json")
+	// validate resource with kubeval
+	cfg := kubeval.NewDefaultConfig()
+	cfg.FileName = "resource.json"
+	cfg.Strict = true
+
+	// try set kubeval schemas to local path
+	if _, err := os.Stat("/schemas/kubernetes-json-schema/master/master-standalone"); !os.IsNotExist(err) {
+		cfg.SchemaLocation = "file:///schemas"
+	}
+
+	results, err := kubeval.Validate(json, cfg)
 	if err != nil {
-		if strings.Contains(err.Error(), "Problem loading schema from the network") {
+		if strings.Contains(err.Error(), "404 Not Found") {
 			report.Message = "This resource is invalid, unknown schema"
 		} else {
 			report.Message = err.Error()

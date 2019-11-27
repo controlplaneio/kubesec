@@ -2,7 +2,7 @@ sudo: required
 language: go
 
 go:
-- 1.12.x
+- 1.13.x
 
 services:
 - docker
@@ -16,15 +16,18 @@ addons:
 script:
 - set -e
 - make lint
-- curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
-- dep ensure -vendor-only
 - go test -v -race -coverprofile=coverage.txt -covermode=atomic ./pkg/...
 - make build test-acceptance
 - docker build -t kubesec .
-- docker run -dp 8080:8080 kubesec
+- docker run -dp 8080:8080 --name kubesec kubesec
 - sleep 1
-- curl -sSX POST --data-binary @test/asset/score-0-daemonset-host-network.yml http://localhost:8080/scan | grep loopback
-- curl -sSX POST --data-binary @test/asset/invalid-schema.yml http://localhost:8080/scan | grep Invalid
+- REMOTE_URL="http://localhost:8080" make test-remote
+- docker kill kubesec
+- docker build -t kubesecscratch .
+- docker run -dp 8080:8080 --name kubesecscratch kubesecscratch
+- sleep 1
+- REMOTE_URL="http://localhost:8080" make test-remote
+- docker kill kubesecscratch
 
 after_success:
 - if [ -z "$DOCKER_USER" ]; then
@@ -35,4 +38,3 @@ after_success:
     echo $DOCKER_PASS | docker login -u=$DOCKER_USER --password-stdin;
     docker push kubesec/kubesec:${BRANCH_COMMIT};
   fi
-
