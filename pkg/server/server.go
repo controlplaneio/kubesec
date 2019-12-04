@@ -4,15 +4,17 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"github.com/controlplaneio/kubesec/pkg/ruler"
-	"github.com/in-toto/in-toto-golang/in_toto"
-	"go.uber.org/zap"
+	"errors"
 	"io/ioutil"
 	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
+
+	"github.com/controlplaneio/kubesec/pkg/ruler"
+	"github.com/in-toto/in-toto-golang/in_toto"
+	"go.uber.org/zap"
 
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
@@ -81,6 +83,32 @@ func PrettyJSON(b []byte) string {
 	return string(out.Bytes())
 }
 
+func writeError(w http.ResponseWriter, e error) {
+
+}
+
+func retrieveRequestData(r *http.Request) ([]byte, error) {
+	// TODO: Implement breaking change respecting header Content-Type
+	// contentType := r.Header.Get("Content-Type")
+	// err := r.ParseForm()
+	// formData := r.Form.Get(formPrefix)
+
+	formPrefix := "file="
+	formPrefixLen := len(formPrefix)
+
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		return nil, errors.New("Error reading request body")
+	}
+	defer r.Body.Close()
+
+	if string(body[:formPrefixLen]) == formPrefix {
+		body = body[formPrefixLen:]
+	}
+
+	return body, nil
+}
+
 func scanHandler(logger *zap.SugaredLogger, keypath string) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == http.MethodGet {
@@ -95,13 +123,12 @@ func scanHandler(logger *zap.SugaredLogger, keypath string) http.Handler {
 			return
 		}
 
-		body, err := ioutil.ReadAll(r.Body)
+		body, err := retrieveRequestData(r)
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
-			w.Write([]byte("Input error\n"))
+			w.Write([]byte(err.Error() + "\n"))
 			return
 		}
-		defer r.Body.Close()
 
 		var payload interface{}
 		reports, err := ruler.NewRuleset(logger).Run(body)
