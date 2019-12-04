@@ -1,0 +1,14 @@
+file=apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx-apparmor
+  labels:
+    app: nginx
+  annotations:
+    container.apparmor.security.beta.kubernetes.io/nginx: localhost/k8s-nginx
+spec:
+  containers:
+  - name: nginx
+    image: nginx
+    ports:
+    - containerPort: 80
