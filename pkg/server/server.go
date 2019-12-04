@@ -4,15 +4,16 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"github.com/controlplaneio/kubesec/pkg/ruler"
-	"github.com/in-toto/in-toto-golang/in_toto"
-	"go.uber.org/zap"
 	"io/ioutil"
 	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
+
+	"github.com/controlplaneio/kubesec/pkg/ruler"
+	"github.com/in-toto/in-toto-golang/in_toto"
+	"go.uber.org/zap"
 
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
@@ -102,6 +103,11 @@ func scanHandler(logger *zap.SugaredLogger, keypath string) http.Handler {
 			return
 		}
 		defer r.Body.Close()
+
+		// check for special skippable prefix (for kubesec.io v1->v2 compatibility)
+		if string(body[:5]) == "file=" {
+			body = body[5:]
+		}
 
 		var payload interface{}
 		reports, err := ruler.NewRuleset(logger).Run(body)
