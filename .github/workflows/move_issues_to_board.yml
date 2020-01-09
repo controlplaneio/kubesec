@@ -1,0 +1,15 @@
+name: Move new issues into To do
+
+on:
+  issues:
+    types: [ opened ]
+
+jobs:
+  automate-project-columns:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: alex-page/github-project-automation-plus@v0.1.0
+        with:
+          project: kubesec-sample
+          column: To do
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
