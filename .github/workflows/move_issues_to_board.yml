@@ -8,8 +8,8 @@ jobs:
   automate-project-columns:
     runs-on: ubuntu-latest
     steps:
-      - uses: alex-page/github-project-automation-plus@v0.0.3
+      - uses: controlplaneio/github-project-automation-plus@e3d6e6cc7af8b102a00091109cbdb8930bdc1d11
         with:
-          project: kubesec
-          column: To do
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          project: Kubesec
+          column: To Do
+          repo-token: ${{ secrets.PROJECT_AUTOMATION_TOKEN }}
