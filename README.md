@@ -8,7 +8,7 @@
 ### Security risk analysis for Kubernetes resources
 
 <p align="center">
-  <img src="http://casual-hosting.s3.amazonaws.com/kubesec-logo.png">
+  <img src="https://casual-hosting.s3.amazonaws.com/kubesec-logo.png">
 </p>
 
 ## Live demo
