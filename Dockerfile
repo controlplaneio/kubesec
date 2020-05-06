@@ -8,7 +8,7 @@ RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o kubesec ./cmd/kub
 
 # ===
 
-FROM alpine:3.10
+FROM alpine:3.11
 
 RUN addgroup -S app \
     && adduser -S -g app app \
