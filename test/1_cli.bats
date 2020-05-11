@@ -162,6 +162,28 @@ teardown() {
   done
 }
 
+@test "returns integer point score for each pass element" {
+  JSON=$(_app "${TEST_DIR}/asset/score-5-pod-serviceaccount.yml")
+
+  run jq -r .[].scoring.passed[].points <<<"${JSON}"
+
+  for SCORE in $output; do
+    assert bash -c "[[ $SCORE =~ ^[0-9]+$ ]]"
+  done
+}
+
+@test "returns an ordered point score for all passed" {
+  JSON=$(_app "${TEST_DIR}/asset/score-5-pod-serviceaccount.yml")
+
+  run jq -r .[].scoring.passed[].points <<<"${JSON}"
+
+  PREVIOUS=""
+  for CURRENT in $output; do
+    [ "${PREVIOUS}" = "" ] || assert [ "$CURRENT" -le "${PREVIOUS}" ]
+    PREVIOUS="${CURRENT}"
+  done
+}
+
 @test "check critical and advisory points listed by magnitude" {
   run _app "${TEST_DIR}/asset/critical-double.yml"
 
