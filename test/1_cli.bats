@@ -140,21 +140,25 @@ teardown() {
   assert_lt_zero_points
 }
 
-@test "returns integer point score for specific response lines" {
-  run _app "${TEST_DIR}/asset/score-2-pod-serviceaccount.yml"
+@test "returns integer point score for each advice element" {
+  JSON=$(_app "${TEST_DIR}/asset/score-2-pod-serviceaccount.yml")
 
-  for LINE in 11 16 21 26 31 36 41 46 51 56 61; do
-    assert_line --index ${LINE} --regexp '^.*"points": [0-9]+$'
+  run jq -r .[].scoring.advise[].points <<<"${JSON}"
+
+  for SCORE in $output; do
+    assert bash -c "[[ $SCORE =~ ^[0-9]+$ ]]"
   done
 }
 
-@test "returns an ordered point score for all responses" {
-  run _app "${TEST_DIR}/asset/score-2-pod-serviceaccount.yml"
+@test "returns an ordered point score for all advice" {
+  JSON=$(_app "${TEST_DIR}/asset/score-2-pod-serviceaccount.yml")
 
-  assert_line --index 11 --regexp '^.*\"points\": 3$'
+  run jq -r .[].scoring.advise[].points <<<"${JSON}"
 
-  for LINE in 16 21 26 31 36 41 46 51 56 61; do
-    assert_line --index ${LINE} --regexp '^.*\"points\": 1$'
+  PREVIOUS=""
+  for CURRENT in $output; do
+    [ "${PREVIOUS}" = "" ] || assert [ "$CURRENT" -le "${PREVIOUS}" ]
+    PREVIOUS="${CURRENT}"
   done
 }
 
