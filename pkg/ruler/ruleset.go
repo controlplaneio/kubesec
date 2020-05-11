@@ -5,17 +5,18 @@ import (
 	"crypto/sha256"
 	"encoding/json"
 	"fmt"
+	"os"
+	"runtime"
+	"sort"
+	"strings"
+	"sync"
+
 	"github.com/controlplaneio/kubesec/pkg/rules"
 	"github.com/ghodss/yaml"
 	"github.com/in-toto/in-toto-golang/in_toto"
 	"github.com/instrumenta/kubeval/kubeval"
 	"github.com/thedevsaddam/gojsonq"
 	"go.uber.org/zap"
-	"os"
-	"runtime"
-	"sort"
-	"strings"
-	"sync"
 )
 
 type Ruleset struct {
@@ -252,8 +253,8 @@ func NewRuleset(logger *zap.SugaredLogger) *Ruleset {
 func (rs *Ruleset) Run(fileBytes []byte) ([]Report, error) {
 	reports := make([]Report, 0)
 
-	isJson := json.Valid(fileBytes)
-	if isJson {
+	isJSON := json.Valid(fileBytes)
+	if isJSON {
 		report := rs.generateReport(fileBytes)
 		reports = append(reports, report)
 	} else {
@@ -312,6 +313,7 @@ func (rs *Ruleset) generateReport(json []byte) Report {
 		Score:  0,
 		Scoring: RuleScoring{
 			Advise:   make([]RuleRef, 0),
+			Passed:   make([]RuleRef, 0),
 			Critical: make([]RuleRef, 0),
 		},
 	}
@@ -373,6 +375,7 @@ func (rs *Ruleset) generateReport(json []byte) Report {
 			if ruleRef.Points >= 0 {
 				rs.logger.Debugf("positive score rule matched %v (%v points)", ruleRef.Selector, ruleRef.Points)
 				report.Score += ruleRef.Points
+				report.Scoring.Passed = append(report.Scoring.Passed, ruleRef)
 			}
 
 			if ruleRef.Points < 0 {
@@ -398,6 +401,7 @@ func (rs *Ruleset) generateReport(json []byte) Report {
 
 	// sort results into priority order
 	sort.Sort(RuleRefCustomOrder(report.Scoring.Critical))
+	sort.Sort(RuleRefCustomOrder(report.Scoring.Passed))
 	sort.Sort(RuleRefCustomOrder(report.Scoring.Advise))
 
 	return report

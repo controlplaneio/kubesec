@@ -10,6 +10,7 @@ type Report struct {
 
 type RuleScoring struct {
 	Critical []RuleRef `json:"critical,omitempty"`
+	Passed   []RuleRef `json:"passed,omitempty"`
 	Advise   []RuleRef `json:"advise,omitempty"`
 }
 
@@ -39,9 +40,8 @@ func (rr RuleRefCustomOrder) Less(i, j int) bool {
 		// no integer absolute fn in golang
 		if rr[i].Points > 0 || rr[j].Points > 0 {
 			return rr[i].Points > rr[j].Points
-		} else {
-			return rr[i].Points < rr[j].Points
 		}
+		return rr[i].Points < rr[j].Points
 	}
 	return rr[i].Selector < rr[j].Selector
 }
