@@ -3,7 +3,7 @@
 load './bin/bats-support/load'
 load './bin/bats-assert/load'
 
-TEST_DIR="."
+export TEST_DIR="."
 
 BIN_UNDER_TEST='./dist/kubesec scan'
 
