@@ -17,16 +17,16 @@ _global_teardown() {
     fi
 }
 
+_get_remote_url() {
+  echo "${REMOTE_URL:-https://v2.kubesec.io/scan}"
+}
+
 _is_local() {
   [[ "${REMOTE_URL:-}" == "" ]]
 }
 
 _is_remote() {
   ! _is_local
-}
-
-_get_remote_url() {
-  echo "${REMOTE_URL:-https://v2.kubesec.io/scan}"
 }
 
 if _is_remote; then
