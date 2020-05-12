@@ -53,7 +53,7 @@ teardown() {
 @test "TODO: passes DaemonSet with apparmor loader" {
   skip
   https://github.com/kubernetes/contrib/blob/master/apparmor/loader/example-daemon.yaml
-  run _app ${TEST_DIR}/asset/score-0-daemonset-
+  run _app "${TEST_DIR}/asset/score-0-daemonset-"
   assert_zero_points
 }
 
@@ -62,14 +62,14 @@ teardown() {
 # TODO: deployment serviceAccountName pass
 @test "TODO: passes Deployment with serviceaccountname" {
   skip
-  run _app ${TEST_DIR}/asset/score-2-dep-serviceaccount.yml
+  run _app "${TEST_DIR}/asset/score-2-dep-serviceaccount.yml"
   assert_zero_points
 }
 
 # TODO: tests for all the permutations of this file
 @test "TODO: fails DaemonSet with loads o' permutations" {
   skip
-  run _app ${TEST_DIR}/asset/score-0-daemonset-
+  run _app "${TEST_DIR}/asset/score-0-daemonset-"
   assert_zero_points
 }
 

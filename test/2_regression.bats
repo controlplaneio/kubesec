@@ -11,35 +11,35 @@ teardown() {
 }
 
 @test "only valid types - allow Pod" {
-  run _app ${TEST_DIR}/asset/score-1-pod-default.yml
+  run _app "${TEST_DIR}/asset/score-1-pod-default.yml"
   refute_output --regexp ".*Only kinds .* accepted.*" \
     || assert_output --regexp ".*This resource kind is not supported.*"
   assert_success
 }
 
 @test "only valid types - allow Deployment" {
-  run _app ${TEST_DIR}/asset/score-1-dep-default.yml
+  run _app "${TEST_DIR}/asset/score-1-dep-default.yml"
   refute_output --regexp ".*Only kinds .* accepted.*" \
     || assert_output --regexp ".*This resource kind is not supported.*"
   assert_success
 }
 
 @test "only valid types - allow StatefulSet" {
-  run _app ${TEST_DIR}/asset/score-1-statefulset-default.yml
+  run _app "${TEST_DIR}/asset/score-1-statefulset-default.yml"
   refute_output --regexp ".*Only kinds .* accepted.*" \
     || assert_output --regexp ".*This resource kind is not supported.*"
   assert_success
 }
 
 @test "only valid types - allow DaemonSet" {
-  run _app ${TEST_DIR}/asset/score-1-daemonset-default.yml
+  run _app "${TEST_DIR}/asset/score-1-daemonset-default.yml"
   refute_output --regexp ".*Only kinds .* accepted.*" \
     || assert_output --regexp ".*This resource kind is not supported.*"
   assert_success
 }
 
 @test "only valid types - deny PodSecurityPolicy" {
-  run _app ${TEST_DIR}/asset/score-0-podsecuritypolicy-permissive.yml
+  run _app "${TEST_DIR}/asset/score-0-podsecuritypolicy-permissive.yml"
   assert_output --regexp ".*Only kinds .* accepted.*" \
     || assert_output --regexp ".*This resource kind is not supported.*"
   if _is_local; then
@@ -48,19 +48,19 @@ teardown() {
 }
 
 @test "passes 1.11 format daemonset" {
-  run _app ${TEST_DIR}/asset/versioned/score-0-daemonset-v1.11.yml
+  run _app "${TEST_DIR}/asset/versioned/score-0-daemonset-v1.11.yml"
   assert_zero_points
 }
 
 @test "passes 1.11 format statefulset" {
-  run _app ${TEST_DIR}/asset/versioned/score-0-statefulset-v1.11.yml
+  run _app "${TEST_DIR}/asset/versioned/score-0-statefulset-v1.11.yml"
   assert_zero_points
 }
 
 # ---
 
 @test "returns error for invalid JSON" {
-  run _app ${TEST_DIR}/asset/invalid-input-pod-dump.json
+  run _app "${TEST_DIR}/asset/invalid-input-pod-dump.json"
 
   assert_output --regexp "Missing 'apiVersion' key" \
     || assert_output --regexp ".*: Invalid type\. .*"
@@ -69,19 +69,19 @@ teardown() {
 }
 
 @test "returns error YAML control characters" {
-  run _app ${TEST_DIR}/asset/invalid-input-no-control-characters.json
+  run _app "${TEST_DIR}/asset/invalid-input-no-control-characters.json"
 
   assert_invalid_input
 }
 
 @test "passes bug dump twice [1/2]" {
-  run _app ${TEST_DIR}/asset/bug-dump-2.json
+  run _app "${TEST_DIR}/asset/bug-dump-2.json"
   assert_success
   assert_gt_zero_points
 }
 
 @test "passes bug dump twice [2/2]" {
-  run _app ${TEST_DIR}/asset/bug-dump-2.json
+  run _app "${TEST_DIR}/asset/bug-dump-2.json"
   assert_success
   assert_gt_zero_points
 }
@@ -100,7 +100,7 @@ teardown() {
 }
 
 @test "errors with empty file" {
-  run _app ${TEST_DIR}/asset/empty-file
+  run _app "${TEST_DIR}/asset/empty-file"
   assert_failure_local
   assert_invalid_input
 }
@@ -110,7 +110,7 @@ teardown() {
     skip
   fi
 
-  run _app ${TEST_DIR}/asset/empty-file --json
+  run _app "${TEST_DIR}/asset/empty-file" --json
   assert_invalid_input
   assert_failure_local
 }
@@ -120,7 +120,7 @@ teardown() {
     skip
   fi
 
-  run _app ${TEST_DIR}/asset/empty-file
+  run _app "${TEST_DIR}/asset/empty-file"
   assert_invalid_input
   assert_failure_local
 }
@@ -130,7 +130,7 @@ teardown() {
     skip
   fi
 
-  run _app ${TEST_DIR}/asset/empty-json-file --json
+  run _app "${TEST_DIR}/asset/empty-json-file" --json
   assert_invalid_input
   assert_failure
 }
@@ -140,7 +140,7 @@ teardown() {
     skip
   fi
 
-  run _app ${TEST_DIR}/asset/empty-json-file
+  run _app "${TEST_DIR}/asset/empty-json-file"
   assert_invalid_input
   assert_success
 }
@@ -151,7 +151,7 @@ teardown() {
   fi
 
   run _app \
-    ${TEST_DIR}/asset/score-0-daemonset-volume-host-docker-socket.yml \
+    "${TEST_DIR}/asset/score-0-daemonset-volume-host-docker-socket.yml" \
     -w '%{content_type}' \
     -o /dev/null
 
@@ -163,7 +163,7 @@ teardown() {
     skip
   fi
 
-  run _app ${TEST_DIR}/asset/form-prefix-file.yml
+  run _app "${TEST_DIR}/asset/form-prefix-file.yml"
   assert_gt_zero_points
   assert_success
 }
@@ -173,7 +173,7 @@ teardown() {
     skip
   fi
 
-  run _app ${TEST_DIR}/asset/form-prefix-file.json
+  run _app "${TEST_DIR}/asset/form-prefix-file.json"
   assert_gt_zero_points
   assert_success
 }
@@ -183,7 +183,7 @@ teardown() {
     skip
   fi
 
-  run _app ${TEST_DIR}/asset/form-prefix-not-file.yml
+  run _app "${TEST_DIR}/asset/form-prefix-not-file.yml"
   assert_output --regexp ".*resource.json: Missing 'apiVersion' key.*"
   assert_success
 }
@@ -193,7 +193,7 @@ teardown() {
     skip
   fi
 
-  run _app ${TEST_DIR}/asset/form-prefix-not-file.json
+  run _app "${TEST_DIR}/asset/form-prefix-not-file.json"
   assert_output "yaml: line 2: mapping values are not allowed in this context"
   assert_success
 }

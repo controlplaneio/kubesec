@@ -50,7 +50,7 @@ Kubesec is available as a:
 - [Kubernetes Admission Controller](https://github.com/controlplaneio/kubesec-webhook)
 - [Kubectl plugin](https://github.com/controlplaneio/kubectl-kubesec)
 
-Or install the latest commit from Github with `go get -u github.com/controlplaneio/kubesec/cmd/kubesec`
+Or install the latest commit from GitHub with `go get -u github.com/controlplaneio/kubesec/cmd/kubesec`
 
 #### Command line usage:
 
@@ -235,7 +235,7 @@ Thanks to our awesome contributors!
 
 ## Contributing
 
-Kubesecis Apache 2.0 licensed and accepts contributions via GitHub pull requests.
+Kubesec is Apache 2.0 licensed and accepts contributions via GitHub pull requests.
 
 When submitting bug reports please include as much details as possible:
 
@@ -254,6 +254,11 @@ If you have any questions about Kubesec and Kubernetes security:
 Your feedback is always welcome!
 
 # Release Notes
+
+## 2.4.0
+
+- added passed to the JSON output
+- note: repo tests now require `jq` - **only concerns maintainers**
 
 ## 2.3.1
 
