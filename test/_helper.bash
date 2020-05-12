@@ -29,6 +29,20 @@ _is_remote() {
   ! _is_local
 }
 
+_test_description_matches_regex() {
+  [[ "${BATS_TEST_DESCRIPTION}" =~ ${1} ]]
+}
+
+skip_if_not_local() {
+  assert _test_description_matches_regex "[ |(]local[)|,]"
+  _is_local || skip
+}
+
+skip_if_not_remote() {
+  assert _test_description_matches_regex "[ |(]remote[)|,]"
+  _is_remote || skip
+}
+
 if _is_remote; then
 
   _app() {
