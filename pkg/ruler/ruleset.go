@@ -281,8 +281,9 @@ func GenerateInTotoLink(reports []Report, fileBytes []byte) in_toto.Metablock {
 
 	materials := make(map[string]interface{})
 	request := make(map[string]interface{})
+	fileBytes = append(fileBytes, 10) // FIXME: we need an additional newline here?!
 	request["sha256"] = fmt.Sprintf("%x", sha256.Sum256([]uint8(fileBytes)))
-	materials["request"] = request
+	materials["deployment.yml"] = request
 
 	products := make(map[string]interface{})
 	for _, report := range reports {
@@ -298,10 +299,13 @@ func GenerateInTotoLink(reports []Report, fileBytes []byte) in_toto.Metablock {
 
 	linkMb.Signatures = []in_toto.Signature{}
 	linkMb.Signed = in_toto.Link{
-		Type:      "link",
-		Name:      "kubesec",
-		Materials: materials,
-		Products:  products,
+		Type:        "link",
+		Name:        "kubesec",
+		Materials:   materials,
+		Products:    products,
+		ByProducts:  map[string]interface{}{},
+		Command:     []string{},
+		Environment: map[string]interface{}{},
 	}
 
 	return linkMb
