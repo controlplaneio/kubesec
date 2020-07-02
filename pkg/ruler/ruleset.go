@@ -281,8 +281,15 @@ func GenerateInTotoLink(reports []Report, fileBytes []byte) in_toto.Metablock {
 
 	materials := make(map[string]interface{})
 	request := make(map[string]interface{})
-	fileBytes = append(fileBytes, 10) // FIXME: we need an additional newline here?!
+
+	// INFO: it appears that the last newline of the yaml is removed when
+	// receiving, which makes the integrity check fail on other implementations
+	fileBytes = append(fileBytes, 10)
+
 	request["sha256"] = fmt.Sprintf("%x", sha256.Sum256([]uint8(fileBytes)))
+
+	// TODO: the filename should be a parameter passed to the report (as it is
+	// very likely other filenames will exist in supply chains)
 	materials["deployment.yml"] = request
 
 	products := make(map[string]interface{})
@@ -299,11 +306,13 @@ func GenerateInTotoLink(reports []Report, fileBytes []byte) in_toto.Metablock {
 
 	linkMb.Signatures = []in_toto.Signature{}
 	linkMb.Signed = in_toto.Link{
-		Type:        "link",
-		Name:        "kubesec",
-		Materials:   materials,
-		Products:    products,
-		ByProducts:  map[string]interface{}{},
+		Type:       "link",
+		Name:       "kubesec",
+		Materials:  materials,
+		Products:   products,
+		ByProducts: map[string]interface{}{},
+		// FIXME: the command should include whether this is called through the
+		// server or a standalone tool.
 		Command:     []string{},
 		Environment: map[string]interface{}{},
 	}
