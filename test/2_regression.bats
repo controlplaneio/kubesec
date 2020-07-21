@@ -105,6 +105,34 @@ teardown() {
   assert_invalid_input
 }
 
+@test "can read piped input - (yaml, local)" {
+  skip_if_not_local
+  FILE="${TEST_DIR}/asset/allowPrivilegeEscalation.yaml"
+  run bash -c "cat \"${FILE}\" | ${BIN_DIR:-}/kubesec scan -"
+  assert_lt_zero_points
+}
+
+@test "can read piped input /dev/stdin (yaml, local)" {
+  skip_if_not_local
+  FILE="${TEST_DIR}/asset/allowPrivilegeEscalation.yaml"
+  run bash -c "cat \"${FILE}\" | ${BIN_DIR:-}/kubesec scan /dev/stdin"
+  assert_lt_zero_points
+}
+
+@test "can read redirected input - (yaml, local)" {
+  skip_if_not_local
+  FILE="${TEST_DIR}/asset/allowPrivilegeEscalation.yaml"
+  run bash -c "${BIN_DIR:-}/kubesec scan - <\"${FILE}\""
+  assert_lt_zero_points
+}
+
+@test "can read redirected input /dev/stdin (yaml, local)" {
+  skip_if_not_local
+  FILE="${TEST_DIR}/asset/allowPrivilegeEscalation.yaml"
+  run bash -c "${BIN_DIR:-}/kubesec scan /dev/stdin <\"${FILE}\""
+  assert_lt_zero_points
+}
+
 @test "errors with empty file (json, local)" {
   skip_if_not_local
 
