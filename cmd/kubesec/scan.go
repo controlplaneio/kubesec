@@ -3,13 +3,15 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
+	"log"
+	"os"
+	"path/filepath"
+
 	"github.com/controlplaneio/kubesec/pkg/ruler"
 	"github.com/controlplaneio/kubesec/pkg/server"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
-	"io/ioutil"
-	"log"
-	"path/filepath"
 )
 
 type ScanFailedValidationError struct {
@@ -24,6 +26,43 @@ var debug bool
 func init() {
 	scanCmd.Flags().BoolVar(&debug, "debug", false, "turn on debug logs")
 	rootCmd.AddCommand(scanCmd)
+}
+
+// File holds the name and contents
+type File struct {
+	fileName  string
+	fileBytes []byte
+}
+
+func getInput(args []string) (File, error) {
+	var file File
+
+	if len(args) == 1 && (args[0] == "-" || args[0] == "/dev/stdin") {
+		fileBytes, err := ioutil.ReadAll(os.Stdin)
+		if err != nil {
+			return file, err
+		}
+		file = File{
+			fileName:  "STDIN",
+			fileBytes: fileBytes,
+		}
+		return file, nil
+	}
+
+	filename, err := filepath.Abs(args[0])
+	if err != nil {
+		return file, err
+	}
+
+	fileBytes, err := ioutil.ReadFile(filename)
+	if err != nil {
+		return file, err
+	}
+	file = File{
+		fileName:  filename,
+		fileBytes: fileBytes,
+	}
+	return file, nil
 }
 
 var scanCmd = &cobra.Command{
@@ -43,26 +82,21 @@ var scanCmd = &cobra.Command{
 			logger = z.Sugar()
 		}
 
-		filename, err := filepath.Abs(args[0])
-		if err != nil {
-			return err
-		}
-
 		rootCmd.SilenceErrors = true
 		rootCmd.SilenceUsage = true
 
-		fileBytes, err := ioutil.ReadFile(filename)
+		file, err := getInput(args)
 		if err != nil {
 			return err
 		}
 
-		reports, err := ruler.NewRuleset(logger).Run(fileBytes)
+		reports, err := ruler.NewRuleset(logger).Run(file.fileBytes)
 		if err != nil {
 			return err
 		}
 
 		if len(reports) == 0 {
-			return fmt.Errorf("invalid input %s", filename)
+			return fmt.Errorf("invalid input %s", file.fileName)
 		}
 
 		var lowScore bool
