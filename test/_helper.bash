@@ -3,7 +3,7 @@
 load './bin/bats-support/load'
 load './bin/bats-assert/load'
 
-TEST_DIR="."
+export TEST_DIR="."
 
 BIN_UNDER_TEST='./dist/kubesec scan'
 
@@ -17,6 +17,10 @@ _global_teardown() {
     fi
 }
 
+_get_remote_url() {
+  echo "${REMOTE_URL:-https://v2.kubesec.io/scan}"
+}
+
 _is_local() {
   [[ "${REMOTE_URL:-}" == "" ]]
 }
@@ -25,8 +29,18 @@ _is_remote() {
   ! _is_local
 }
 
-_get_remote_url() {
-  echo "${REMOTE_URL:-https://v2.kubesec.io/scan}"
+_test_description_matches_regex() {
+  [[ "${BATS_TEST_DESCRIPTION}" =~ ${1} ]]
+}
+
+skip_if_not_local() {
+  assert _test_description_matches_regex "[ |(]local[)|,]"
+  _is_local || skip
+}
+
+skip_if_not_remote() {
+  assert _test_description_matches_regex "[ |(]remote[)|,]"
+  _is_remote || skip
 }
 
 if _is_remote; then

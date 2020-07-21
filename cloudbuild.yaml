@@ -31,6 +31,9 @@ steps:
       - '-c'
       - |
         set -euxo pipefail
+        JQ_VER="1.6"
         if [[ "${BRANCH_NAME}" == "master" ]]; then
+          curl -Lo /usr/local/bin/jq "https://github.com/stedolan/jq/releases/download/jq-$${JQ_VER}/jq-linux64"
+          chmod +x /usr/local/bin/jq
           make test-remote
         fi
