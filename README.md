@@ -2,7 +2,9 @@
 
 <!-- markdownlint-disable no-inline-html header-increment -->
 <!-- markdownlint-disable line-length -->
+
 #### <center>🚨 v1 API is deprecated, please read the <a href="https://github.com/controlplaneio/kubesec/blob/master/README.md#release-notes" target="_blank">release notes</a> 🚨</center>
+
 <!-- markdownlint-enable line-length -->
 
 ### Security risk analysis for Kubernetes resources
@@ -34,6 +36,8 @@ This uses ControlPlane's hosted API at [v2.kubesec.io/scan](https://v2.kubesec.i
 - [Contributing](#contributing)
 - [Getting Help](#getting-help)
 - [Release Notes](#release-notes)
+  - [2.5.0](#250)
+  - [2.4.0](#240)
   - [2.3.1](#231)
   - [2.3.0](#230)
   - [2.2.0](#220)
@@ -91,13 +95,17 @@ Kubesec includes a bundled HTTP server
 #### CLI usage example:
 
 Start the HTTP server in the background
+
 <!-- markdownlint-disable line-length -->
+
 ```bash
 $ kubesec http 8080 &
 [1] 12345
 {"severity":"info","timestamp":"2019-05-12T11:58:34.662+0100","caller":"server/server.go:69","message":"Starting HTTP server on port 8080"}
 ```
+
 <!-- markdownlint-enable line-length -->
+
 Use curl to POST a file to the server
 
 ```bash
@@ -255,6 +263,16 @@ Your feedback is always welcome!
 
 # Release Notes
 
+## 2.6.0
+
+- allow for piping into `kubesec scan` using `-` or `/dev/stdin`
+  - `cat somefile.yml | kubesec scan -`
+  - `cat somefile.yml | kubesec scan /dev/stdin`
+
+## 2.5.0
+
+- improved in-toto integration
+
 ## 2.4.0
 
 - added passed to the JSON output
@@ -290,5 +308,5 @@ Your feedback is always welcome!
 
 ## 1.0.0
 
-- initial release at https://kubesec.io
+- initial release at <https://kubesec.io>
 - closed source
