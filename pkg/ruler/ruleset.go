@@ -258,7 +258,8 @@ func (rs *Ruleset) Run(fileBytes []byte) ([]Report, error) {
 		report := rs.generateReport(fileBytes)
 		reports = append(reports, report)
 	} else {
-		bits := bytes.Split(fileBytes, []byte(detectLineBreak(fileBytes)+"---"+detectLineBreak(fileBytes)))
+		lineBreak := detectLineBreak(fileBytes)
+		bits := bytes.Split(fileBytes, []byte(lineBreak+"---"+lineBreak))
 		for _, doc := range bits {
 			if len(doc) < 1 {
 				return nil, &InvalidInputError{}
