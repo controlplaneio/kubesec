@@ -5,7 +5,7 @@ load './bin/bats-assert/load'
 
 export TEST_DIR="."
 
-BIN_UNDER_TEST='./dist/kubesec scan'
+export BIN_DIR='../dist/'
 
 _global_setup() {
     [ ! -f ${BATS_PARENT_TMPNAME}.skip ] || skip "skip remaining tests"
@@ -88,11 +88,11 @@ else
 
   _app() {
     local ARGS="${@:-}"
-    if [[ "${BIN_UNDER_TEST}" != "" ]]; then
+    if [[ "${BIN_DIR}" != "" ]]; then
       # remove --json flags
       ARGS=$(echo "${ARGS}" | sed -E 's,--json,,g')
     fi
-    ./../${BIN_UNDER_TEST:-false} "${ARGS}";
+    "${BIN_DIR}"/kubesec scan "${ARGS}";
   }
 
   assert_gt_zero_points() {
