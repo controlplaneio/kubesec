@@ -93,6 +93,13 @@ teardown() {
   assert_failure_local
 }
 
+@test "errors with no filename - output logs (local)" {
+  skip_if_not_local
+  run "${BIN_DIR:-}"/kubesec scan
+  assert_failure
+  assert_line "Error: file path is required"
+}
+
 @test "errors with invalid file" {
   run _app somefile.yaml
   assert_failure_local
