@@ -140,6 +140,46 @@ teardown() {
   assert_lt_zero_points
 }
 
+@test "can read multiple inputs (yaml, local)" {
+  skip_if_not_local
+
+  run _app \
+    "${TEST_DIR}/asset/score-1-cap-drop-all.yml" \
+    "${TEST_DIR}/asset/score-1-daemonset-default.yml"
+
+  assert [ "$(jq -r 'length' <<<"${output}")" == "2" ]
+  assert [ "$(jq -r '.[0].valid' <<<"${output}")" == "true" ]
+  assert [ "$(jq -r '.[1].valid' <<<"${output}")" == "true" ]
+}
+
+@test "can read multiple inputs plus invalid (yaml, local)" {
+  skip_if_not_local
+
+  run _app \
+    "${TEST_DIR}/asset/score-1-cap-drop-all.yml" \
+    "${TEST_DIR}/asset/score-1-daemonset-default.yml" \
+    "${TEST_DIR}/asset/invalid-schema.yml"
+
+  select_obj_valid() {
+    jq -r ".[] | select(.object == \"${1}\") | .valid" <<<"${output}"
+  }
+  assert [ "$(jq -r 'length' <<<"${output}")" == "3" ]
+  assert [ "$(select_obj_valid "Deployment/demo.default")" == "false" ]
+  assert [ "$(select_obj_valid "DaemonSet/undefined.default")" == "true" ]
+  assert [ "$(select_obj_valid "Pod/security-context-demo.default")" == "true" ]
+}
+
+@test "can read multiple inputs plus multi file (yaml, local)" {
+  skip_if_not_local
+
+  run _app \
+    "${TEST_DIR}/asset/score-1-cap-drop-all.yml" \
+    "${TEST_DIR}/asset/score-1-daemonset-default.yml" \
+    "${TEST_DIR}/asset/multi.yml"
+
+  assert [ "$(jq -r 'length' <<<"${output}")" == "7" ]
+}
+
 @test "errors with empty file (json, local)" {
   skip_if_not_local
 
