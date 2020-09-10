@@ -255,6 +255,11 @@ func (rs *Ruleset) Run(fileBytes []byte) ([]Report, error) {
 
 	isJSON := json.Valid(fileBytes)
 	if isJSON {
+		var obj map[string]interface{}
+		json.Unmarshal(fileBytes, &obj)
+		if len(obj) == 0 {
+			return nil, &InvalidInputError{}
+		}
 		report := rs.generateReport(fileBytes)
 		reports = append(reports, report)
 	} else {
