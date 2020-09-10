@@ -129,9 +129,15 @@ func scanHandler(logger *zap.SugaredLogger, keypath string) http.Handler {
 			w.Write([]byte(err.Error() + "\n"))
 			return
 		}
+		files := []ruler.File{
+			{
+				FileName:  "STDIN",
+				FileBytes: body,
+			},
+		}
 
 		var payload interface{}
-		reports, err := ruler.NewRuleset(logger).Run(body)
+		reports, err := ruler.NewRuleset(logger).Run(files)
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
 			w.Write([]byte(err.Error() + "\n"))

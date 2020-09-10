@@ -27,6 +27,12 @@ type Ruleset struct {
 type InvalidInputError struct {
 }
 
+// File holds the name and contents
+type File struct {
+	FileName  string
+	FileBytes []byte
+}
+
 func (e *InvalidInputError) Error() string {
 	return fmt.Sprintf("Invalid input")
 }
@@ -250,7 +256,36 @@ func NewRuleset(logger *zap.SugaredLogger) *Ruleset {
 	}
 }
 
-func (rs *Ruleset) Run(fileBytes []byte) ([]Report, error) {
+// Run processes files
+func (rs *Ruleset) Run(files []File) ([]Report, error) {
+	ch := make(chan []Report, len(files))
+	var wg sync.WaitGroup
+	for _, file := range files {
+		wg.Add(1)
+		// go rs.evall(file, ch, &wg)
+		go func(file File, ch chan []Report, wg *sync.WaitGroup) {
+			defer wg.Done()
+
+			rs.logger.Debugf("processing fileeee: %s", file.FileName)
+			reports, err := rs.processFile(file.FileBytes)
+			if err != nil {
+				return
+			}
+
+			ch <- reports
+		}(file, ch, &wg)
+	}
+	wg.Wait()
+	close(ch)
+	var r []Report
+	for reports := range ch {
+		r = append(r, reports...)
+	}
+
+	return r, nil
+}
+
+func (rs *Ruleset) processFile(fileBytes []byte) ([]Report, error) {
 	reports := make([]Report, 0)
 
 	isJSON := json.Valid(fileBytes)
@@ -371,9 +406,9 @@ func (rs *Ruleset) generateReport(json []byte) Report {
 
 	if len(report.Message) > 0 {
 		return report
-	} else {
-		report.Valid = true
 	}
+
+	report.Valid = true
 
 	// run rules in parallel
 	ch := make(chan RuleRef, len(rs.Rules))
