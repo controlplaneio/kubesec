@@ -83,10 +83,6 @@ func PrettyJSON(b []byte) string {
 	return out.String()
 }
 
-func writeError(w http.ResponseWriter, e error) {
-
-}
-
 func retrieveRequestData(r *http.Request) ([]byte, error) {
 	// TODO: Implement breaking change respecting header Content-Type
 	// contentType := r.Header.Get("Content-Type")
@@ -155,7 +151,11 @@ func scanHandler(logger *zap.SugaredLogger, keypath string) http.Handler {
 			}
 
 			link := ruler.GenerateInTotoLink(reports, body)
-			link.Sign(key)
+			err = link.Sign(key)
+			if err != nil {
+				w.WriteHeader(http.StatusInternalServerError)
+				return
+			}
 			payload = map[string]interface{}{
 				"reports": reports,
 				"link":    link,
