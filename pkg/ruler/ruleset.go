@@ -258,28 +258,13 @@ func NewRuleset(logger *zap.SugaredLogger) *Ruleset {
 
 // Run processes files
 func (rs *Ruleset) Run(files []File) ([]Report, error) {
-	ch := make(chan []Report, len(files))
-	var wg sync.WaitGroup
-	for _, file := range files {
-		wg.Add(1)
-		// go rs.evall(file, ch, &wg)
-		go func(file File, ch chan []Report, wg *sync.WaitGroup) {
-			defer wg.Done()
-
-			rs.logger.Debugf("processing fileeee: %s", file.FileName)
-			reports, err := rs.processFile(file.FileBytes)
-			if err != nil {
-				return
-			}
-
-			ch <- reports
-		}(file, ch, &wg)
-	}
-	wg.Wait()
-	close(ch)
 	var r []Report
-	for reports := range ch {
-		r = append(r, reports...)
+	for _, file := range files {
+		rs.logger.Debugf("processing file: %s", file.FileName)
+		reports, err := rs.processFile(file.FileBytes)
+		if err == nil {
+			r = append(r, reports...)
+		}
 	}
 
 	return r, nil
