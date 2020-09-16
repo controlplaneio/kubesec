@@ -80,7 +80,7 @@ func SetupSignalHandler() (stopCh <-chan struct{}) {
 func PrettyJSON(b []byte) string {
 	var out bytes.Buffer
 	json.Indent(&out, b, "", "  ")
-	return string(out.Bytes())
+	return out.String()
 }
 
 func writeError(w http.ResponseWriter, e error) {
