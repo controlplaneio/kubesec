@@ -30,7 +30,7 @@ func SeccompAny(json []byte) int {
 		// TODO(ajm) match end of string in regex
 		isNamedPodMatch, _ := regexp.MatchString(startWordBoundaryRegex+keyNameRegex+":", capDropString)
 
-		if isNamedPodMatch == true {
+		if isNamedPodMatch {
 			isUnconfinedNamedPodMatch, _ := regexp.MatchString(startWordBoundaryRegex+keyNameRegex+":unconfined"+endWordBoundaryRegex, capDropString)
 			if !isUnconfinedNamedPodMatch {
 				containers++

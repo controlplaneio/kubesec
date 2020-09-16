@@ -30,7 +30,7 @@ func ApparmorAny(json []byte) int {
 		// TODO(ajm) match end of string in regex
 		isNamedPodMatch, _ := regexp.MatchString(startWordBoundaryRegex+keyNameRegex+":", annotationsString)
 
-		if isNamedPodMatch == true {
+		if isNamedPodMatch {
 			isUnconfinedNamedPodMatch, _ := regexp.MatchString(startWordBoundaryRegex+keyNameRegex+":unconfined"+endWordBoundaryRegex, annotationsString)
 			if !isUnconfinedNamedPodMatch {
 				containers++
