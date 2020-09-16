@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 	"time"
 
@@ -104,6 +105,10 @@ func retrieveRequestData(r *http.Request) ([]byte, error) {
 
 	if string(body[:formPrefixLen]) == formPrefix {
 		body = body[formPrefixLen:]
+	}
+
+	if len(body) == 0 || len(strings.TrimSpace(string(body))) == 0 {
+		return nil, errors.New("Invalid input: empty")
 	}
 
 	return body, nil

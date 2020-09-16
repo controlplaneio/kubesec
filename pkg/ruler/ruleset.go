@@ -262,9 +262,10 @@ func (rs *Ruleset) Run(files []File) ([]Report, error) {
 	for _, file := range files {
 		rs.logger.Debugf("processing file: %s", file.FileName)
 		reports, err := rs.processFile(file.FileBytes)
-		if err == nil {
-			r = append(r, reports...)
+		if err != nil {
+			return nil, err
 		}
+		r = append(r, reports...)
 	}
 
 	return r, nil
