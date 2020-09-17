@@ -18,7 +18,7 @@ type ScanFailedValidationError struct {
 }
 
 func (e *ScanFailedValidationError) Error() string {
-	return fmt.Sprintf("Kubesec scan failed")
+	return "Kubesec scan failed"
 }
 
 var debug bool

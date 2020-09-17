@@ -28,7 +28,7 @@ type InvalidInputError struct {
 }
 
 func (e *InvalidInputError) Error() string {
-	return fmt.Sprintf("Invalid input")
+	return "Invalid input"
 }
 
 func NewRuleset(logger *zap.SugaredLogger) *Ruleset {
@@ -396,16 +396,14 @@ func (rs *Ruleset) generateReport(json []byte) Report {
 				report.Score += ruleRef.Points
 				report.Scoring.Critical = append(report.Scoring.Critical, ruleRef)
 			}
-		} else {
-			if ruleRef.Points >= 0 {
-				rs.logger.Debugf("positive score rule failed %v (%v points)", ruleRef.Selector, ruleRef.Points)
-				report.Scoring.Advise = append(report.Scoring.Advise, ruleRef)
-			}
+		} else if ruleRef.Points >= 0 {
+			rs.logger.Debugf("positive score rule failed %v (%v points)", ruleRef.Selector, ruleRef.Points)
+			report.Scoring.Advise = append(report.Scoring.Advise, ruleRef)
 		}
 	}
 
 	if appliedRules < 1 {
-		report.Message = fmt.Sprintf("This resource kind is not supported by kubesec")
+		report.Message = "This resource kind is not supported by kubesec"
 	} else if report.Score >= 0 {
 		report.Message = fmt.Sprintf("Passed with a score of %v points", report.Score)
 	} else {

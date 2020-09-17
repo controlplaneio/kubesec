@@ -80,11 +80,7 @@ func SetupSignalHandler() (stopCh <-chan struct{}) {
 func PrettyJSON(b []byte) string {
 	var out bytes.Buffer
 	json.Indent(&out, b, "", "  ")
-	return string(out.Bytes())
-}
-
-func writeError(w http.ResponseWriter, e error) {
-
+	return out.String()
 }
 
 func retrieveRequestData(r *http.Request) ([]byte, error) {
@@ -155,7 +151,11 @@ func scanHandler(logger *zap.SugaredLogger, keypath string) http.Handler {
 			}
 
 			link := ruler.GenerateInTotoLink(reports, body)
-			link.Sign(key)
+			err = link.Sign(key)
+			if err != nil {
+				w.WriteHeader(http.StatusInternalServerError)
+				return
+			}
 			payload = map[string]interface{}{
 				"reports": reports,
 				"link":    link,
