@@ -1,9 +1,9 @@
 before:
   hooks:
-    - go mod tidy
+    - cd v2 && go mod tidy
 
 builds:
-  - main: ./cmd/kubesec
+  - main: ./v2/cmd/kubesec
     binary: kubesec
     goos:
       - darwin
@@ -18,10 +18,10 @@ builds:
       - CGO_ENABLED=0
 
 checksum:
-  name_template: '{{ .ProjectName }}_checksums.txt'
+  name_template: "{{ .ProjectName }}_checksums.txt"
 
 archives:
-  - name_template: '{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}'
+  - name_template: "{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}"
 
 snapshot:
   name_template: "{{ .Tag }}-next"

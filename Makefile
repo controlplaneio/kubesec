@@ -73,7 +73,7 @@ lint:
 .PHONY: lint-go-fmt
 lint-go-fmt: ## golang fmt check
 	@echo "+ $@"
-	gofmt -l -s ./pkg | grep ".*\.go"; if [ "$$?" = "0" ]; then exit 1; fi
+	gofmt -l -s ./v2 | grep ".*\.go"; if [ "$$?" = "0" ]; then exit 1; fi
 
 MARKDOWN_IMAGE ?= registry.gitlab.com/06kellyjac/docker_markdownlint-cli
 MARKDOWN_IMAGE_TAG ?= 0.19.0
@@ -102,19 +102,19 @@ test-remote: ## acceptance tests against remote URL
 .PHONY: test-unit
 test-unit: ## golang unit tests
 	@echo "+ $@"
-	go test -race $$(go list ./... | grep -v '/vendor/') -run "$${RUN:-.*}"
+	cd v2; go test -race $$(go list ./... | grep -v '/vendor/') -run "$${RUN:-.*}"
 
 .PHONY: test-unit-verbose
 test-unit-verbose: ## golang unit tests (verbose)
 	@echo "+ $@"
-	go test -race -v $$(go list ./... | grep -v '/vendor/') -run "$${RUN:-.*}"
+	cd v2; go test -race -v $$(go list ./... | grep -v '/vendor/') -run "$${RUN:-.*}"
 
 # ---
 
 .PHONY: build
 build: ## golang build
 	@echo "+ $@"
-	go build -a -o ./dist/kubesec ./cmd/kubesec/*.go
+	cd v2; go build -a -o ../dist/kubesec ./cmd/kubesec
 
 .PHONY: prune
 prune: ## golang dependency prune

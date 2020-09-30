@@ -8,8 +8,8 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/controlplaneio/kubesec/pkg/ruler"
-	"github.com/controlplaneio/kubesec/pkg/server"
+	"github.com/controlplaneio/kubesec/v2/pkg/ruler"
+	"github.com/controlplaneio/kubesec/v2/pkg/server"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
 )

@@ -4,7 +4,9 @@ WORKDIR /kubesec
 
 COPY . .
 
-RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o kubesec ./cmd/kubesec/*
+WORKDIR /kubesec/v2
+
+RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o kubesec ./cmd/kubesec
 
 # ===
 
@@ -16,7 +18,7 @@ RUN addgroup -S app \
 
 WORKDIR /home/app
 
-COPY --from=builder /kubesec/kubesec .
+COPY --from=builder /kubesec/v2/kubesec .
 COPY --from=stefanprodan/kubernetes-json-schema:latest /schemas/master-standalone /schemas/master-standalone-strict
 
 RUN chown -R app:app ./ /schemas
