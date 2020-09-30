@@ -263,6 +263,11 @@ Your feedback is always welcome!
 
 # Release Notes
 
+## 2.7.0
+
+- fix go mod issues with `v2`
+  - can use `go get` again
+
 ## 2.6.0
 
 - allow for piping into `kubesec scan` using `-` or `/dev/stdin`
