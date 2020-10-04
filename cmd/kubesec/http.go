@@ -2,12 +2,11 @@ package main
 
 import (
 	"fmt"
+	"github.com/controlplaneio/kubesec/pkg/server"
+	"github.com/spf13/cobra"
 	"os"
 	"strconv"
 	"time"
-
-	"github.com/controlplaneio/kubesec/v2/pkg/server"
-	"github.com/spf13/cobra"
 )
 
 func init() {

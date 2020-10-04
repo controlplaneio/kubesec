@@ -12,7 +12,7 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/controlplaneio/kubesec/v2/pkg/ruler"
+	"github.com/controlplaneio/kubesec/pkg/ruler"
 	"github.com/in-toto/in-toto-golang/in_toto"
 	"go.uber.org/zap"
 

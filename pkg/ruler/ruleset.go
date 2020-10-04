@@ -11,7 +11,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/controlplaneio/kubesec/v2/pkg/rules"
+	"github.com/controlplaneio/kubesec/pkg/rules"
 	"github.com/ghodss/yaml"
 	"github.com/in-toto/in-toto-golang/in_toto"
 	"github.com/instrumenta/kubeval/kubeval"

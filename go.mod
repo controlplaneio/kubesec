@@ -1,4 +1,4 @@
-module github.com/controlplaneio/kubesec/v2
+module github.com/controlplaneio/kubesec
 
 go 1.13
 

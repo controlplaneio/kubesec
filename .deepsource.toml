@@ -10,4 +10,4 @@ name = "go"
 enabled = true
 
   [analyzers.meta]
-  import_paths = ["github.com/controlplaneio/kubesec/v2"]
+  import_paths = ["github.com/controlplaneio/kubesec"]

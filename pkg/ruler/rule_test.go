@@ -2,10 +2,9 @@ package ruler
 
 import (
 	"fmt"
-	"testing"
-
-	"github.com/controlplaneio/kubesec/v2/pkg/rules"
+	"github.com/controlplaneio/kubesec/pkg/rules"
 	"github.com/ghodss/yaml"
+	"testing"
 )
 
 func TestRule_Eval(t *testing.T) {

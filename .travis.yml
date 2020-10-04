@@ -16,7 +16,7 @@ addons:
 script:
 - set -e
 - make lint
-- cd v2; go test -v -race -coverprofile="../coverage.txt" -covermode=atomic ./pkg/... ; cd ..
+- go test -v -race -coverprofile=coverage.txt -covermode=atomic ./pkg/...
 - make build test-acceptance
 - docker build -t kubesec .
 - docker run -dp 8080:8080 --name kubesec kubesec
