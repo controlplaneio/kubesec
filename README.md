@@ -263,6 +263,11 @@ Your feedback is always welcome!
 
 # Release Notes
 
+## 2.7.1
+
+- further fixes to make `go mod` happy with `v2`
+  - should resolve issues with tools that use `go list ./...` at the project root
+
 ## 2.7.0
 
 - fix go mod issues with `v2`
