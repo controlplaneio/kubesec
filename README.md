@@ -263,6 +263,11 @@ Your feedback is always welcome!
 
 # Release Notes
 
+## 2.7.2
+
+- bump go and alpine versions
+  - this is also part of making `go mod` happy with `v2`
+
 ## 2.7.1
 
 - further fixes to make `go mod` happy with `v2`
