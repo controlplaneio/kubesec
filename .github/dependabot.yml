@@ -5,7 +5,8 @@ updates:
     directory: /
     schedule:
       interval: daily
-      timezone: 06:00 UTC
+      time: "06:00"
+      timezone: UTC
     open-pull-requests-limit: 10
     commit-message:
       prefix: chore
@@ -14,7 +15,8 @@ updates:
     directory: /
     schedule:
       interval: daily
-      timezone: 06:00 UTC
+      time: "06:00"
+      timezone: UTC
     commit-message:
       prefix: chore
       include: scope
@@ -22,7 +24,8 @@ updates:
     directory: /
     schedule:
       interval: daily
-      timezone: 06:00 UTC
+      time: "06:00"
+      timezone: UTC
     commit-message:
       prefix: chore
       include: scope
