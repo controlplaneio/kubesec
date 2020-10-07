@@ -9,5 +9,5 @@ require (
 	github.com/prometheus/client_golang v1.2.1
 	github.com/spf13/cobra v0.0.7
 	github.com/thedevsaddam/gojsonq v2.3.0+incompatible
-	go.uber.org/zap v1.12.0
+	go.uber.org/zap v1.16.0
 )
