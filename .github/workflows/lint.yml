@@ -28,6 +28,23 @@ jobs:
       - name: Run golangci-lint
         uses: reviewdog/action-golangci-lint@v1
 
+  shellcheck:
+    name: shellcheck
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        extention: ["bash", "bats"]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Run shellcheck
+        uses: reviewdog/action-shellcheck@v1
+        with:
+          pattern: "*.${{ matrix.extention }}"
+          exclude: "./test/bin/*"
+
   yamllint:
     name: yamllint
     runs-on: ubuntu-latest
