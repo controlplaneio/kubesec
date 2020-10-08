@@ -1,0 +1,26 @@
+---
+name: Testing
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+jobs:
+  unit:
+    name: Go Unit Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up Go
+        uses: actions/setup-go@v2.1.3
+        id: go
+        with:
+          go-version: ^1.15
+
+      - name: Run go unit tests
+        run: |
+          make test-unit
