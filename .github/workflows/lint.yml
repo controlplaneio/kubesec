@@ -27,3 +27,13 @@ jobs:
 
       - name: Run golangci-lint
         uses: reviewdog/action-golangci-lint@v1
+
+  yamllint:
+    name: yamllint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Run yamllint
+        uses: reviewdog/action-yamllint@v1
