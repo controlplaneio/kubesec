@@ -7,6 +7,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/controlplaneio/kubesec/v2/pkg/ruler"
 	"github.com/controlplaneio/kubesec/v2/pkg/server"
@@ -28,45 +29,42 @@ func init() {
 	rootCmd.AddCommand(scanCmd)
 }
 
-// File holds the name and contents
-type File struct {
-	fileName  string
-	fileBytes []byte
-}
-
-func getInput(args []string) (File, error) {
-	var file File
+func getInput(args []string) ([]ruler.File, error) {
+	var files []ruler.File
 
 	if len(args) == 1 && (args[0] == "-" || args[0] == "/dev/stdin") {
 		fileBytes, err := ioutil.ReadAll(os.Stdin)
 		if err != nil {
-			return file, err
+			return files, err
 		}
-		file = File{
-			fileName:  "STDIN",
-			fileBytes: fileBytes,
+		file := ruler.File{
+			FileName:  "STDIN",
+			FileBytes: fileBytes,
 		}
-		return file, nil
+		return append(files, file), nil
 	}
 
-	filename, err := filepath.Abs(args[0])
-	if err != nil {
-		return file, err
+	for _, arg := range args {
+		filename, err := filepath.Abs(arg)
+		if err != nil {
+			return files, err
+		}
+		fileBytes, err := ioutil.ReadFile(filename)
+		if err != nil {
+			return files, err
+		}
+		file := ruler.File{
+			FileName:  filename,
+			FileBytes: fileBytes,
+		}
+		files = append(files, file)
 	}
 
-	fileBytes, err := ioutil.ReadFile(filename)
-	if err != nil {
-		return file, err
-	}
-	file = File{
-		fileName:  filename,
-		fileBytes: fileBytes,
-	}
-	return file, nil
+	return files, nil
 }
 
 var scanCmd = &cobra.Command{
-	Use:     `scan [file]`,
+	Use:     `scan [files]`,
 	Short:   "Scans Kubernetes resource YAML or JSON",
 	Example: `  scan ./deployment.yaml`,
 	RunE: func(cmd *cobra.Command, args []string) error {
@@ -85,18 +83,21 @@ var scanCmd = &cobra.Command{
 		rootCmd.SilenceErrors = true
 		rootCmd.SilenceUsage = true
 
-		file, err := getInput(args)
+		files, err := getInput(args)
 		if err != nil {
 			return err
 		}
-
-		reports, err := ruler.NewRuleset(logger).Run(file.fileBytes)
+		reports, err := ruler.NewRuleset(logger).Run(files)
 		if err != nil {
 			return err
 		}
 
 		if len(reports) == 0 {
-			return fmt.Errorf("invalid input %s", file.fileName)
+			var fileNames []string
+			for _, f := range files {
+				fileNames = append(fileNames, f.FileName)
+			}
+			return fmt.Errorf("invalid inputs: %s", strings.Join(fileNames, ", "))
 		}
 
 		var lowScore bool

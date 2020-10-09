@@ -87,12 +87,11 @@ if _is_remote; then
 else
 
   _app() {
-    local ARGS="${@:-}"
+    local ARGS="${*}"
     if [[ "${BIN_DIR}" != "" ]]; then
-      # remove --json flags
       ARGS=$(echo "${ARGS}" | sed -E 's,--json,,g')
     fi
-    "${BIN_DIR}"/kubesec scan "${ARGS}";
+    "${BIN_DIR}"/kubesec scan ${ARGS};
   }
 
   assert_gt_zero_points() {
