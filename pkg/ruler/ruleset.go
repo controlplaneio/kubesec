@@ -258,10 +258,20 @@ func (rs *Ruleset) Run(fileBytes []byte) ([]Report, error) {
 		report := rs.generateReport(fileBytes)
 		reports = append(reports, report)
 	} else {
-		bits := bytes.Split(fileBytes, []byte(detectLineBreak(fileBytes)+"---"+detectLineBreak(fileBytes)))
-		for _, doc := range bits {
-			if len(doc) < 1 {
-				return nil, &InvalidInputError{}
+		lineBreak := detectLineBreak(fileBytes)
+		bits := bytes.Split(fileBytes, []byte(lineBreak+"---"+lineBreak))
+		for i, d := range bits {
+			doc := bytes.TrimSpace(d)
+
+			// If empty or just a header
+			if len(doc) == 0 || (len(doc) == 3 && string(doc) == "---") {
+				// if we're at the end and there are no reports
+				if len(bits) == i+1 && len(reports) == 0 {
+					rs.logger.Debugf("empty and no records, erroring")
+					return nil, &InvalidInputError{}
+				}
+				rs.logger.Debugf("empty but still more docs, continuing")
+				continue
 			}
 			data, err := yaml.YAMLToJSON(doc)
 			if err != nil {
