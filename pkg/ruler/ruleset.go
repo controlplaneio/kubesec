@@ -258,10 +258,16 @@ func (rs *Ruleset) Run(fileBytes []byte) ([]Report, error) {
 		report := rs.generateReport(fileBytes)
 		reports = append(reports, report)
 	} else {
-		bits := bytes.Split(fileBytes, []byte(detectLineBreak(fileBytes)+"---"+detectLineBreak(fileBytes)))
-		for _, doc := range bits {
+		lineBreak := detectLineBreak(fileBytes)
+		bits := bytes.Split(fileBytes, []byte(lineBreak+"---"+lineBreak))
+		for i, doc := range bits {
 			if len(doc) < 1 {
-				return nil, &InvalidInputError{}
+				if i+1 == len(bits) {
+					return nil, &InvalidInputError{}
+				}
+				rs.logger.Debugf("empty but not at the end")
+				// Account for cases where the split above results in a completely empty doc rather than ---
+				doc = []byte("---")
 			}
 			data, err := yaml.YAMLToJSON(doc)
 			if err != nil {
