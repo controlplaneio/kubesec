@@ -250,12 +250,12 @@ func NewRuleset(logger *zap.SugaredLogger) *Ruleset {
 	}
 }
 
-func (rs *Ruleset) Run(fileBytes []byte) ([]Report, error) {
+func (rs *Ruleset) Run(fileName string, fileBytes []byte) ([]Report, error) {
 	reports := make([]Report, 0)
 
 	isJSON := json.Valid(fileBytes)
 	if isJSON {
-		report := rs.generateReport(fileBytes)
+		report := rs.generateReport(fileName, fileBytes)
 		reports = append(reports, report)
 	} else {
 		lineBreak := detectLineBreak(fileBytes)
@@ -277,7 +277,7 @@ func (rs *Ruleset) Run(fileBytes []byte) ([]Report, error) {
 			if err != nil {
 				return reports, err
 			}
-			report := rs.generateReport(data)
+			report := rs.generateReport(fileName, data)
 			reports = append(reports, report)
 		}
 	}
@@ -330,7 +330,7 @@ func GenerateInTotoLink(reports []Report, fileBytes []byte) in_toto.Metablock {
 	return linkMb
 }
 
-func (rs *Ruleset) generateReport(json []byte) Report {
+func (rs *Ruleset) generateReport(fileName string, json []byte) Report {
 	report := Report{
 		Object: "Unknown",
 		Score:  0,
@@ -345,7 +345,7 @@ func (rs *Ruleset) generateReport(json []byte) Report {
 
 	// validate resource with kubeval
 	cfg := kubeval.NewDefaultConfig()
-	cfg.FileName = "resource.json"
+	cfg.FileName = fileName
 	cfg.Strict = true
 
 	// try set kubeval schemas to local path
