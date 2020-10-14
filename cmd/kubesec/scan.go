@@ -66,9 +66,11 @@ func getInput(args []string) (File, error) {
 }
 
 var scanCmd = &cobra.Command{
-	Use:     `scan [file]`,
-	Short:   "Scans Kubernetes resource YAML or JSON",
-	Example: `  scan ./deployment.yaml`,
+	Use:   `scan [file]`,
+	Short: "Scans Kubernetes resource YAML or JSON",
+	Example: `  kubesec scan ./deployment.yaml
+  cat file.json | kubesec scan -
+  helm template -f values.yaml ./chart | kubesec scan /dev/stdin`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		if len(args) < 1 {
 			return fmt.Errorf("file path is required")
