@@ -203,7 +203,7 @@ teardown() {
   skip_if_not_remote
 
   run _app "${TEST_DIR}/asset/form-prefix-not-file.yml"
-  assert_output --regexp ".*resource.json: Missing 'apiVersion' key.*"
+  assert_output --regexp ".*API: Missing 'apiVersion' key.*"
   assert_success
 }
 

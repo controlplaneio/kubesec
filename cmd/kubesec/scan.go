@@ -48,18 +48,18 @@ func getInput(args []string) (File, error) {
 		}
 		return file, nil
 	}
-
-	filename, err := filepath.Abs(args[0])
+	fileName := args[0]
+	filePath, err := filepath.Abs(fileName)
 	if err != nil {
 		return file, err
 	}
 
-	fileBytes, err := ioutil.ReadFile(filename)
+	fileBytes, err := ioutil.ReadFile(filePath)
 	if err != nil {
 		return file, err
 	}
 	file = File{
-		fileName:  filename,
+		fileName:  fileName,
 		fileBytes: fileBytes,
 	}
 	return file, nil
@@ -92,7 +92,7 @@ var scanCmd = &cobra.Command{
 			return err
 		}
 
-		reports, err := ruler.NewRuleset(logger).Run(file.fileBytes)
+		reports, err := ruler.NewRuleset(logger).Run(file.fileName, file.fileBytes)
 		if err != nil {
 			return err
 		}
