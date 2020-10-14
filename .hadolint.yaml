@@ -1,0 +1,4 @@
+---
+ignored:
+  - DL3018 # Pin versions in apk add.
+  - DL3022 # COPY --from alias
