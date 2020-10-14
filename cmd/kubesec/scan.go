@@ -22,9 +22,11 @@ func (e *ScanFailedValidationError) Error() string {
 }
 
 var debug bool
+var absolutePath bool
 
 func init() {
 	scanCmd.Flags().BoolVar(&debug, "debug", false, "turn on debug logs")
+	scanCmd.Flags().BoolVar(&absolutePath, "absolute-path", false, "use the absolute path for the file name")
 	rootCmd.AddCommand(scanCmd)
 }
 
@@ -52,6 +54,9 @@ func getInput(args []string) (File, error) {
 	filePath, err := filepath.Abs(fileName)
 	if err != nil {
 		return file, err
+	}
+	if absolutePath {
+		fileName = filePath
 	}
 
 	fileBytes, err := ioutil.ReadFile(filePath)
