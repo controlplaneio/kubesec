@@ -36,6 +36,11 @@ This uses ControlPlane's hosted API at [v2.kubesec.io/scan](https://v2.kubesec.i
 - [Contributing](#contributing)
 - [Getting Help](#getting-help)
 - [Release Notes](#release-notes)
+  - [2.8.0](#280)
+  - [2.7.2](#272)
+  - [2.7.1](#271)
+  - [2.7.0](#270)
+  - [2.6.0](#260)
   - [2.5.0](#250)
   - [2.4.0](#240)
   - [2.3.1](#231)
@@ -262,6 +267,13 @@ If you have any questions about Kubesec and Kubernetes security:
 Your feedback is always welcome!
 
 # Release Notes
+
+## 2.8.0
+
+- fix issues processing multi doc yaml with empty elements
+- added some more kubesec scan examples
+- added the file name to the kubeval input
+- added a flag to show the absolute filename instead
 
 ## 2.7.2
 
