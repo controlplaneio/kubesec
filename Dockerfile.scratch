@@ -12,7 +12,7 @@ RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o kubesec ./cmd/kub
 FROM scratch
 WORKDIR /home/kubesec
 COPY --from=stefanprodan/kubernetes-json-schema:latest /schemas/master-standalone /schemas/master-standalone-strict
-COPY --from=builder /kubesec .
+COPY --from=builder /kubesec/kubesec .
 COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 COPY --from=builder /passwd /group /etc/
 USER kubesec
