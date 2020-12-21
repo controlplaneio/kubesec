@@ -1,7 +1,6 @@
 package server
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
@@ -12,6 +11,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/controlplaneio/kubesec/v2/pkg/report"
 	"github.com/controlplaneio/kubesec/v2/pkg/ruler"
 	"github.com/in-toto/in-toto-golang/in_toto"
 	"go.uber.org/zap"
@@ -75,12 +75,6 @@ func SetupSignalHandler() (stopCh <-chan struct{}) {
 	}()
 
 	return stop
-}
-
-func PrettyJSON(b []byte) string {
-	var out bytes.Buffer
-	json.Indent(&out, b, "", "  ")
-	return out.String()
 }
 
 func retrieveRequestData(r *http.Request) ([]byte, error) {
@@ -173,6 +167,11 @@ func scanHandler(logger *zap.SugaredLogger, keypath string) http.Handler {
 
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte(PrettyJSON(res) + "\n"))
+		formattedOutput, err := report.PrettyJSON(res)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		w.Write([]byte(string(formattedOutput) + "\n"))
 	})
 }
