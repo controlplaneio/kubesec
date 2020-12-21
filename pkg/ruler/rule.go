@@ -3,6 +3,7 @@ package ruler
 import (
 	"bytes"
 	"fmt"
+
 	"github.com/thedevsaddam/gojsonq"
 )
 
@@ -16,6 +17,7 @@ func (e *NotSupportedError) Error() string {
 
 type Rule struct {
 	Selector  string
+	ID        string
 	Title     string
 	Reason    string
 	Link      string

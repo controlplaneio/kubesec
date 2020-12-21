@@ -1,11 +1,15 @@
 package ruler
 
+type Reports []Report
+
 type Report struct {
-	Object  string      `json:"object"`
-	Valid   bool        `json:"valid"`
-	Message string      `json:"message,omitempty"`
-	Score   int         `json:"score"`
-	Scoring RuleScoring `json:"scoring,omitempty"`
+	Object   string      `json:"object"`
+	Valid    bool        `json:"valid"`
+	FileName string      `json:"fileName"`
+	Rules    []RuleRef   `json:"-"`
+	Message  string      `json:"message,omitempty"`
+	Score    int         `json:"score"`
+	Scoring  RuleScoring `json:"scoring,omitempty"`
 }
 
 type RuleScoring struct {
@@ -15,6 +19,7 @@ type RuleScoring struct {
 }
 
 type RuleRef struct {
+	ID         string `json:"id"`
 	Selector   string `json:"selector"`
 	Reason     string `json:"reason"`
 	Weight     int    `json:"weight,omitempty"`
