@@ -16,7 +16,7 @@ import (
 	"github.com/ghodss/yaml"
 	"github.com/in-toto/in-toto-golang/in_toto"
 	"github.com/instrumenta/kubeval/kubeval"
-	"github.com/thedevsaddam/gojsonq"
+	"github.com/thedevsaddam/gojsonq/v2"
 	"go.uber.org/zap"
 )
 

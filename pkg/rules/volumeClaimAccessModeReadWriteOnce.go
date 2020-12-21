@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/thedevsaddam/gojsonq"
+	"github.com/thedevsaddam/gojsonq/v2"
 )
 
 func VolumeClaimAccessModeReadWriteOnce(json []byte) int {

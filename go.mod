@@ -8,6 +8,6 @@ require (
 	github.com/instrumenta/kubeval v0.0.0-20190918223246-8d013ec9fc56
 	github.com/prometheus/client_golang v1.9.0
 	github.com/spf13/cobra v0.0.7
-	github.com/thedevsaddam/gojsonq v2.3.0+incompatible
+	github.com/thedevsaddam/gojsonq/v2 v2.5.2
 	go.uber.org/zap v1.16.0
 )

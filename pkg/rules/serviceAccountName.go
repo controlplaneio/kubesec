@@ -3,7 +3,7 @@ package rules
 import (
 	"bytes"
 	"fmt"
-	"github.com/thedevsaddam/gojsonq"
+	"github.com/thedevsaddam/gojsonq/v2"
 )
 
 func ServiceAccountName(json []byte) int {
