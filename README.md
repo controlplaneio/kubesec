@@ -55,8 +55,8 @@ This uses ControlPlane's hosted API at [v2.kubesec.io/scan](https://v2.kubesec.i
   - [Usage example](#usage-example--1)
 - [Example output](#example-output)
 - [Contributors](#contributors)
-- [Contributing](#contributing)
 - [Getting Help](#getting-help)
+- [Contributing](/CONTRIBUTING.md)
 - [Changelog](/CHANGELOG.md)
 
 
@@ -256,16 +256,6 @@ Thanks to our awesome contributors!
 - [Andrew Martin](@sublimino)
 - [Stefan Prodan](@stefanprodan)
 - [Jack Kelly](@06kellyjac)
-
-## Contributing
-
-Kubesec is Apache 2.0 licensed and accepts contributions via GitHub pull requests.
-
-When submitting bug reports please include as much details as possible:
-
-- which Kubesec version
-- which Kubernetes version
-- what happened (Kubesec logs and expected output)
 
 ## Getting Help
 
