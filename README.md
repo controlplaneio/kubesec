@@ -1,18 +1,3 @@
-[testing_workflow]: https://github.com/controlplaneio/kubesec/actions?query=workflow%3ATesting
-[testing_workflow_badge]: https://github.com/controlplaneio/kubesec/workflows/Testing/badge.svg
-
-[security_workflow]: https://github.com/controlplaneio/kubesec/actions?query=workflow%3A%22Security+Analysis%22
-[security_workflow_badge]: https://github.com/controlplaneio/kubesec/workflows/Security%20Analysis/badge.svg
-
-[release_workflow]: https://github.com/controlplaneio/kubesec/actions?query=workflow%3ARelease
-[release_workflow_badge]: https://github.com/controlplaneio/kubesec/workflows/Release/badge.svg
-
-[goreportcard]: https://goreportcard.com/report/github.com/controlplaneio/kubesec
-[goreportcard_badge]: https://goreportcard.com/badge/github.com/controlplaneio/kubesec
-
-[go_dev]: https://pkg.go.dev/github.com/controlplaneio/kubesec/v2
-[go_dev_badge]: https://pkg.go.dev/badge/github.com/controlplaneio/kubesec/v2
-
 # Kubesec
 
 [![Testing Workflow][testing_workflow_badge]][testing_workflow_badge]
@@ -266,3 +251,18 @@ If you have any questions about Kubesec and Kubernetes security:
 - File an issue
 
 Your feedback is always welcome!
+
+[testing_workflow]: https://github.com/controlplaneio/kubesec/actions?query=workflow%3ATesting
+[testing_workflow_badge]: https://github.com/controlplaneio/kubesec/workflows/Testing/badge.svg
+
+[security_workflow]: https://github.com/controlplaneio/kubesec/actions?query=workflow%3A%22Security+Analysis%22
+[security_workflow_badge]: https://github.com/controlplaneio/kubesec/workflows/Security%20Analysis/badge.svg
+
+[release_workflow]: https://github.com/controlplaneio/kubesec/actions?query=workflow%3ARelease
+[release_workflow_badge]: https://github.com/controlplaneio/kubesec/workflows/Release/badge.svg
+
+[goreportcard]: https://goreportcard.com/report/github.com/controlplaneio/kubesec
+[goreportcard_badge]: https://goreportcard.com/badge/github.com/controlplaneio/kubesec
+
+[go_dev]: https://pkg.go.dev/github.com/controlplaneio/kubesec/v2
+[go_dev_badge]: https://pkg.go.dev/badge/github.com/controlplaneio/kubesec/v2
