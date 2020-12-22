@@ -1,24 +1,26 @@
 ---
-name: Linting - Go
+name: Linting - YAML
 # Split until path filtering for jobs added
 # https://github.community/t/path-filtering-for-jobs-and-steps/16447
 on:
   push:
     branches: [master]
     paths:
-      - "**.go"
+      - "**.yml"
+      - "**.yaml"
   pull_request:
     branches: [master]
     paths:
-      - "**.go"
+      - "**.yml"
+      - "**.yaml"
 
 jobs:
-  golangci-lint:
-    name: golangci-lint
+  yamllint:
+    name: yamllint
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
 
-      - name: Run golangci-lint
-        uses: reviewdog/action-golangci-lint@v1
+      - name: Run yamllint
+        uses: reviewdog/action-yamllint@v1
