@@ -62,7 +62,10 @@ teardown() {
 
 @test "fails deployment with invalid security context" {
   run _app "${TEST_DIR}/asset/score-1-dep-invalid-security-context.yml"
-  assert_line --index 4 --regexp 'fake: Additional property fake is not allowed'
+
+  run jq -r .[].message <<<"${output}"
+
+  assert_output --partial 'fake: Additional property fake is not allowed'
 }
 
 @test "passes deployment with cgroup resource limits" {
@@ -141,45 +144,48 @@ teardown() {
 }
 
 @test "returns integer point score for each advice element" {
-  JSON=$(_app "${TEST_DIR}/asset/score-2-pod-serviceaccount.yml")
+  run _app "${TEST_DIR}/asset/score-2-pod-serviceaccount.yml"
+  assert_success
 
-  run jq -r .[].scoring.advise[].points <<<"${JSON}"
+  run jq -r .[].scoring.advise[].points <<<"${output}"
 
-  for SCORE in $output; do
-    assert bash -c "[[ $SCORE =~ ^[0-9]+$ ]]"
+  for SCORE in ${output}; do
+    assert bash -c "[[ ${SCORE} =~ ^[0-9]+$ ]]"
   done
 }
 
 @test "returns an ordered point score for all advice" {
-  JSON=$(_app "${TEST_DIR}/asset/score-2-pod-serviceaccount.yml")
+  run _app "${TEST_DIR}/asset/score-2-pod-serviceaccount.yml"
+  assert_success
 
-  run jq -r .[].scoring.advise[].points <<<"${JSON}"
+  run jq -r .[].scoring.advise[].points <<<"${output}"
 
   PREVIOUS=""
-  for CURRENT in $output; do
-    [ "${PREVIOUS}" = "" ] || assert [ "$CURRENT" -le "${PREVIOUS}" ]
+  for CURRENT in ${output}; do
+    [ "${PREVIOUS}" = "" ] || assert [ "${CURRENT}" -le "${PREVIOUS}" ]
     PREVIOUS="${CURRENT}"
   done
 }
 
 @test "returns integer point score for each pass element" {
-  JSON=$(_app "${TEST_DIR}/asset/score-5-pod-serviceaccount.yml")
+  run _app "${TEST_DIR}/asset/score-5-pod-serviceaccount.yml"
+  assert_success
 
-  run jq -r .[].scoring.passed[].points <<<"${JSON}"
+  run jq -r .[].scoring.passed[].points <<<"${output}"
 
-  for SCORE in $output; do
-    assert bash -c "[[ $SCORE =~ ^[0-9]+$ ]]"
+  for SCORE in ${output}; do
+    assert bash -c "[[ ${SCORE} =~ ^[0-9]+$ ]]"
   done
 }
 
 @test "returns an ordered point score for all passed" {
-  JSON=$(_app "${TEST_DIR}/asset/score-5-pod-serviceaccount.yml")
+  run _app "${TEST_DIR}/asset/score-5-pod-serviceaccount.yml"
 
-  run jq -r .[].scoring.passed[].points <<<"${JSON}"
+  run jq -r .[].scoring.passed[].points <<<"${output}"
 
   PREVIOUS=""
-  for CURRENT in $output; do
-    [ "${PREVIOUS}" = "" ] || assert [ "$CURRENT" -le "${PREVIOUS}" ]
+  for CURRENT in ${output}; do
+    [ "${PREVIOUS}" = "" ] || assert [ "${CURRENT}" -le "${PREVIOUS}" ]
     PREVIOUS="${CURRENT}"
   done
 }
@@ -188,35 +194,41 @@ teardown() {
   run _app "${TEST_DIR}/asset/critical-double.yml"
 
   # criticals - magnitude sort/lowest number first
-  assert_line --index 11 --regexp '^.*\"points\": -30$'
-  assert_line --index 16 --regexp '^.*\"points\": -7$'
+  CRITICAL_FIRST=$(jq -r .[].scoring.critical[0].points <<<"${output}")
+  CRITICAL_SECOND=$(jq -r .[].scoring.critical[1].points <<<"${output}")
+  (( CRITICAL_FIRST <= CRITICAL_SECOND ))
 
   # advisories - magnitude sort/highest number first
-  assert_line --index 23 --regexp '^.*\"points\": 3$'
-  assert_line --index 28 --regexp '^.*\"points\": 3$'
-  assert_line --index 33 --regexp '^.*\"points\": 1$'
+  ADVISE_FIRST=$(jq -r .[].scoring.advise[0].points <<<"${output}")
+  ADVISE_SECOND=$(jq -r .[].scoring.advise[1].points <<<"${output}")
+  ADVISE_THIRD=$(jq -r .[].scoring.advise[2].points <<<"${output}")
+  (( ADVISE_FIRST >= ADVISE_SECOND >= ADVISE_THIRD ))
 }
 
 @test "check critical and advisory points as multi-yaml" {
   run _app "${TEST_DIR}/asset/critical-double-multiple.yml"
 
   # report 1 - criticals - magnitude sort/lowest number first
-  assert_line --index 11 --regexp '^.*\"points\": -30$'
-  assert_line --index 16 --regexp '^.*\"points\": -7$'
+  CRITICAL_FIRST_FIRST=$(jq -r .[0].scoring.critical[0].points <<<"${output}")
+  CRITICAL_FIRST_SECOND=$(jq -r .[0].scoring.critical[1].points <<<"${output}")
+  (( CRITICAL_FIRST_FIRST <= CRITICAL_FIRST_SECOND ))
 
   # report 1 - advisories - magnitude sort/highest number first
-  assert_line --index 23 --regexp '^.*\"points\": 3$'
-  assert_line --index 28 --regexp '^.*\"points\": 3$'
-  assert_line --index 33 --regexp '^.*\"points\": 1$'
+  ADVISE_FIRST_FIRST=$(jq -r .[0].scoring.advise[0].points <<<"${output}")
+  ADVISE_FIRST_SECOND=$(jq -r .[0].scoring.advise[1].points <<<"${output}")
+  ADVISE_FIRST_THIRD=$(jq -r .[0].scoring.advise[2].points <<<"${output}")
+  (( ADVISE_FIRST_FIRST >= ADVISE_FIRST_SECOND >= ADVISE_FIRST_THIRD ))
 
   # report 2 - criticals - magnitude sort/lowest number first
-  assert_line --index 93 --regexp '^.*\"points\": -30$'
-  assert_line --index 98 --regexp '^.*\"points\": -7$'
+  CRITICAL_SECOND_FIRST=$(jq -r .[1].scoring.critical[0].points <<<"${output}")
+  CRITICAL_SECOND_SECOND=$(jq -r .[1].scoring.critical[1].points <<<"${output}")
+  (( CRITICAL_SECOND_FIRST <= CRITICAL_SECOND_SECOND ))
 
   # report 2 - advisories - magnitude sort/highest number first
-  assert_line --index 105 --regexp '^.*\"points\": 3$'
-  assert_line --index 110 --regexp '^.*\"points\": 3$'
-  assert_line --index 115 --regexp '^.*\"points\": 1$'
+  ADVISE_SECOND_FIRST=$(jq -r .[1].scoring.advise[0].points <<<"${output}")
+  ADVISE_SECOND_SECOND=$(jq -r .[1].scoring.advise[1].points <<<"${output}")
+  ADVISE_SECOND_THIRD=$(jq -r .[1].scoring.advise[2].points <<<"${output}")
+  (( ADVISE_SECOND_FIRST >= ADVISE_SECOND_SECOND >= ADVISE_SECOND_THIRD ))
 }
 
 @test "returns deterministic report output" {

@@ -38,6 +38,7 @@ Thumbs.db
 #######################
 .idea/
 atlassian-ide-plugin.xml
+.vscode/
 
 # Test Files #
 ##############
@@ -94,6 +95,7 @@ lib64
 .mr.developer.cfg
 .project
 .pydevproject
+shell.nix
 
 # Complexity
 output/*.html

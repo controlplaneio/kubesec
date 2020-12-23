@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"reflect"
 	"runtime"
 	"sort"
 	"strings"
@@ -36,6 +37,7 @@ func NewRuleset(logger *zap.SugaredLogger) *Ruleset {
 
 	hostNetworkRule := Rule{
 		Predicate: rules.HostNetwork,
+		ID:        "HostNetwork",
 		Selector:  ".spec .hostNetwork == true",
 		Reason:    "Sharing the host's network namespace permits processes in the pod to communicate with processes bound to the host's loopback adapter",
 		Kinds:     []string{"Pod", "Deployment", "StatefulSet", "DaemonSet"},
@@ -45,6 +47,7 @@ func NewRuleset(logger *zap.SugaredLogger) *Ruleset {
 
 	hostPIDRule := Rule{
 		Predicate: rules.HostPID,
+		ID:        "HostPID",
 		Selector:  ".spec .hostPID == true",
 		Reason:    "Sharing the host's PID namespace allows visibility of processes on the host, potentially leaking information such as environment variables and configuration",
 		Kinds:     []string{"Pod", "Deployment", "StatefulSet", "DaemonSet"},
@@ -54,6 +57,7 @@ func NewRuleset(logger *zap.SugaredLogger) *Ruleset {
 
 	hostIPCRule := Rule{
 		Predicate: rules.HostIPC,
+		ID:        "HostIPC",
 		Selector:  ".spec .hostIPC == true",
 		Reason:    "Sharing the host's IPC namespace allows container processes to communicate with processes on the host",
 		Kinds:     []string{"Pod", "Deployment", "StatefulSet", "DaemonSet"},
@@ -63,6 +67,7 @@ func NewRuleset(logger *zap.SugaredLogger) *Ruleset {
 
 	readOnlyRootFilesystemRule := Rule{
 		Predicate: rules.ReadOnlyRootFilesystem,
+		ID:        "ReadOnlyRootFilesystem",
 		Selector:  "containers[] .securityContext .readOnlyRootFilesystem == true",
 		Reason:    "An immutable root filesystem can prevent malicious binaries being added to PATH and increase attack cost",
 		Kinds:     []string{"Pod", "Deployment", "StatefulSet", "DaemonSet"},
@@ -73,6 +78,7 @@ func NewRuleset(logger *zap.SugaredLogger) *Ruleset {
 
 	runAsNonRootRule := Rule{
 		Predicate: rules.RunAsNonRoot,
+		ID:        "RunAsNonRoot",
 		Selector:  "containers[] .securityContext .runAsNonRoot == true",
 		Reason:    "Force the running image to run as a non-root user to ensure least privilege",
 		Kinds:     []string{"Pod", "Deployment", "StatefulSet", "DaemonSet"},
@@ -83,6 +89,7 @@ func NewRuleset(logger *zap.SugaredLogger) *Ruleset {
 
 	runAsUserRule := Rule{
 		Predicate: rules.RunAsUser,
+		ID:        "RunAsUser",
 		Selector:  "containers[] .securityContext .runAsUser -gt 10000",
 		Reason:    "Run as a high-UID user to avoid conflicts with the host's user table",
 		Kinds:     []string{"Pod", "Deployment", "StatefulSet", "DaemonSet"},
@@ -93,6 +100,7 @@ func NewRuleset(logger *zap.SugaredLogger) *Ruleset {
 
 	privilegedRule := Rule{
 		Predicate: rules.Privileged,
+		ID:        "Privileged",
 		Selector:  "containers[] .securityContext .privileged == true",
 		Reason:    "Privileged containers can allow almost completely unrestricted host access",
 		Kinds:     []string{"Pod", "Deployment", "StatefulSet", "DaemonSet"},
@@ -102,6 +110,7 @@ func NewRuleset(logger *zap.SugaredLogger) *Ruleset {
 
 	capSysAdminRule := Rule{
 		Predicate: rules.CapSysAdmin,
+		ID:        "CapSysAdmin",
 		Selector:  "containers[] .securityContext .capabilities .add == SYS_ADMIN",
 		Reason:    "CAP_SYS_ADMIN is the most privileged capability and should always be avoided",
 		Kinds:     []string{"Pod", "Deployment", "StatefulSet", "DaemonSet"},
@@ -111,6 +120,7 @@ func NewRuleset(logger *zap.SugaredLogger) *Ruleset {
 
 	capDropAnyRule := Rule{
 		Predicate: rules.CapDropAny,
+		ID:        "CapDropAny",
 		Selector:  "containers[] .securityContext .capabilities .drop",
 		Reason:    "Reducing kernel capabilities available to a container limits its attack surface",
 		Kinds:     []string{"Pod", "Deployment", "StatefulSet", "DaemonSet"},
@@ -120,6 +130,7 @@ func NewRuleset(logger *zap.SugaredLogger) *Ruleset {
 
 	capDropAllRule := Rule{
 		Predicate: rules.CapDropAll,
+		ID:        "CapDropAll",
 		Selector:  "containers[] .securityContext .capabilities .drop | index(\"ALL\")",
 		Reason:    "Drop all capabilities and add only those required to reduce syscall attack surface",
 		Kinds:     []string{"Pod", "Deployment", "StatefulSet", "DaemonSet"},
@@ -129,6 +140,7 @@ func NewRuleset(logger *zap.SugaredLogger) *Ruleset {
 
 	dockerSockRule := Rule{
 		Predicate: rules.DockerSock,
+		ID:        "DockerSock",
 		Selector:  "volumes[] .hostPath .path == /var/run/docker.sock",
 		Reason:    "Mounting the docker.socket leaks information about other containers and can allow container breakout",
 		Kinds:     []string{"Pod", "Deployment", "StatefulSet", "DaemonSet"},
@@ -138,6 +150,7 @@ func NewRuleset(logger *zap.SugaredLogger) *Ruleset {
 
 	requestsCPURule := Rule{
 		Predicate: rules.RequestsCPU,
+		ID:        "RequestsCPU",
 		Selector:  "containers[] .resources .requests .cpu",
 		Reason:    "Enforcing CPU requests aids a fair balancing of resources across the cluster",
 		Kinds:     []string{"Pod", "Deployment", "StatefulSet", "DaemonSet"},
@@ -147,6 +160,7 @@ func NewRuleset(logger *zap.SugaredLogger) *Ruleset {
 
 	limitsCPURule := Rule{
 		Predicate: rules.LimitsCPU,
+		ID:        "LimitsCPU",
 		Selector:  "containers[] .resources .limits .cpu",
 		Reason:    "Enforcing CPU limits prevents DOS via resource exhaustion",
 		Kinds:     []string{"Pod", "Deployment", "StatefulSet", "DaemonSet"},
@@ -156,6 +170,7 @@ func NewRuleset(logger *zap.SugaredLogger) *Ruleset {
 
 	requestsMemoryRule := Rule{
 		Predicate: rules.RequestsMemory,
+		ID:        "RequestsMemory",
 		Selector:  "containers[] .resources .requests .memory",
 		Reason:    "Enforcing memory requests aids a fair balancing of resources across the cluster",
 		Kinds:     []string{"Pod", "Deployment", "StatefulSet", "DaemonSet"},
@@ -165,6 +180,7 @@ func NewRuleset(logger *zap.SugaredLogger) *Ruleset {
 
 	limitsMemoryRule := Rule{
 		Predicate: rules.RequestsMemory,
+		ID:        "RequestsMemory",
 		Selector:  "containers[] .resources .limits .memory",
 		Reason:    "Enforcing memory limits prevents DOS via resource exhaustion",
 		Kinds:     []string{"Pod", "Deployment", "StatefulSet", "DaemonSet"},
@@ -174,6 +190,7 @@ func NewRuleset(logger *zap.SugaredLogger) *Ruleset {
 
 	serviceAccountNameRule := Rule{
 		Predicate: rules.ServiceAccountName,
+		ID:        "ServiceAccountName",
 		Selector:  ".spec .serviceAccountName",
 		Reason:    "Service accounts restrict Kubernetes API access and should be configured with least privilege",
 		Kinds:     []string{"Pod", "Deployment", "StatefulSet", "DaemonSet"},
@@ -183,6 +200,7 @@ func NewRuleset(logger *zap.SugaredLogger) *Ruleset {
 
 	hostAliasesRule := Rule{
 		Predicate: rules.HostAliases,
+		ID:        "HostAliases",
 		Selector:  ".spec .hostAliases",
 		Reason:    "Managing /etc/hosts aliases can prevent the container from modifying the file after a pod's containers have already been started. DNS should be managed by the orchestrator",
 		Kinds:     []string{"Pod", "Deployment", "StatefulSet", "DaemonSet"},
@@ -192,6 +210,7 @@ func NewRuleset(logger *zap.SugaredLogger) *Ruleset {
 
 	seccompAnyRule := Rule{
 		Predicate: rules.SeccompAny,
+		ID:        "SeccompAny",
 		Selector:  ".metadata .annotations .\"container.seccomp.security.alpha.kubernetes.io/pod\"",
 		Reason:    "Seccomp profiles set minimum privilege and secure against unknown threats",
 		Kinds:     []string{"Pod", "Deployment", "StatefulSet", "DaemonSet"},
@@ -201,6 +220,7 @@ func NewRuleset(logger *zap.SugaredLogger) *Ruleset {
 
 	seccompUnconfinedRule := Rule{
 		Predicate: rules.SeccompUnconfined,
+		ID:        "SeccompUnconfined",
 		Selector:  ".metadata .annotations .\"container.seccomp.security.alpha.kubernetes.io/pod\"",
 		Reason:    "Unconfined Seccomp profiles have full system call access",
 		Kinds:     []string{"Pod", "Deployment", "StatefulSet", "DaemonSet"},
@@ -210,6 +230,7 @@ func NewRuleset(logger *zap.SugaredLogger) *Ruleset {
 
 	apparmorAnyRule := Rule{
 		Predicate: rules.ApparmorAny,
+		ID:        "ApparmorAny",
 		Selector:  ".metadata .annotations .\"container.apparmor.security.beta.kubernetes.io/nginx\"",
 		Reason:    "Well defined AppArmor policies may provide greater protection from unknown threats. WARNING: NOT PRODUCTION READY",
 		Kinds:     []string{"Pod", "Deployment", "StatefulSet", "DaemonSet"},
@@ -219,6 +240,7 @@ func NewRuleset(logger *zap.SugaredLogger) *Ruleset {
 
 	volumeClaimAccessModeReadWriteOnce := Rule{
 		Predicate: rules.VolumeClaimAccessModeReadWriteOnce,
+		ID:        "VolumeClaimAccessModeReadWriteOnce",
 		Selector:  ".spec .volumeClaimTemplates[] .spec .accessModes | index(\"ReadWriteOnce\")",
 		Reason:    "",
 		Kinds:     []string{"StatefulSet"},
@@ -228,6 +250,7 @@ func NewRuleset(logger *zap.SugaredLogger) *Ruleset {
 
 	volumeClaimRequestsStorage := Rule{
 		Predicate: rules.VolumeClaimRequestsStorage,
+		ID:        "VolumeClaimRequestsStorage",
 		Selector:  ".spec .volumeClaimTemplates[] .spec .resources .requests .storage",
 		Reason:    "",
 		Kinds:     []string{"StatefulSet"},
@@ -237,6 +260,7 @@ func NewRuleset(logger *zap.SugaredLogger) *Ruleset {
 
 	allowPrivilegeEscalation := Rule{
 		Predicate: rules.AllowPrivilegeEscalation,
+		ID:        "AllowPrivilegeEscalation",
 		Selector:  "containers[] .securityContext .allowPrivilegeEscalation == true",
 		Reason:    "",
 		Kinds:     []string{"Pod", "Deployment", "StatefulSet", "DaemonSet"},
@@ -330,10 +354,28 @@ func GenerateInTotoLink(reports []Report, fileBytes []byte) in_toto.Metablock {
 	return linkMb
 }
 
+func appendUniqueRule(uniqueRules []RuleRef, newRule RuleRef) []RuleRef {
+	if !containsRule(uniqueRules[:], newRule) {
+		uniqueRules = append(uniqueRules, newRule)
+	}
+	return uniqueRules
+}
+
+func containsRule(rules []RuleRef, newRule RuleRef) bool {
+	for _, rule := range rules {
+		if reflect.DeepEqual(rule, newRule) {
+			return true
+		}
+	}
+	return false
+}
+
 func (rs *Ruleset) generateReport(fileName string, json []byte) Report {
 	report := Report{
-		Object: "Unknown",
-		Score:  0,
+		Object:   "Unknown",
+		FileName: fileName,
+		Score:    0,
+		Rules:    make([]RuleRef, 0),
 		Scoring: RuleScoring{
 			Advise:   make([]RuleRef, 0),
 			Passed:   make([]RuleRef, 0),
@@ -375,9 +417,8 @@ func (rs *Ruleset) generateReport(fileName string, json []byte) Report {
 
 	if len(report.Message) > 0 {
 		return report
-	} else {
-		report.Valid = true
 	}
+	report.Valid = true
 
 	// run rules in parallel
 	ch := make(chan RuleRef, len(rs.Rules))
@@ -393,6 +434,8 @@ func (rs *Ruleset) generateReport(fileName string, json []byte) Report {
 	var appliedRules int
 	for ruleRef := range ch {
 		appliedRules++
+
+		report.Rules = appendUniqueRule(report.Rules, ruleRef)
 
 		if ruleRef.Containers > 0 {
 			if ruleRef.Points >= 0 {
@@ -441,6 +484,7 @@ func eval(json []byte, rule Rule, ch chan RuleRef, wg *sync.WaitGroup) {
 
 	result := RuleRef{
 		Containers: containers,
+		ID:         rule.ID,
 		Points:     rule.Points,
 		Reason:     rule.Reason,
 		Selector:   rule.Selector,

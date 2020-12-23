@@ -55,17 +55,20 @@ if _is_remote; then
   }
 
   assert_gt_zero_points() {
-    assert_output --regexp ".*\"score\": [1-9]+,.*"
+    SCORE=$(jq -r .[].score <<<"${output:-}")
+    (( SCORE > 0 ))
     assert_success
   }
 
   assert_zero_points() {
-    assert_output --regexp ".*\"score\": 0,.*"
+    SCORE=$(jq -r .[].score <<<"${output:-}")
+    (( SCORE == 0 ))
     assert_success
   }
 
   assert_lt_zero_points() {
-    assert_output --regexp ".*\"score\": \-[1-9][0-9]*,.*"
+    SCORE=$(jq -r .[].score <<<"${output:-}")
+    (( SCORE < 0 ))
     assert_success
   }
 

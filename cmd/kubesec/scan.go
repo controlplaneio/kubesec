@@ -1,15 +1,15 @@
 package main
 
 import (
-	"encoding/json"
+	"bytes"
 	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
 
+	"github.com/controlplaneio/kubesec/v2/pkg/report"
 	"github.com/controlplaneio/kubesec/v2/pkg/ruler"
-	"github.com/controlplaneio/kubesec/v2/pkg/server"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
 )
@@ -23,10 +23,14 @@ func (e *ScanFailedValidationError) Error() string {
 
 var debug bool
 var absolutePath bool
+var format string
+var template string
 
 func init() {
 	scanCmd.Flags().BoolVar(&debug, "debug", false, "turn on debug logs")
 	scanCmd.Flags().BoolVar(&absolutePath, "absolute-path", false, "use the absolute path for the file name")
+	scanCmd.Flags().StringVarP(&format, "format", "f", "json", "Set the output format, also set the output template")
+	scanCmd.Flags().StringVarP(&template, "template", "t", "", "Set the output template, prefix with @ if it's a path to a file")
 	rootCmd.AddCommand(scanCmd)
 }
 
@@ -114,11 +118,13 @@ var scanCmd = &cobra.Command{
 			}
 		}
 
-		res, err := json.Marshal(reports)
+		var buff bytes.Buffer
+		err = report.WriteReports(format, &buff, reports, template)
 		if err != nil {
 			return err
 		}
-		fmt.Println(server.PrettyJSON(res))
+		out := buff.String()
+		fmt.Println(out)
 
 		if len(reports) > 0 && !lowScore {
 			return nil
