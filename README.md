@@ -1,4 +1,11 @@
-# kubesec [![Build Status](https://travis-ci.com/controlplaneio/kubesec.svg?token=2zTFdbp4Jrcox4MuDKaD&branch=master)](https://travis-ci.com/controlplaneio/kubesec)
+# Kubesec
+
+[![Testing Workflow][testing_workflow_badge]][testing_workflow_badge]
+[![Security Analysis Workflow][security_workflow_badge]][security_workflow_badge]
+[![Release Workflow][release_workflow_badge]][release_workflow_badge]
+
+[![Go Report Card][goreportcard_badge]][goreportcard]
+[![PkgGoDev][go_dev_badge]][go_dev]
 
 <!-- markdownlint-disable no-inline-html header-increment -->
 <!-- markdownlint-disable line-length -->
@@ -33,22 +40,10 @@ This uses ControlPlane's hosted API at [v2.kubesec.io/scan](https://v2.kubesec.i
   - [Usage example](#usage-example--1)
 - [Example output](#example-output)
 - [Contributors](#contributors)
-- [Contributing](#contributing)
 - [Getting Help](#getting-help)
-- [Release Notes](#release-notes)
-  - [2.8.0](#280)
-  - [2.7.2](#272)
-  - [2.7.1](#271)
-  - [2.7.0](#270)
-  - [2.6.0](#260)
-  - [2.5.0](#250)
-  - [2.4.0](#240)
-  - [2.3.1](#231)
-  - [2.3.0](#230)
-  - [2.2.0](#220)
-  - [2.1.0](#210)
-  - [2.0.0](#200)
-  - [1.0.0](#100)
+- [Contributing](/CONTRIBUTING.md)
+- [Changelog](/CHANGELOG.md)
+
 
 ## Download Kubesec
 
@@ -245,16 +240,7 @@ Thanks to our awesome contributors!
 
 - [Andrew Martin](@sublimino)
 - [Stefan Prodan](@stefanprodan)
-
-## Contributing
-
-Kubesec is Apache 2.0 licensed and accepts contributions via GitHub pull requests.
-
-When submitting bug reports please include as much details as possible:
-
-- which Kubesec version
-- which Kubernetes version
-- what happened (Kubesec logs and expected output)
+- [Jack Kelly](@06kellyjac)
 
 ## Getting Help
 
@@ -266,74 +252,17 @@ If you have any questions about Kubesec and Kubernetes security:
 
 Your feedback is always welcome!
 
-# Release Notes
+[testing_workflow]: https://github.com/controlplaneio/kubesec/actions?query=workflow%3ATesting
+[testing_workflow_badge]: https://github.com/controlplaneio/kubesec/workflows/Testing/badge.svg
 
-## 2.8.0
+[security_workflow]: https://github.com/controlplaneio/kubesec/actions?query=workflow%3A%22Security+Analysis%22
+[security_workflow_badge]: https://github.com/controlplaneio/kubesec/workflows/Security%20Analysis/badge.svg
 
-- fix issues processing multi doc yaml with empty elements
-- added some more kubesec scan examples
-- added the file name to the kubeval input
-- added a flag to show the absolute filename instead
+[release_workflow]: https://github.com/controlplaneio/kubesec/actions?query=workflow%3ARelease
+[release_workflow_badge]: https://github.com/controlplaneio/kubesec/workflows/Release/badge.svg
 
-## 2.7.2
+[goreportcard]: https://goreportcard.com/report/github.com/controlplaneio/kubesec
+[goreportcard_badge]: https://goreportcard.com/badge/github.com/controlplaneio/kubesec
 
-- bump go and alpine versions
-  - this is also part of making `go mod` happy with `v2`
-
-## 2.7.1
-
-- further fixes to make `go mod` happy with `v2`
-  - should resolve issues with tools that use `go list ./...` at the project root
-
-## 2.7.0
-
-- fix go mod issues with `v2`
-  - can use `go get` again
-
-## 2.6.0
-
-- allow for piping into `kubesec scan` using `-` or `/dev/stdin`
-  - `cat somefile.yml | kubesec scan -`
-  - `cat somefile.yml | kubesec scan /dev/stdin`
-
-## 2.5.0
-
-- improved in-toto integration
-
-## 2.4.0
-
-- added passed to the JSON output
-- note: repo tests now require `jq` - **only concerns maintainers**
-
-## 2.3.1
-
-- patch to accept form data from the <https://kubesec.io> webpage sample form
-
-## 2.3.0
-
-- moved everything to go modules
-
-## 2.2.0
-
-- added in-toto support
-
-## 2.1.0
-
-- add rule for `allowPrivilegeEscalation: true` with a score of -7
-- add `points` field to each recommendation so the values that comprise the total score can be seen
-- fix case sensitivity bug in `.capabilities.drop | index("ALL")`
-- rules in `critical` and `advise` lists prioritised and returned in same order across runs
-
-## 2.0.0
-
-- first open source release
-- passes same acceptance tests as Kubesec v1
-- more stringent analysis: scoring for a rule is multiplied by number of matches (previously the score was only applied
-  once), initContainers are included in score, new securityContext directive support, seccomp and apparmor pod-targeting
-  tighter
-- CLI and HTTP server bundled in single binary
-
-## 1.0.0
-
-- initial release at <https://kubesec.io>
-- closed source
+[go_dev]: https://pkg.go.dev/github.com/controlplaneio/kubesec/v2
+[go_dev_badge]: https://pkg.go.dev/badge/github.com/controlplaneio/kubesec/v2
