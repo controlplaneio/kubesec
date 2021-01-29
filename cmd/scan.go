@@ -25,12 +25,14 @@ var debug bool
 var absolutePath bool
 var format string
 var template string
+var outputLocation string
 
 func init() {
 	scanCmd.Flags().BoolVar(&debug, "debug", false, "turn on debug logs")
 	scanCmd.Flags().BoolVar(&absolutePath, "absolute-path", false, "use the absolute path for the file name")
 	scanCmd.Flags().StringVarP(&format, "format", "f", "json", "Set output format (json, template)")
 	scanCmd.Flags().StringVarP(&template, "template", "t", "", "Set output template, it will check for a file or read input as the")
+	scanCmd.Flags().StringVarP(&outputLocation, "output", "o", "", "Set output location")
 	rootCmd.AddCommand(scanCmd)
 }
 
@@ -123,6 +125,14 @@ var scanCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
+
+		if outputLocation != "" {
+			err = ioutil.WriteFile(outputLocation, buff.Bytes(), 0644)
+			if err != nil {
+				logger.Debugf("Couldn't write output to %s", outputLocation)
+			}
+		}
+
 		out := buff.String()
 		fmt.Println(out)
 
