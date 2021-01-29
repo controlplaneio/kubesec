@@ -54,7 +54,7 @@ Kubesec is available as a:
 - [Kubernetes Admission Controller](https://github.com/controlplaneio/kubesec-webhook)
 - [Kubectl plugin](https://github.com/controlplaneio/kubectl-kubesec)
 
-Or install the latest commit from GitHub with `GO111MODULE="on" go get github.com/controlplaneio/kubesec/v2/cmd/kubesec`
+Or install the latest commit from GitHub with `GO111MODULE="on" go get github.com/controlplaneio/kubesec/v2`
 
 #### Command line usage:
 

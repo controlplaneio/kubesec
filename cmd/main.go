@@ -1,13 +1,14 @@
-package main
+package cmd
 
 import (
 	"fmt"
-	"github.com/spf13/cobra"
-	"go.uber.org/zap"
-	"go.uber.org/zap/zapcore"
 	"log"
 	"os"
 	"strings"
+
+	"github.com/spf13/cobra"
+	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 )
 
 var (
@@ -26,7 +27,8 @@ var rootCmd = &cobra.Command{
 Validate Kubernetes resource security policies`,
 }
 
-func main() {
+// Execute runs kubesec
+func Execute() {
 	var err error
 
 	// logger writes to stderr
@@ -51,6 +53,7 @@ func main() {
 	}
 }
 
+// NewLogger creates a logger
 func NewLogger(logLevel string, zapEncoding string) (*zap.SugaredLogger, error) {
 	level := zap.NewAtomicLevelAt(zapcore.InfoLevel)
 	switch logLevel {

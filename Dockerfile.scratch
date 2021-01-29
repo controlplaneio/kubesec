@@ -5,7 +5,7 @@ RUN echo "kubesec:x:31012:31012:kubesec:/home/kubesec:/sbin/nologin" > /passwd &
 WORKDIR /kubesec
 RUN apk add --no-cache git ca-certificates
 COPY . .
-RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o kubesec ./cmd/kubesec/*
+RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o kubesec .
 
 # ===
 

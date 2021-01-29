@@ -114,7 +114,7 @@ test-unit-verbose: ## golang unit tests (verbose)
 .PHONY: build
 build: ## golang build
 	@echo "+ $@"
-	go build -a -o ./dist/kubesec ./cmd/kubesec/*.go
+	go build -a -o ./dist/kubesec .
 
 .PHONY: prune
 prune: ## golang dependency prune
