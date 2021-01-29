@@ -29,8 +29,8 @@ var template string
 func init() {
 	scanCmd.Flags().BoolVar(&debug, "debug", false, "turn on debug logs")
 	scanCmd.Flags().BoolVar(&absolutePath, "absolute-path", false, "use the absolute path for the file name")
-	scanCmd.Flags().StringVarP(&format, "format", "f", "json", "Set the output format, also set the output template")
-	scanCmd.Flags().StringVarP(&template, "template", "t", "", "Set the output template, prefix with @ if it's a path to a file")
+	scanCmd.Flags().StringVarP(&format, "format", "f", "json", "Set output format (json, template)")
+	scanCmd.Flags().StringVarP(&template, "template", "t", "", "Set output template, it will check for a file or read input as the")
 	rootCmd.AddCommand(scanCmd)
 }
 
