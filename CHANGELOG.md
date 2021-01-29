@@ -4,6 +4,7 @@ All notable changes to this project will be documented in this file.
 
 ## Table of Contents
 
+- [2.9.0](#290)
 - [2.8.0](#280)
 - [2.7.2](#272)
 - [2.7.1](#271)
@@ -19,6 +20,16 @@ All notable changes to this project will be documented in this file.
 - [1.0.0](#100)
 
 ---
+
+## `2.9.0`
+
+- add templating output format
+- add provided sarif template
+- add output location
+- make go install and build easier by splitting cmd and a main.go in the root
+- cleaned up docs
+- made tests less brittle
+- fix scratch container
 
 ## `2.8.0`
 
