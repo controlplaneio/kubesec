@@ -16,6 +16,7 @@ RUN addgroup -S app \
 
 WORKDIR /home/app
 
+COPY ./templates/ templates
 COPY --from=builder /kubesec/kubesec .
 COPY --from=stefanprodan/kubernetes-json-schema:latest /schemas/master-standalone /schemas/master-standalone-strict
 
