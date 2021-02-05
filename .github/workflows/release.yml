@@ -79,7 +79,7 @@ jobs:
       - name: Build container and push tags
         uses: docker/build-push-action@v2.2.2
         with:
-          push: false
+          push: true
           file: ${{ matrix.containers.file }}
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: mode=max,type=local,dest=/tmp/.buildx-cache

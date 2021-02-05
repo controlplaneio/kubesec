@@ -21,6 +21,10 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## `2.10.1`
+
+- actually push the container releases
+
 ## `2.10.0`
 
 - add more release targets
