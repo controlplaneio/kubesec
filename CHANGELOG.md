@@ -21,6 +21,15 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## `2.10.0`
+
+- add more release targets
+- sunset i386 target
+- add template directory to the Dockerfiles
+- build and push containers on release
+  - Docker Hub
+  - GitHub Container Registry
+
 ## `2.9.0`
 
 - add templating output format
