@@ -10,19 +10,19 @@ RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o kubesec .
 
 FROM alpine:3.13.1
 
-RUN addgroup -S app \
-    && adduser -S -g app app \
+RUN addgroup -S kubesec \
+    && adduser -S -g kubesec kubesec \
     && apk --no-cache add ca-certificates
 
-WORKDIR /home/app
+WORKDIR /home/kubesec
 
-COPY ./templates/ templates
-COPY --from=builder /kubesec/kubesec .
+COPY --from=builder /kubesec/kubesec /bin/kubesec
 COPY --from=stefanprodan/kubernetes-json-schema:latest /schemas/master-standalone /schemas/master-standalone-strict
+COPY ./templates/ /templates
 
-RUN chown -R app:app ./ /schemas
+RUN chown -R kubesec:kubesec ./ /schemas
 
-USER app
+USER kubesec
 
-ENTRYPOINT ["./kubesec"]
+ENTRYPOINT ["kubesec"]
 CMD ["http", "8080"]
