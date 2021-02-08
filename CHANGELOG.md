@@ -4,9 +4,9 @@ All notable changes to this project will be documented in this file.
 
 ## Table of Contents
 
-- [2.10.2](#212)
-- [2.10.1](#211)
-- [2.10.0](#210)
+- [2.10.2](#2102)
+- [2.10.1](#2101)
+- [2.10.0](#2100)
 - [2.9.0](#290)
 - [2.8.0](#280)
 - [2.7.2](#272)
