@@ -26,6 +26,7 @@ var absolutePath bool
 var format string
 var template string
 var outputLocation string
+var exitCode int
 
 func init() {
 	scanCmd.Flags().BoolVar(&debug, "debug", false, "turn on debug logs")
@@ -33,6 +34,7 @@ func init() {
 	scanCmd.Flags().StringVarP(&format, "format", "f", "json", "Set output format (json, template)")
 	scanCmd.Flags().StringVarP(&template, "template", "t", "", "Set output template, it will check for a file or read input as the")
 	scanCmd.Flags().StringVarP(&outputLocation, "output", "o", "", "Set output location")
+	scanCmd.Flags().IntVar(&exitCode, "exit-code", 2, "Set the exit-code to use on failure")
 	rootCmd.AddCommand(scanCmd)
 }
 
@@ -140,6 +142,7 @@ var scanCmd = &cobra.Command{
 			return nil
 		}
 
+		os.Exit(exitCode)
 		return &ScanFailedValidationError{}
 	},
 }
