@@ -4,6 +4,7 @@ All notable changes to this project will be documented in this file.
 
 ## Table of Contents
 
+- [2.11.0](#2110)
 - [2.10.2](#2102)
 - [2.10.1](#2101)
 - [2.10.0](#2100)
@@ -23,6 +24,12 @@ All notable changes to this project will be documented in this file.
 - [1.0.0](#100)
 
 ---
+
+## `2.11.0`
+
+- Move assets in the containers to make them easier to access
+- Fix changelog links
+- Add exit-code override
 
 ## `2.10.2`
 
