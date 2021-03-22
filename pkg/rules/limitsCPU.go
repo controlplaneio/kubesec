@@ -3,7 +3,7 @@ package rules
 import (
 	"bytes"
 
-	"github.com/thedevsaddam/gojsonq"
+	"github.com/thedevsaddam/gojsonq/v2"
 )
 
 func LimitsCPU(json []byte) int {
