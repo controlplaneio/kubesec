@@ -14,9 +14,8 @@ import (
 	"github.com/controlplaneio/kubesec/v2/pkg/report"
 	"github.com/controlplaneio/kubesec/v2/pkg/ruler"
 	"github.com/in-toto/in-toto-golang/in_toto"
-	"go.uber.org/zap"
-
 	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"go.uber.org/zap"
 )
 
 // ListenAndServe starts a web server and waits for SIGTERM
@@ -130,14 +129,9 @@ func scanHandler(logger *zap.SugaredLogger, keypath string) http.Handler {
 		}
 
 		if r.URL.Query().Get("in-toto") != "" {
-			json_key, err := ioutil.ReadFile(keypath)
-			if err != nil {
-				logger.Errorf("Attempted to serve an in-toto payload but the key is unavailable: %v",
-					err.Error())
-				w.WriteHeader(http.StatusInternalServerError)
-				return
-			}
-			key, err := in_toto.ParseEd25519FromPrivateJSON(string(json_key))
+			intotoKey := in_toto.Key{}
+
+			err := intotoKey.LoadKey(keypath, "ed25519", []string{"sha256", "sha512"})
 			if err != nil {
 				logger.Errorf("Attempted to serve an in-toto payload but the key is unavailable: %v",
 					err.Error())
@@ -146,7 +140,7 @@ func scanHandler(logger *zap.SugaredLogger, keypath string) http.Handler {
 			}
 
 			link := ruler.GenerateInTotoLink(reports, body)
-			err = link.Sign(key)
+			err = link.Sign(intotoKey)
 			if err != nil {
 				w.WriteHeader(http.StatusInternalServerError)
 				return
