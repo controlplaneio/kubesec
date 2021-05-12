@@ -16,7 +16,7 @@ jobs:
           go-version: ^1.15
 
       - name: Check out code
-        uses: actions/checkout@v2.3.3
+        uses: actions/checkout@v2.3.4
 
       - name: Launch goreleaser
         uses: goreleaser/goreleaser-action@v2.5.0
