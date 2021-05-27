@@ -65,7 +65,7 @@ teardown() {
 
   run jq -r .[].message <<<"${output}"
 
-  assert_output --partial 'fake: Additional property fake is not allowed'
+  assert_output --partial 'Additional property fake is not allowed'
 }
 
 @test "passes deployment with cgroup resource limits" {
