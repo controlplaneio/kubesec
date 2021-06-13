@@ -121,7 +121,7 @@ func scanHandler(logger *zap.SugaredLogger, keypath string) http.Handler {
 		}
 
 		var payload interface{}
-		reports, err := ruler.NewRuleset(logger).Run(fileName, body)
+		reports, err := ruler.NewRuleset(logger).Run(fileName, body, "")
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
 			w.Write([]byte(err.Error() + "\n"))

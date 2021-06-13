@@ -9,6 +9,8 @@ import (
 	"go.uber.org/zap"
 )
 
+const schemaDir = ""
+
 func TestRuleset_Run(t *testing.T) {
 	var data = `
 ---
@@ -51,7 +53,7 @@ spec:
 		t.Fatal(err.Error())
 	}
 
-	report := NewRuleset(zap.NewNop().Sugar()).generateReport("kube.yaml", json)
+	report := NewRuleset(zap.NewNop().Sugar()).generateReport("kube.yaml", json, schemaDir)
 
 	critical := len(report.Scoring.Critical)
 	if critical < 1 {
@@ -89,7 +91,7 @@ spec:
 		t.Fatal(err.Error())
 	}
 
-	report := NewRuleset(zap.NewNop().Sugar()).generateReport("kube.yaml", json)
+	report := NewRuleset(zap.NewNop().Sugar()).generateReport("kube.yaml", json, schemaDir)
 
 	if len(report.Message) < 1 || !strings.Contains(report.Message, "selector is required") {
 		t.Errorf("Got error %v ", report.Message)
@@ -117,7 +119,7 @@ spec:
 		t.Fatal(err.Error())
 	}
 
-	report := NewRuleset(zap.NewNop().Sugar()).generateReport("kube.yaml", json)
+	report := NewRuleset(zap.NewNop().Sugar()).generateReport("kube.yaml", json, schemaDir)
 
 	// kubeval should error out with:
 	// spec.replicas: Invalid type. Expected: integer, given: string
@@ -146,7 +148,7 @@ spec:
 		t.Fatal(err.Error())
 	}
 
-	report := NewRuleset(zap.NewNop().Sugar()).generateReport("kube.yaml", json)
+	report := NewRuleset(zap.NewNop().Sugar()).generateReport("kube.yaml", json, schemaDir)
 
 	if len(report.Message) < 1 || !strings.Contains(report.Message, "unknown schema") {
 		t.Errorf("Got error %v ", report.Message)
@@ -169,7 +171,7 @@ data:
 		t.Fatal(err.Error())
 	}
 
-	report := NewRuleset(zap.NewNop().Sugar()).generateReport("kube.yaml", json)
+	report := NewRuleset(zap.NewNop().Sugar()).generateReport("kube.yaml", json, schemaDir)
 
 	if len(report.Message) < 1 || !strings.Contains(report.Message, "not supported") {
 		t.Errorf("Got error %v ", report.Message)
@@ -213,7 +215,7 @@ spec:
 
 	var reports []Report
 
-	report := NewRuleset(zap.NewNop().Sugar()).generateReport("kube.yaml", json)
+	report := NewRuleset(zap.NewNop().Sugar()).generateReport("kube.yaml", json, schemaDir)
 	reports = append(reports, report)
 
 	link := GenerateInTotoLink(reports, []byte(data)).Signed.(in_toto.Link)
