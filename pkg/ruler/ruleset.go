@@ -274,12 +274,12 @@ func NewRuleset(logger *zap.SugaredLogger) *Ruleset {
 	}
 }
 
-func (rs *Ruleset) Run(fileName string, fileBytes []byte) ([]Report, error) {
+func (rs *Ruleset) Run(fileName string, fileBytes []byte, schemaDir string) ([]Report, error) {
 	reports := make([]Report, 0)
 
 	isJSON := json.Valid(fileBytes)
 	if isJSON {
-		report := rs.generateReport(fileName, fileBytes)
+		report := rs.generateReport(fileName, fileBytes, schemaDir)
 		reports = append(reports, report)
 	} else {
 		lineBreak := detectLineBreak(fileBytes)
@@ -301,7 +301,7 @@ func (rs *Ruleset) Run(fileName string, fileBytes []byte) ([]Report, error) {
 			if err != nil {
 				return reports, err
 			}
-			report := rs.generateReport(fileName, data)
+			report := rs.generateReport(fileName, data, schemaDir)
 			reports = append(reports, report)
 		}
 	}
@@ -370,7 +370,7 @@ func containsRule(rules []RuleRef, newRule RuleRef) bool {
 	return false
 }
 
-func (rs *Ruleset) generateReport(fileName string, json []byte) Report {
+func (rs *Ruleset) generateReport(fileName string, json []byte, schemaDir string) Report {
 	report := Report{
 		Object:   "Unknown",
 		FileName: fileName,
@@ -390,8 +390,9 @@ func (rs *Ruleset) generateReport(fileName string, json []byte) Report {
 	cfg.FileName = fileName
 	cfg.Strict = true
 
-	// try set kubeval schemas to local path
-	if _, err := os.Stat("/schemas/kubernetes-json-schema/master/master-standalone"); !os.IsNotExist(err) {
+	if schemaDir != "" {
+		cfg.SchemaLocation = "file://" + schemaDir
+	} else if _, err := os.Stat("/schemas/kubernetes-json-schema/master/master-standalone"); !os.IsNotExist(err) {
 		cfg.SchemaLocation = "file:///schemas"
 	}
 
