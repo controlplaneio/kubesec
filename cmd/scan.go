@@ -33,7 +33,7 @@ func init() {
 	scanCmd.Flags().BoolVar(&debug, "debug", false, "turn on debug logs")
 	scanCmd.Flags().BoolVar(&absolutePath, "absolute-path", false, "use the absolute path for the file name")
 	scanCmd.Flags().StringVarP(&format, "format", "f", "json", "Set output format (json, template)")
-	scanCmd.Flags().StringVarP(&schemaDir, "schema-dir", "schema-dir", "", "Sets the directory for the json schemas")
+	scanCmd.Flags().StringVar(&schemaDir, "schema-dir", "", "Sets the directory for the json schemas")
 	scanCmd.Flags().StringVarP(&template, "template", "t", "", "Set output template, it will check for a file or read input as the")
 	scanCmd.Flags().StringVarP(&outputLocation, "output", "o", "", "Set output location")
 	scanCmd.Flags().IntVar(&exitCode, "exit-code", 2, "Set the exit-code to use on failure")
