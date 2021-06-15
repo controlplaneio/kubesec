@@ -179,8 +179,8 @@ func NewRuleset(logger *zap.SugaredLogger) *Ruleset {
 	list = append(list, requestsMemoryRule)
 
 	limitsMemoryRule := Rule{
-		Predicate: rules.RequestsMemory,
-		ID:        "RequestsMemory",
+		Predicate: rules.LimitsMemory,
+		ID:        "LimitsMemory",
 		Selector:  "containers[] .resources .limits .memory",
 		Reason:    "Enforcing memory limits prevents DOS via resource exhaustion",
 		Kinds:     []string{"Pod", "Deployment", "StatefulSet", "DaemonSet"},
