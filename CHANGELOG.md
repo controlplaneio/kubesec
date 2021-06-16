@@ -4,6 +4,7 @@ All notable changes to this project will be documented in this file.
 
 ## Table of Contents
 
+- [2.11.2](#2112)
 - [2.11.1](#2111)
 - [2.11.0](#2110)
 - [2.10.2](#2102)
@@ -25,6 +26,13 @@ All notable changes to this project will be documented in this file.
 - [1.0.0](#100)
 
 ---
+
+## `2.11.2`
+
+- Allow specifying schema location with `--schema-dir`
+  - thanks @AndreasMili
+- Fix LimitsMemory rule incorrectly using the RequestsLimit rule
+  - thanks @AndreasMili
 
 ## `2.11.1`
 
