@@ -1,8 +1,9 @@
 package rules
 
 import (
-	"github.com/ghodss/yaml"
 	"testing"
+
+	"github.com/ghodss/yaml"
 )
 
 func Test_SeccompAny_Pod(t *testing.T) {
@@ -186,3 +187,131 @@ spec:
 }
 
 // TODO(ajm) more seccomp tests for deployments
+
+func Test_SeccompAnyField_Pod(t *testing.T) {
+	var data = `
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  annotations:
+    other: runtime/default
+    something: runtime/default
+spec:
+  securityContext:
+    seccompProfile:
+      type: RuntimeDefault
+  containers:
+    - name: trustworthy-container
+      image: sotrustworthy:latest
+`
+
+	json, err := yaml.YAMLToJSON([]byte(data))
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+
+	containers := SeccompAny(json)
+	if containers != 1 {
+		t.Errorf("Got %v containers wanted %v", containers, 1)
+	}
+}
+
+func Test_SeccompAnyField_Deployment(t *testing.T) {
+	var data = `
+---
+apiVersion: apps/v1
+kind: Deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: something
+  template:
+    metadata:
+      labels:
+        app: something
+    spec:
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: trustworthy-container
+          image: sotrustworthy:latest
+`
+
+	json, err := yaml.YAMLToJSON([]byte(data))
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+
+	containers := SeccompAny(json)
+	if containers != 1 {
+		t.Errorf("Got %v containers wanted %v", containers, 1)
+	}
+}
+
+func Test_SeccompAnyField_Deployment_No_Seccomp(t *testing.T) {
+	var data = `
+---
+apiVersion: apps/v1
+kind: Deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: something
+  template:
+    metadata:
+      labels:
+        app: something
+    spec:
+      containers:
+        - name: trustworthy-container
+          image: sotrustworthy:latest
+`
+
+	json, err := yaml.YAMLToJSON([]byte(data))
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+
+	containers := SeccompAny(json)
+	if containers != 0 {
+		t.Errorf("Got %v containers wanted %v", containers, 0)
+	}
+}
+
+func Test_SeccompAnyField_Deployment_Unconfined(t *testing.T) {
+	var data = `
+---
+apiVersion: apps/v1
+kind: Deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: something
+  template:
+    metadata:
+      labels:
+        app: something
+    spec:
+      securityContext:
+        seccompProfile:
+          type: Unconfined
+      containers:
+        - name: trustworthy-container
+          image: sotrustworthy:latest
+`
+
+	json, err := yaml.YAMLToJSON([]byte(data))
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+
+	containers := SeccompAny(json)
+	if containers != 0 {
+		t.Errorf("Got %v containers wanted %v", containers, 0)
+	}
+}
