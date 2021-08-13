@@ -108,6 +108,11 @@ teardown() {
   assert_lt_zero_points
 }
 
+@test "passes Pod with non-unconfined seccomp field for all containers" {
+  run _app "${TEST_DIR}/asset/versioned/score-0-pod-seccomp-non-unconfined-v1.19.yml"
+  assert_gt_zero_points
+}
+
 @test "passes Pod with non-unconfined seccomp for all containers" {
   run _app "${TEST_DIR}/asset/score-0-pod-seccomp-non-unconfined.yml"
   assert_gt_zero_points
