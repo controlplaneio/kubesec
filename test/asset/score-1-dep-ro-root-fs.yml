@@ -1,12 +1,18 @@
 ---
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 spec:
   replicas: 1
+  selector:
+    matchLabels:
+      app: carts-db
   template:
+    metadata:
+      labels:
+        app: carts-db
     spec:
       containers:
-      - name: carts-db
-        image: mongo
-        securityContext:
-          readOnlyRootFilesystem: true
+        - name: carts-db
+          image: mongo
+          securityContext:
+            readOnlyRootFilesystem: true

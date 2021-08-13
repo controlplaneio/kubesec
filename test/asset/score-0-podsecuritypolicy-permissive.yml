@@ -1,4 +1,4 @@
-apiVersion: extensions/v1beta1
+apiVersion: policy/v1beta1
 kind: PodSecurityPolicy
 metadata:
   name: permissive
@@ -12,9 +12,9 @@ spec:
   fsGroup:
     rule: RunAsAny
   hostPorts:
-  - min: 8000
-    max: 8080
+    - min: 8000
+      max: 8080
   volumes:
-  - '*'
+    - "*"
   allowedCapabilities:
-  - '*'
+    - "*"

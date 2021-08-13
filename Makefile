@@ -87,7 +87,20 @@ lint-markdown:
 .PHONY: test
 test: ## unit and local acceptance tests
 	@echo "+ $@"
-	make test-unit build test-acceptance
+	make test-unit build download-schema test-acceptance cleanup-schema
+
+SCHEMA_VERSION = v1.20.0
+.PHONY: download-schema
+download-schema: ## unit and local acceptance tests
+	@echo "+ $@"
+	openapi2jsonschema \
+	  -o dist/schemas/kubernetes-json-schema/master-standalone-strict \
+	  --expanded \
+	  --kubernetes \
+	  --stand-alone \
+	  --strict \
+	  https://raw.githubusercontent.com/kubernetes/kubernetes/${SCHEMA_VERSION}/api/openapi-spec/swagger.json
+	deactivate
 
 .PHONY: test-acceptance
 test-acceptance: ## acceptance tests
@@ -108,6 +121,11 @@ test-unit: ## golang unit tests
 test-unit-verbose: ## golang unit tests (verbose)
 	@echo "+ $@"
 	go test -race -v $$(go list ./... | grep -v '/vendor/') -run "$${RUN:-.*}"
+
+.PHONY: cleanup-schema
+cleanup-schema: ## unit and local acceptance tests
+	@echo "+ $@"
+	rm -rf dist/schemas
 
 # ---
 

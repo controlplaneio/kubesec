@@ -1,4 +1,4 @@
-apiVersion: apps/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   creationTimestamp: null
@@ -18,9 +18,9 @@ spec:
         run: statefulset
     spec:
       containers:
-      - args:
-        - arse
-        image: arse
-        name: statefulset
-        resources: {}
+        - args:
+            - arse
+          image: arse
+          name: statefulset
+          resources: {}
 status: {}

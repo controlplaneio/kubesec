@@ -1,99 +1,102 @@
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: DaemonSet
 metadata:
   name: example-daemonset
   labels:
     app: example-daemonset
 spec:
+  selector:
+    matchLabels:
+      name: example-daemonset
   template:
     metadata:
       labels:
         name: example-daemonset
     spec:
       tolerations:
-      - key: "dedicated"
-        operator: "Exists"
-      - key: "node-role.kubernetes.io/master"
-        operator: "Exists"
+        - key: "dedicated"
+          operator: "Exists"
+        - key: "node-role.kubernetes.io/master"
+          operator: "Exists"
       hostNetwork: true
       hostPID: true
-      serviceAccount: sysdig-agent                     #OPTIONAL - OpenShift service account for OpenShift
+      serviceAccount: sysdig-agent #OPTIONAL - OpenShift service account for OpenShift
       containers:
-      - name: example-daemonset
-        image: example-daemonset:latest
-        imagePullPolicy: Always
-        securityContext:
-          privileged: true
-        resources:
-          requests:
-            cpu: 200m
-            memory: 1G
-          limits:
-            cpu: 400m
-            memory: 3G
-        env:
-        - name: ACCESS_KEY                                  #REQUIRED - replace with your Sysdig Cloud access key
-          value: "SOME VALUE"
-        - name: COLLECTOR_PORT                             #OPTIONAL - on-prem install only
-          value: "6443"
-        - name: TAGS                                       #OPTIONAL
-          value: "SOME VALUE"
-        - name: COLLECTOR                                  #OPTIONAL - on-prem install only
-          value: "SOME VALUE"
-        - name: SECURE                                     #OPTIONAL - on-prem install only
-          value: "true"
-        - name: CHECK_CERTIFICATE                          #OPTIONAL - on-prem install only
-          value: "false"
-        volumeMounts:
-        - mountPath: /dev/shm
-          name: dshm
-        - mountPath: /host/var/run/docker.sock
-          name: docker-sock
-          readOnly: false
-        - mountPath: /host/dev
-          name: dev-vol
-          readOnly: false
-        - mountPath: /host/proc
-          name: proc-vol
-          readOnly: true
-        - mountPath: /host/boot
-          name: boot-vol
-          readOnly: true
-        - mountPath: /host/lib/modules
-          name: modules-vol
-          readOnly: true
-        - mountPath: /host/usr
-          name: usr-vol
-        - mountPath: /host/etc/ssl
-          name: etc-ssl
-        - name: config
-          mountPath: /opt/draios/etc/dragent.yaml
-          subPath: dragent.yaml
+        - name: example-daemonset
+          image: example-daemonset:latest
+          imagePullPolicy: Always
+          securityContext:
+            privileged: true
+          resources:
+            requests:
+              cpu: 200m
+              memory: 1G
+            limits:
+              cpu: 400m
+              memory: 3G
+          env:
+            - name: ACCESS_KEY #REQUIRED - replace with your Sysdig Cloud access key
+              value: "SOME VALUE"
+            - name: COLLECTOR_PORT #OPTIONAL - on-prem install only
+              value: "6443"
+            - name: TAGS #OPTIONAL
+              value: "SOME VALUE"
+            - name: COLLECTOR #OPTIONAL - on-prem install only
+              value: "SOME VALUE"
+            - name: SECURE #OPTIONAL - on-prem install only
+              value: "true"
+            - name: CHECK_CERTIFICATE #OPTIONAL - on-prem install only
+              value: "false"
+          volumeMounts:
+            - mountPath: /dev/shm
+              name: dshm
+            - mountPath: /host/var/run/docker.sock
+              name: docker-sock
+              readOnly: false
+            - mountPath: /host/dev
+              name: dev-vol
+              readOnly: false
+            - mountPath: /host/proc
+              name: proc-vol
+              readOnly: true
+            - mountPath: /host/boot
+              name: boot-vol
+              readOnly: true
+            - mountPath: /host/lib/modules
+              name: modules-vol
+              readOnly: true
+            - mountPath: /host/usr
+              name: usr-vol
+            - mountPath: /host/etc/ssl
+              name: etc-ssl
+            - name: config
+              mountPath: /opt/draios/etc/dragent.yaml
+              subPath: dragent.yaml
       volumes:
-      - name: dshm
-        emptyDir:
-          medium: Memory
-      - name: docker-sock
-        hostPath:
-         path: /var/run/docker.sock
-      - name: dev-vol
-        hostPath:
-         path: /dev
-      - name: proc-vol
-        hostPath:
-         path: /proc
-      - name: boot-vol
-        hostPath:
-         path: /boot
-      - name: modules-vol
-        hostPath:
-         path: /lib/modules
-      - name: usr-vol
-        hostPath:
-          path: /usr
-      - name: etc-ssl
-        hostPath:
-          path: /etc/ssl
-      - name: config
-        configMap:
-          name: agent-config
+        - name: dshm
+          emptyDir:
+            medium: Memory
+        - name: docker-sock
+          hostPath:
+            path: /var/run/docker.sock
+        - name: dev-vol
+          hostPath:
+            path: /dev
+        - name: proc-vol
+          hostPath:
+            path: /proc
+        - name: boot-vol
+          hostPath:
+            path: /boot
+        - name: modules-vol
+          hostPath:
+            path: /lib/modules
+        - name: usr-vol
+          hostPath:
+            path: /usr
+        - name: etc-ssl
+          hostPath:
+            path: /etc/ssl
+        - name: config
+          configMap:
+            name: agent-config

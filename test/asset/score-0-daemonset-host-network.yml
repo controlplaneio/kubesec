@@ -1,9 +1,12 @@
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: DaemonSet
 spec:
+  selector:
+    matchLabels:
+      name: example-daemonset
   template:
     spec:
       hostNetwork: true
       containers:
-      - name: example-daemonset
-        image: example-daemonset:latest
+        - name: example-daemonset
+          image: example-daemonset:latest

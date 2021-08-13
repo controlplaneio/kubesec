@@ -1,16 +1,19 @@
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: DaemonSet
 spec:
+  selector:
+    matchLabels:
+      name: example-daemonset
   template:
     spec:
       containers:
-      - name: example-daemonset
-        image: example-daemonset:latest
-        volumeMounts:
-        - mountPath: /host/var/run/docker.sock
-          name: docker-sock
-          readOnly: false
+        - name: example-daemonset
+          image: example-daemonset:latest
+          volumeMounts:
+            - mountPath: /host/var/run/docker.sock
+              name: docker-sock
+              readOnly: false
       volumes:
-      - name: docker-sock
-        hostPath:
-         path: /var/run/docker.sock
+        - name: docker-sock
+          hostPath:
+            path: /var/run/docker.sock
