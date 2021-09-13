@@ -5,6 +5,7 @@ go 1.16
 require (
 	github.com/fatih/color v1.12.0 // indirect
 	github.com/ghodss/yaml v1.0.0
+	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/google/go-cmp v0.5.6 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
