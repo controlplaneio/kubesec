@@ -4,6 +4,7 @@ All notable changes to this project will be documented in this file.
 
 ## Table of Contents
 
+- [2.11.3](#2113)
 - [2.11.2](#2112)
 - [2.11.1](#2111)
 - [2.11.0](#2110)
@@ -26,6 +27,11 @@ All notable changes to this project will be documented in this file.
 - [1.0.0](#100)
 
 ---
+
+## `2.11.3`
+
+- Bump dependencies
+- Minor doc cleanup
 
 ## `2.11.2`
 

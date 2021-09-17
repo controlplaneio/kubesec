@@ -85,7 +85,7 @@ $ kubesec scan kubesec-test.yaml
 Run the same command in Docker:
 
 ```bash
-$ docker run -i kubesec/kubesec:512c5e0 scan /dev/stdin < kubesec-test.yaml
+$ docker run -i kubesec/kubesec:v2 scan /dev/stdin < kubesec-test.yaml
 ```
 
 ## Kubesec HTTP Server
@@ -142,7 +142,7 @@ $ kill %
 Start the HTTP server using Docker
 
 ```bash
-$ docker run -d -p 8080:8080 kubesec/kubesec:d432be9 http 8080
+$ docker run -d -p 8080:8080 kubesec/kubesec:v2 http 8080
 ```
 
 Use curl to POST a file to the server
@@ -157,6 +157,10 @@ Don't forget to stop the server.
 ## Kubesec-as-a-Service
 
 Kubesec is also available via HTTPS at [v2.kubesec.io/scan](https://v2.kubesec.io/scan)
+
+Please do not submit sensitive YAML to this service.
+
+The service is ran on a good faith best effort basis.
 
 #### Command line usage:
 
