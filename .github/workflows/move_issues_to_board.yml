@@ -1,8 +1,9 @@
-name: Move new issues into To do
+---
+name: Move new issues into To Do
 
 on:
   issues:
-    types: [ opened ]
+    types: [opened]
 
 jobs:
   automate-project-columns:
