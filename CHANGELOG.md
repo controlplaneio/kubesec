@@ -4,6 +4,7 @@ All notable changes to this project will be documented in this file.
 
 ## Table of Contents
 
+- [2.11.4](#2114)
 - [2.11.3](#2113)
 - [2.11.2](#2112)
 - [2.11.1](#2111)
@@ -27,6 +28,12 @@ All notable changes to this project will be documented in this file.
 - [1.0.0](#100)
 
 ---
+
+## `2.11.4`
+
+- Fix container builds so all tags are correctly built
+- Split release and container release so they can be re-ran separately
+- Bump dependencies
 
 ## `2.11.3`
 
