@@ -1,0 +1,70 @@
+name: Release Containers
+on:
+  create:
+    branches:
+      - "!*"
+    tags:
+      - v*.*.*
+
+jobs:
+  release-containers:
+    name: Build and Push container - ${{ matrix.containers.name }}
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        containers:
+          - name: kubesec
+            file: ./Dockerfile
+            suffix: ""
+          - name: kubesec scratch
+            file: ./Dockerfile.scratch
+            suffix: -scratch
+
+    steps:
+      - name: Cache container layers
+        uses: actions/cache@v2.1.6
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}${{ matrix.containers.suffix }}-buildx-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}${{ matrix.containers.suffix }}-buildx-
+
+      - name: Generate container tags and labels
+        id: docker_meta
+        uses: crazy-max/ghaction-docker-meta@v3.4.1
+        with:
+          # images: kubesec/kubesec,ghcr.io/controlplaneio/kubesec
+          images: kubesec/kubesec
+          tag-latest: ${{ matrix.containers.suffix == '' }}
+          tag-semver: |
+            {{version}}${{ matrix.containers.suffix }}
+          label-custom: |
+            org.opencontainers.image.vendor=controlplane
+            org.opencontainers.image.url=https://kubesec.io/
+
+      - name: Login to Docker Hub Registry
+        uses: docker/login-action@v1.10.0
+        with:
+          registry: docker.io
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      # - name: Login to GitHub Container Registry
+      #   uses: docker/login-action@v1.10.0
+      #   with:
+      #     registry: ghcr.io
+      #     username: ${{ github.repository_owner }}
+      #     password: ${{ secrets.CR_PAT }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1.6.0
+
+      - name: Build container and push tags
+        uses: docker/build-push-action@v2.7.0
+        with:
+          push: true
+          file: ${{ matrix.containers.file }}
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: mode=max,type=local,dest=/tmp/.buildx-cache
+          tags: ${{ steps.docker_meta.outputs.tags }}
+          labels: ${{ steps.docker_meta.outputs.labels }}
