@@ -59,13 +59,13 @@ Or install the latest commit from GitHub with:
 #### Go 1.16+
 
 ```bash
-go install github.com/controlplaneio/kubesec/v2@latest
+$ go install github.com/controlplaneio/kubesec/v2@latest
 ```
 
 #### Go version < 1.16
 
 ```bash
-GO111MODULE="on" go get github.com/controlplaneio/kubesec/v2
+$ GO111MODULE="on" go get github.com/controlplaneio/kubesec/v2
 ```
 
 #### Command line usage:
