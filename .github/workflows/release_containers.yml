@@ -34,7 +34,7 @@ jobs:
 
       - name: Generate container tags and labels
         id: docker_meta
-        uses: docker/metadata-action@v3.6.0
+        uses: docker/metadata-action@v3.6.2
         with:
           # images: kubesec/kubesec,ghcr.io/controlplaneio/kubesec
           images: kubesec/kubesec
