@@ -23,4 +23,4 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Run hadolint
-        uses: reviewdog/action-hadolint@v1.28
+        uses: reviewdog/action-hadolint@v1.31
