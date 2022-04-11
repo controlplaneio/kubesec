@@ -39,7 +39,7 @@ jobs:
           make build
 
       - name: Upload kubesec
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: kubesec
           path: dist/kubesec
