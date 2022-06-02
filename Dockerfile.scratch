@@ -1,4 +1,4 @@
-FROM golang:1.18.1-alpine AS builder
+FROM golang:1.18.3-alpine AS builder
 
 RUN echo "kubesec:x:31012:31012:kubesec:/home/kubesec:/sbin/nologin" > /passwd && \
     echo "kubesec:x:31012:" > /group
