@@ -1,4 +1,4 @@
-FROM golang:1.18.1 AS builder
+FROM golang:1.18 AS builder
 
 WORKDIR /kubesec
 
@@ -8,7 +8,7 @@ RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o kubesec .
 
 # ===
 
-FROM alpine:3.15.4
+FROM alpine:3.16
 
 RUN addgroup -S kubesec \
     && adduser -S -g kubesec kubesec \

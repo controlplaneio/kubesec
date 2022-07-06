@@ -32,14 +32,14 @@ jobs:
         uses: actions/setup-go@v3
         id: go
         with:
-          go-version: ^1.16
+          go-version: ^1.18
 
       - name: Build kubesec
         run: |
           make build
 
       - name: Upload kubesec
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: kubesec
           path: dist/kubesec
@@ -59,7 +59,7 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Download kubesec
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v3
         with:
           name: kubesec
           path: dist
