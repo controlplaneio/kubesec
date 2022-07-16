@@ -14,7 +14,9 @@ func init() {
 	// FIXME: I don't understand why I need a reference to keypath here,
 	// and the cobra docs don't make it exactly clear.
 	var keypath string
+	var schemaDir string
 	httpCmd.Flags().StringVarP(&keypath, "keypath", "k", "", "Path to in-toto link signing key")
+	httpCmd.Flags().StringVarP(&schemaDir, "schema-dir", "s", "", "Sets the directory for the json schemas")
 	rootCmd.AddCommand(httpCmd)
 }
 
@@ -40,7 +42,9 @@ var httpCmd = &cobra.Command{
 
 		keypath := cmd.Flag("keypath").Value.String()
 
-		server.ListenAndServe(port, time.Minute, jsonLogger, stopCh, keypath)
+		schemaDir := cmd.Flag("schema-dir").Value.String()
+
+		server.ListenAndServe(port, time.Minute, jsonLogger, stopCh, keypath, schemaDir)
 		return nil
 	},
 }
