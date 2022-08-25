@@ -9,7 +9,7 @@ require (
 	github.com/prometheus/client_golang v1.12.2
 	github.com/spf13/cobra v1.5.0
 	github.com/thedevsaddam/gojsonq/v2 v2.5.2
-	go.uber.org/zap v1.21.0
+	go.uber.org/zap v1.23.0
 )
 
 require (
