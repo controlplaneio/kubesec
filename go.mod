@@ -4,7 +4,7 @@ go 1.17
 
 require (
 	github.com/ghodss/yaml v1.0.0
-	github.com/in-toto/in-toto-golang v0.3.3
+	github.com/in-toto/in-toto-golang v0.4.0
 	github.com/instrumenta/kubeval v0.16.1
 	github.com/prometheus/client_golang v1.12.2
 	github.com/spf13/cobra v1.5.0
@@ -27,6 +27,7 @@ require (
 	github.com/prometheus/client_model v0.2.0 // indirect
 	github.com/prometheus/common v0.35.0 // indirect
 	github.com/prometheus/procfs v0.7.3 // indirect
+	github.com/secure-systems-lab/go-securesystemslib v0.4.0 // indirect
 	github.com/shibumi/go-pathspec v1.3.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/xeipuuv/gojsonpointer v0.0.0-20190905194746-02993c407bfb // indirect
@@ -34,6 +35,7 @@ require (
 	github.com/xeipuuv/gojsonschema v1.2.0 // indirect
 	go.uber.org/atomic v1.9.0 // indirect
 	go.uber.org/multierr v1.8.0 // indirect
+	golang.org/x/crypto v0.0.0-20211209193657-4570a0811e8b // indirect
 	golang.org/x/sys v0.0.0-20220704084225-05e143d24a9e // indirect
 	google.golang.org/protobuf v1.28.0 // indirect
 	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
