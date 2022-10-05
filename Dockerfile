@@ -1,4 +1,4 @@
-FROM golang:1.18 AS builder
+FROM golang:1.19.2 AS builder
 
 WORKDIR /kubesec
 
