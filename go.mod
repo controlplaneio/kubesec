@@ -7,7 +7,7 @@ require (
 	github.com/in-toto/in-toto-golang v0.3.3
 	github.com/instrumenta/kubeval v0.16.1
 	github.com/prometheus/client_golang v1.12.2
-	github.com/spf13/cobra v1.5.0
+	github.com/spf13/cobra v1.6.0
 	github.com/thedevsaddam/gojsonq/v2 v2.5.2
 	go.uber.org/zap v1.21.0
 )
@@ -19,7 +19,7 @@ require (
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
-	github.com/inconshreveable/mousetrap v1.0.0 // indirect
+	github.com/inconshreveable/mousetrap v1.0.1 // indirect
 	github.com/kr/text v0.2.0 // indirect
 	github.com/mattn/go-colorable v0.1.12 // indirect
 	github.com/mattn/go-isatty v0.0.14 // indirect
