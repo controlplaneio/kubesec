@@ -395,15 +395,14 @@ func (rs *Ruleset) generateReport(fileName string, json []byte, schemaDir string
 	}
 	f := io.NopCloser(bytes.NewReader(json))
 
-	for _, res := range v.Validate(fileName, f) { // A file might contain multiple resources
+	for _, res := range v.Validate(fileName, f) {
+		// A file might contain multiple resources
 		// File starts with ---, the parser assumes a first empty resource
 		if res.Status == validator.Invalid {
 			report.Message += res.Err.Error() + "\n"
-			// fmt.Printf("resource %d in file %s is not valid: %s", i, fileName, res.Err)
 		}
 		if res.Status == validator.Error {
 			report.Message += res.Err.Error()
-			// fmt.Printf("error while processing resource %d in file %s: %s", i, fileName, res.Err)
 		}
 	}
 
