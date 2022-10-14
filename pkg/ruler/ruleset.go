@@ -5,18 +5,17 @@ import (
 	"crypto/sha256"
 	"encoding/json"
 	"fmt"
-	"os"
+	"io"
 	"reflect"
 	"runtime"
 	"sort"
-	"strings"
 	"sync"
 
 	"github.com/controlplaneio/kubesec/v2/pkg/rules"
 	"github.com/ghodss/yaml"
 	"github.com/in-toto/in-toto-golang/in_toto"
-	"github.com/instrumenta/kubeval/kubeval"
 	"github.com/thedevsaddam/gojsonq/v2"
+	"github.com/yannh/kubeconform/pkg/validator"
 	"go.uber.org/zap"
 )
 
@@ -385,34 +384,26 @@ func (rs *Ruleset) generateReport(fileName string, json []byte, schemaDir string
 
 	report.Object = getObjectName(json)
 
-	// validate resource with kubeval
-	cfg := kubeval.NewDefaultConfig()
-	cfg.FileName = fileName
-	cfg.Strict = true
+	// validate resource with kubeconform
 
-	if schemaDir != "" {
-		cfg.SchemaLocation = "file://" + schemaDir
-	} else if _, err := os.Stat("/schemas/kubernetes-json-schema/master/master-standalone"); !os.IsNotExist(err) {
-		cfg.SchemaLocation = "file:///schemas"
-	}
-
-	results, err := kubeval.Validate(json, cfg)
+	v, err := validator.New(nil, validator.Opts{Strict: true})
 	if err != nil {
-		if strings.Contains(err.Error(), "404 Not Found") {
-			report.Message = "This resource is invalid, unknown schema"
-		} else {
-			report.Message = err.Error()
-		}
+		report.Message += fmt.Sprintf("failed initializing validator: %s", err)
+	}
+	if len(report.Message) > 0 {
 		return report
 	}
+	f := io.NopCloser(bytes.NewReader(json))
 
-	for _, result := range results {
-		if len(result.Errors) > 0 {
-			for _, desc := range result.Errors {
-				report.Message += desc.String() + " "
-			}
-		} else if result.Kind == "" {
-			report.Message += "This resource is invalid, Kubernetes kind not found"
+	for _, res := range v.Validate(fileName, f) { // A file might contain multiple resources
+		// File starts with ---, the parser assumes a first empty resource
+		if res.Status == validator.Invalid {
+			report.Message += res.Err.Error() + "\n"
+			// fmt.Printf("resource %d in file %s is not valid: %s", i, fileName, res.Err)
+		}
+		if res.Status == validator.Error {
+			report.Message += res.Err.Error()
+			// fmt.Printf("error while processing resource %d in file %s: %s", i, fileName, res.Err)
 		}
 	}
 
