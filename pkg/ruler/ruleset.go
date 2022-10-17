@@ -241,7 +241,7 @@ func NewRuleset(logger *zap.SugaredLogger) *Ruleset {
 		Predicate: rules.VolumeClaimAccessModeReadWriteOnce,
 		ID:        "VolumeClaimAccessModeReadWriteOnce",
 		Selector:  ".spec .volumeClaimTemplates[] .spec .accessModes | index(\"ReadWriteOnce\")",
-		Reason:    "",
+		Reason:    "Setting the access mode of ReadWriteOnce on volumeClaimTemplates (if any exist) allows only one node to mount the persistentVolume.",
 		Kinds:     []string{"StatefulSet"},
 		Points:    1,
 	}
@@ -251,7 +251,7 @@ func NewRuleset(logger *zap.SugaredLogger) *Ruleset {
 		Predicate: rules.VolumeClaimRequestsStorage,
 		ID:        "VolumeClaimRequestsStorage",
 		Selector:  ".spec .volumeClaimTemplates[] .spec .resources .requests .storage",
-		Reason:    "",
+		Reason:    "Setting a storage request on volumeClaimTemplates (if any exist) allows for the StatefulSet's PVCs to be bound to appropriately sized PVs.",
 		Kinds:     []string{"StatefulSet"},
 		Points:    1,
 	}

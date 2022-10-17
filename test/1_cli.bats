@@ -83,6 +83,12 @@ teardown() {
   assert_gt_zero_points
 }
 
+@test "passes StatefulSet with no volumeClaimTemplate" {
+  run _app "${TEST_DIR}/asset/score-1-statefulset-novolumeclaimtemplate.yml"
+  assert_gt_zero_points
+}
+
+
 @test "fails StatefulSet with no security" {
   run _app "${TEST_DIR}/asset/score-0-statefulset-no-sec.yml"
   assert_zero_points
