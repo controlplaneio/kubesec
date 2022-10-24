@@ -1,10 +1,13 @@
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: DaemonSet
 metadata:
   name: example-daemonset
   labels:
     app: example-daemonset
 spec:
+  selector:
+    matchLabels:
+      app: test
   template:
     metadata:
       labels:

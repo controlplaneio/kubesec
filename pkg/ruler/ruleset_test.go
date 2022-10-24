@@ -150,7 +150,7 @@ spec:
 
 	report := NewRuleset(zap.NewNop().Sugar()).generateReport("kube.yaml", json, schemaDir)
 
-	if len(report.Message) < 1 || !strings.Contains(report.Message, "unknown schema") {
+	if len(report.Message) < 1 || !strings.Contains(report.Message, "could not find schema for Deployment2") {
 		t.Errorf("Got error %v ", report.Message)
 	}
 }
