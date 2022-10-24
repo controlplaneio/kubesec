@@ -32,7 +32,7 @@ jobs:
         uses: actions/setup-go@v3
         id: go
         with:
-          go-version: ^1.18
+          go-version: ^1.19
 
       - name: Build kubesec
         run: |
