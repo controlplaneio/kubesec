@@ -4,6 +4,7 @@ All notable changes to this project will be documented in this file.
 
 ## Table of Contents
 
+- [2.12.0](#2120)
 - [2.11.4](#2114)
 - [2.11.3](#2113)
 - [2.11.2](#2112)
@@ -28,6 +29,13 @@ All notable changes to this project will be documented in this file.
 - [1.0.0](#100)
 
 ---
+
+## `2.12.0`
+
+- Update kubesec dependencies
+- Update actions
+- Migrate from kubeval to kubeconform
+- Fix StatefulSet and VolumeClaimTemplate issues
 
 ## `2.11.4`
 
