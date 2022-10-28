@@ -1,8 +1,9 @@
 package rules
 
 import (
-	"github.com/ghodss/yaml"
 	"testing"
+
+	"github.com/ghodss/yaml"
 )
 
 func Test_VolumeClaimAccessModeReadWriteOnce(t *testing.T) {
@@ -56,4 +57,29 @@ spec:
 	if containers != 1 {
 		t.Errorf("Got %v containers wanted %v", containers, 1)
 	}
+}
+
+func TestStatefulSetHasNoPVCsAndNoAccessModes(t *testing.T) {
+	var data = `
+---
+apiVersion: "apps/v1"
+kind: StatefulSet
+spec:
+  template:
+    spec:
+      containers:
+      - name: cassandra
+        image: gcr.io/google-samples/cassandra:v14
+
+`
+	json, err := yaml.YAMLToJSON([]byte(data))
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+
+	containers := VolumeClaimAccessModeReadWriteOnce(json)
+	if containers != 1 {
+		t.Errorf("Got %v containers wanted %v", containers, 1)
+	}
+
 }
