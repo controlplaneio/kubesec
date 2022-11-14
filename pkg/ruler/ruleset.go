@@ -76,7 +76,7 @@ func NewRuleset(logger *zap.SugaredLogger) *Ruleset {
 	runAsNonRootRule := Rule{
 		Predicate: rules.RunAsNonRoot,
 		ID:        "RunAsNonRoot",
-		Selector:  "containers[] .securityContext .runAsNonRoot == true",
+		Selector:  ".spec, .spec.containers[] | .securityContext .runAsNonRoot == true",
 		Reason:    "Force the running image to run as a non-root user to ensure least privilege",
 		Kinds:     []string{"Pod", "Deployment", "StatefulSet", "DaemonSet"},
 		Points:    1,
@@ -87,13 +87,24 @@ func NewRuleset(logger *zap.SugaredLogger) *Ruleset {
 	runAsUserRule := Rule{
 		Predicate: rules.RunAsUser,
 		ID:        "RunAsUser",
-		Selector:  "containers[] .securityContext .runAsUser -gt 10000",
-		Reason:    "Run as a high-UID user to avoid conflicts with the host's user table",
+		Selector:  ".spec, .spec.containers[] | .securityContext .runAsUser -gt 10000",
+		Reason:    "Run as a high-UID user to avoid conflicts with the host's users",
 		Kinds:     []string{"Pod", "Deployment", "StatefulSet", "DaemonSet"},
 		Points:    1,
 		Advise:    4,
 	}
 	list = append(list, runAsUserRule)
+
+	runAsGroupRule := Rule{
+		Predicate: rules.RunAsGroup,
+		ID:        "RunAsGroup",
+		Selector:  ".spec, .spec.containers[] | .securityContext .runAsGroup -gt 10000",
+		Reason:    "Run as a high-UID group to avoid conflicts with the host's groups",
+		Kinds:     []string{"Pod", "Deployment", "StatefulSet", "DaemonSet"},
+		Points:    1,
+		Advise:    4,
+	}
+	list = append(list, runAsGroupRule)
 
 	privilegedRule := Rule{
 		Predicate: rules.Privileged,

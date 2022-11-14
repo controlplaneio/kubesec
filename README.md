@@ -44,7 +44,6 @@ This uses ControlPlane's hosted API at [v2.kubesec.io/scan](https://v2.kubesec.i
 - [Contributing](/CONTRIBUTING.md)
 - [Changelog](/CHANGELOG.md)
 
-
 ## Download Kubesec
 
 Kubesec is available as a:

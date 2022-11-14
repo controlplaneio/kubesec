@@ -1,9 +1,49 @@
 package rules
 
 import (
-	"github.com/ghodss/yaml"
 	"testing"
+
+	"github.com/ghodss/yaml"
 )
+
+func Test_RunAsGroup_Pod(t *testing.T) {
+	var data = `
+---
+apiVersion: apps/v1
+kind: Deployment
+spec:
+  template:
+    spec:
+      securityContext:
+        runAsGroup: 10001
+      initContainers:
+        - name: init1
+        - name: init2
+          securityContext:
+            runAsGroup: 0
+        - name: init2
+          securityContext:
+            runAsGroup: 99999
+      containers:
+        - name: c1
+        - name: c2
+          securityContext:
+            runAsGroup: 999
+        - name: c2
+          securityContext:
+            runAsGroup: 99999
+`
+
+	json, err := yaml.YAMLToJSON([]byte(data))
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+
+	containers := RunAsGroup(json)
+	if containers != 4 {
+		t.Errorf("Got %v containers wanted %v", containers, 4)
+	}
+}
 
 func Test_RunAsGroup_InitContainers(t *testing.T) {
 	var data = `
@@ -144,7 +184,7 @@ spec:
   containers:
   - name: c1
     securityContext:
-      runAsGroup: 
+      runAsGroup:
 `
 
 	json, err := yaml.YAMLToJSON([]byte(data))

@@ -1,31 +1,29 @@
 package rules
 
 import (
-	"bytes"
 	"fmt"
-	"github.com/thedevsaddam/gojsonq/v2"
 	"strings"
+
+	"github.com/thedevsaddam/gojsonq/v2"
 )
 
 func CapDropAll(json []byte) int {
-	spec := getSpecSelector(json)
-	containers := 0
+	return checkSecurityContext(
+		json,
+		false, // not present in PodSecurityContext
+		func(jq *gojsonq.JSONQ) checkSecurityContextResult {
+			value := jq.From("securityContext.capabilities.drop").Get()
 
-	capDrop := gojsonq.New().Reader(bytes.NewReader(json)).
-		From(spec + ".containers").
-		Only("securityContext.capabilities.drop")
+			res := checkSecurityContextResult{}
+			if value == nil {
+				res.unset = true
+				return res
+			}
 
-	if capDrop != nil && strings.Contains(strings.ToUpper(fmt.Sprintf("%v", capDrop)), "ALL") {
-		containers++
-	}
+			if strings.Contains(strings.ToUpper(fmt.Sprintf("%v", value)), "ALL") {
+				res.valid = true
+			}
 
-	capDropInit := gojsonq.New().Reader(bytes.NewReader(json)).
-		From(spec + ".initContainers").
-		Only("securityContext.capabilities.drop")
-
-	if capDropInit != nil && strings.Contains(strings.ToUpper(fmt.Sprintf("%v", capDropInit)), "ALL") {
-		containers++
-	}
-
-	return containers
+			return res
+		})
 }

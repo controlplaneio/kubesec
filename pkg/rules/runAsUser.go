@@ -1,24 +1,28 @@
 package rules
 
 import (
-	"bytes"
 	"github.com/thedevsaddam/gojsonq/v2"
 )
 
 func RunAsUser(json []byte) int {
-	spec := getSpecSelector(json)
+	return checkSecurityContext(
+		json,
+		true,
+		func(jq *gojsonq.JSONQ) checkSecurityContextResult {
+			value := jq.From("securityContext.runAsUser").Get()
 
-	jqContainers := gojsonq.New().Reader(bytes.NewReader(json)).
-		From(spec+".containers").
-		Where("securityContext", "!=", nil).
-		Where("securityContext.runAsUser", "!=", nil).
-		Where("securityContext.runAsUser", ">", 10000)
+			v, ok := value.(float64)
 
-	jqInitContainers := gojsonq.New().Reader(bytes.NewReader(json)).
-		From(spec+".initContainers").
-		Where("securityContext", "!=", nil).
-		Where("securityContext.runAsUser", "!=", nil).
-		Where("securityContext.runAsUser", ">", 10000)
+			res := checkSecurityContextResult{}
+			if !ok {
+				res.unset = true
+				return res
+			}
 
-	return jqContainers.Count() + jqInitContainers.Count()
+			if v > 10000 {
+				res.valid = true
+			}
+
+			return res
+		})
 }
