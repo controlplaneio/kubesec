@@ -10,11 +10,11 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var keypath string
+
 func init() {
-	// FIXME: I don't understand why I need a reference to keypath here,
-	// and the cobra docs don't make it exactly clear.
-	var keypath string
 	httpCmd.Flags().StringVarP(&keypath, "keypath", "k", "", "Path to in-toto link signing key")
+	httpCmd.Flags().StringSliceVar(&schemaLocations, "schema-location", []string{}, "Override schema location search path, local or http (can be specified multiple times)")
 	rootCmd.AddCommand(httpCmd)
 }
 
@@ -36,11 +36,12 @@ var httpCmd = &cobra.Command{
 		}
 
 		stopCh := server.SetupSignalHandler()
-		jsonLogger, _ := NewLogger("info", "json")
+		jsonLogger, err := NewLogger("info", "json")
+		if err != nil {
+			return fmt.Errorf("Unable to create new logger: %w", err)
+		}
 
-		keypath := cmd.Flag("keypath").Value.String()
-
-		server.ListenAndServe(port, time.Minute, jsonLogger, stopCh, keypath)
+		server.ListenAndServe(port, time.Minute, jsonLogger, stopCh, keypath, schemaLocations)
 		return nil
 	},
 }
