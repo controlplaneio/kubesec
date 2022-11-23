@@ -7,6 +7,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/controlplaneio/kubesec/v2/pkg/report"
 	"github.com/controlplaneio/kubesec/v2/pkg/ruler"
@@ -21,18 +22,23 @@ func (e *ScanFailedValidationError) Error() string {
 	return "Kubesec scan failed"
 }
 
-var debug bool
-var absolutePath bool
-var format string
-var template string
-var schemaLocations = []string{}
-var outputLocation string
-var exitCode int
+var (
+	debug           bool
+	absolutePath    bool
+	format          string
+	template        string
+	k8sVersion      string
+	validateSchema  bool
+	schemaLocations = []string{}
+	outputLocation  string
+	exitCode        int
+)
 
 func init() {
 	scanCmd.Flags().BoolVar(&debug, "debug", false, "turn on debug logs")
 	scanCmd.Flags().BoolVar(&absolutePath, "absolute-path", false, "use the absolute path for the file name")
 	scanCmd.Flags().StringVarP(&format, "format", "f", "json", "Set output format (json, template)")
+	scanCmd.Flags().StringVar(&k8sVersion, "kubernetes-version", "", "Kubernetes version to validate manifets")
 	scanCmd.Flags().StringSliceVar(&schemaLocations, "schema-location", []string{}, "Override schema location search path, local or http (can be specified multiple times)")
 	scanCmd.Flags().StringVarP(&template, "template", "t", "", "Set output template, it will check for a file or read input as the")
 	scanCmd.Flags().StringVarP(&outputLocation, "output", "o", "", "Set output location")
@@ -107,7 +113,21 @@ var scanCmd = &cobra.Command{
 			return err
 		}
 
-		reports, err := ruler.NewRuleset(logger).Run(file.fileName, file.fileBytes, true, schemaLocations)
+		ver := os.Getenv("K8S_SCHEMA_VER")
+		if ver != "" && k8sVersion == "" {
+			k8sVersion = ver
+		}
+
+		loc := os.Getenv("SCHEMA_LOCATION")
+		if loc != "" && len(schemaLocations) == 0 {
+			schemaLocations = strings.Split(loc, ",")
+		}
+
+		schemaConfig := ruler.NewDefaultSchemaConfig()
+		schemaConfig.Locations = schemaLocations
+		schemaConfig.ValidatorOpts.KubernetesVersion = k8sVersion
+
+		reports, err := ruler.NewRuleset(logger).Run(file.fileName, file.fileBytes, schemaConfig)
 		if err != nil {
 			return err
 		}

@@ -5,7 +5,6 @@ import (
 	"crypto/sha256"
 	"encoding/json"
 	"fmt"
-	"io"
 	"reflect"
 	"runtime"
 	"sort"
@@ -15,7 +14,6 @@ import (
 	"github.com/ghodss/yaml"
 	"github.com/in-toto/in-toto-golang/in_toto"
 	"github.com/thedevsaddam/gojsonq/v2"
-	"github.com/yannh/kubeconform/pkg/validator"
 	"go.uber.org/zap"
 )
 
@@ -273,12 +271,12 @@ func NewRuleset(logger *zap.SugaredLogger) *Ruleset {
 	}
 }
 
-func (rs *Ruleset) Run(fileName string, fileBytes []byte, schemaValidation bool, schemaLocations []string) ([]Report, error) {
+func (rs *Ruleset) Run(fileName string, fileBytes []byte, schemaConfig SchemaConfig) ([]Report, error) {
 	reports := make([]Report, 0)
 
 	isJSON := json.Valid(fileBytes)
 	if isJSON {
-		report := rs.generateReport(fileName, fileBytes, schemaValidation, schemaLocations)
+		report := rs.generateReport(fileName, fileBytes, schemaConfig)
 		reports = append(reports, report)
 	} else {
 		lineBreak := detectLineBreak(fileBytes)
@@ -301,7 +299,7 @@ func (rs *Ruleset) Run(fileName string, fileBytes []byte, schemaValidation bool,
 			if err != nil {
 				return reports, err
 			}
-			report := rs.generateReport(fileName, data, schemaValidation, schemaLocations)
+			report := rs.generateReport(fileName, data, schemaConfig)
 			reports = append(reports, report)
 		}
 	}
@@ -370,7 +368,7 @@ func containsRule(rules []RuleRef, newRule RuleRef) bool {
 	return false
 }
 
-func (rs *Ruleset) generateReport(fileName string, json []byte, schemaValidation bool, schemaLocations []string) Report {
+func (rs *Ruleset) generateReport(fileName string, json []byte, schemaConfig SchemaConfig) Report {
 	report := Report{
 		Object:   getObjectName(json),
 		FileName: fileName,
@@ -385,8 +383,8 @@ func (rs *Ruleset) generateReport(fileName string, json []byte, schemaValidation
 	}
 
 	// validate resource with kubeconform
-	if schemaValidation {
-		report = validateSchema(report, json, schemaLocations)
+	if !schemaConfig.DisableValidation {
+		report = validateSchema(report, json, schemaConfig)
 		if report.Message != "" {
 			report.Valid = false
 			return report
@@ -395,30 +393,6 @@ func (rs *Ruleset) generateReport(fileName string, json []byte, schemaValidation
 
 	// check kubesec rules
 	return rs.checkRules(report, json)
-}
-
-// validateSchema validates the json schema of the resource
-// using kubeconform and updates the provided Report.
-func validateSchema(report Report, json []byte, schemaLocations []string) Report {
-	v, err := validator.New(schemaLocations, validator.Opts{Strict: true})
-	if err != nil {
-		report.Message += fmt.Sprintf("failed initializing validator: %s", err)
-		return report
-	}
-
-	f := io.NopCloser(bytes.NewReader(json))
-	for _, res := range v.Validate(report.FileName, f) {
-		// A file might contain multiple resources
-		// File starts with ---, the parser assumes a first empty resource
-		if res.Status == validator.Invalid {
-			report.Message += res.Err.Error() + "\n"
-		}
-		if res.Status == validator.Error {
-			report.Message += res.Err.Error()
-		}
-	}
-
-	return report
 }
 
 // checkRules checks the resource against the kubesec rules

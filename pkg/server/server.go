@@ -25,12 +25,12 @@ func ListenAndServe(
 	logger *zap.SugaredLogger,
 	stopCh <-chan struct{},
 	keypath string,
-	schemaLocations []string,
+	schemaConfig ruler.SchemaConfig,
 ) {
 
 	mux := http.DefaultServeMux
-	mux.Handle("/", scanHandler(logger, keypath, schemaLocations))
-	mux.Handle("/scan", scanHandler(logger, keypath, schemaLocations))
+	mux.Handle("/", scanHandler(logger, keypath, schemaConfig))
+	mux.Handle("/scan", scanHandler(logger, keypath, schemaConfig))
 	mux.Handle("/metrics", promhttp.Handler())
 	mux.HandleFunc("/healthz", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
@@ -106,7 +106,7 @@ func retrieveRequestData(r *http.Request) ([]byte, error) {
 	return body, nil
 }
 
-func scanHandler(logger *zap.SugaredLogger, keypath string, schemaLocations []string) http.Handler {
+func scanHandler(logger *zap.SugaredLogger, keypath string, schemaConfig ruler.SchemaConfig) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == http.MethodGet {
 			http.Redirect(w, r, "https://kubesec.io", http.StatusSeeOther)
@@ -129,7 +129,7 @@ func scanHandler(logger *zap.SugaredLogger, keypath string, schemaLocations []st
 		}
 
 		var payload interface{}
-		reports, err := ruler.NewRuleset(logger).Run(fileName, body, true, schemaLocations)
+		reports, err := ruler.NewRuleset(logger).Run(fileName, body, schemaConfig)
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
 			w.Write([]byte(err.Error() + "\n"))

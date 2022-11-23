@@ -118,7 +118,8 @@ spec:
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			reports, err := NewRuleset(zap.NewNop().Sugar()).Run("kube.yaml", []byte(tt.data), true, []string{})
+			config := NewDefaultSchemaConfig()
+			reports, err := NewRuleset(zap.NewNop().Sugar()).Run("kube.yaml", []byte(tt.data), config)
 			if err != nil || len(reports) == 0 {
 				t.Fatal(err.Error())
 			}
@@ -171,7 +172,10 @@ spec:
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			reports, err := NewRuleset(zap.NewNop().Sugar()).Run("kube.yaml", []byte(tt.data), false, []string{})
+			config := NewDefaultSchemaConfig()
+			config.DisableValidation = true
+
+			reports, err := NewRuleset(zap.NewNop().Sugar()).Run("kube.yaml", []byte(tt.data), config)
 			if err != nil || len(reports) == 0 {
 				t.Fatal(err.Error())
 			}
@@ -264,7 +268,8 @@ data:
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			reports, err := NewRuleset(zap.NewNop().Sugar()).Run("kube.yaml", []byte(tt.data), true, []string{})
+			config := NewDefaultSchemaConfig()
+			reports, err := NewRuleset(zap.NewNop().Sugar()).Run("kube.yaml", []byte(tt.data), config)
 			if err != nil || len(reports) == 0 {
 				t.Fatal(err.Error())
 			}
@@ -309,7 +314,8 @@ spec:
 
 `
 
-	reports, err := NewRuleset(zap.NewNop().Sugar()).Run("kube.yaml", []byte(data), true, []string{})
+	config := NewDefaultSchemaConfig()
+	reports, err := NewRuleset(zap.NewNop().Sugar()).Run("kube.yaml", []byte(data), config)
 	if err != nil || len(reports) == 0 {
 		t.Fatal(err.Error())
 	}

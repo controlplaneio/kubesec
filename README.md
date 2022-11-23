@@ -100,6 +100,51 @@ Run the same command in Docker:
 $ docker run -i kubesec/kubesec:v2 scan /dev/stdin < kubesec-test.yaml
 ```
 
+#### Specify custom schema
+
+Kubesec leverages kubeconform (thanks @yannh) to validate the manifests to scan.
+This implies that specifying different schema locations follows the rules as
+described in [the kubeconform README](https://github.com/yannh/kubeconform#overriding-schemas-location).
+
+Here is a quick overview on how this work for scanning a pod manifest:
+
+- I want to use the latest available schema from upstream.
+
+```bash
+kubesec [scan|http]
+```
+
+Schema will be fetched from: https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/master-standalone-strict/pod-v1.json
+
+- I want to use a specific schema version from upstream.
+
+```bash
+kubesec [scan|http] --kubernetes-version 1.25.3
+```
+
+Schema will be fetched from: https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/v1.25.3-standalone-strict/pod-v1.json
+
+- I want to use a specific schema version in an airgap environment over HTTP.
+
+```bash
+kubesec [scan|http] --kubernetes-version 1.25.3 --schema-location https://host.server
+```
+
+Schema will be fetched from: https://host.server/v1.25.3-standalone-strict/pod-v1.json
+
+- I want to use a specific schema version in an airgap environment with local files:
+
+```bash
+kubesec [scan|http] --kubernetes-version 1.25.3 --schema-location /opt/schemas
+```
+
+Schema will be fetched from: /opt/schemas/v1.25.3-standalone-strict/pod-v1.json
+
+**Note:** in order to limit external network calls and allow usage in airgap
+environments, the `kubesec` image embeds schemas. If you are looking to change
+the schema location, you'll need to change the `K8S_SCHEMA_VER` and `SCHEMA_LOCATION`
+environment variables at runtime.
+
 ## Kubesec HTTP Server
 
 Kubesec includes a bundled HTTP server
