@@ -28,7 +28,6 @@ var (
 	format          string
 	template        string
 	k8sVersion      string
-	validateSchema  bool
 	schemaLocations = []string{}
 	outputLocation  string
 	exitCode        int
