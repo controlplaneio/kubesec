@@ -9,11 +9,10 @@ RUN set -x && \
     BASE_URL="https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master" && \
     SCHEMA_PATH="${K8S_SCHEMA_VER}-standalone-strict" && \
     mkdir "${SCHEMA_PATH}" && \
-    cd "${SCHEMA_PATH}" && \
-    curl -sSL -O "${BASE_URL}/${SCHEMA_PATH}/pod-v1.json" && \
-    curl -sSL -O "${BASE_URL}/${SCHEMA_PATH}/daemonset-apps-v1.json" && \
-    curl -sSL -O "${BASE_URL}/${SCHEMA_PATH}/deployment-apps-v1.json" && \
-    curl -sSL -O "${BASE_URL}/${SCHEMA_PATH}/statefulset-apps-v1.json"
+    curl -sSL --output-dir "${SCHEMA_PATH}" -O "${BASE_URL}/${SCHEMA_PATH}/pod-v1.json" && \
+    curl -sSL --output-dir "${SCHEMA_PATH}" -O "${BASE_URL}/${SCHEMA_PATH}/daemonset-apps-v1.json" && \
+    curl -sSL --output-dir "${SCHEMA_PATH}" -O "${BASE_URL}/${SCHEMA_PATH}/deployment-apps-v1.json" && \
+    curl -sSL --output-dir "${SCHEMA_PATH}" -O "${BASE_URL}/${SCHEMA_PATH}/statefulset-apps-v1.json"
 
 FROM golang:1.19 AS builder
 
