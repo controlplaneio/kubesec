@@ -19,10 +19,18 @@ import (
 )
 
 // ListenAndServe starts a web server and waits for SIGTERM
-func ListenAndServe(port string, timeout time.Duration, logger *zap.SugaredLogger, stopCh <-chan struct{}, keypath string) {
+func ListenAndServe(
+	port string,
+	timeout time.Duration,
+	logger *zap.SugaredLogger,
+	stopCh <-chan struct{},
+	keypath string,
+	schemaConfig ruler.SchemaConfig,
+) {
+
 	mux := http.DefaultServeMux
-	mux.Handle("/", scanHandler(logger, keypath))
-	mux.Handle("/scan", scanHandler(logger, keypath))
+	mux.Handle("/", scanHandler(logger, keypath, schemaConfig))
+	mux.Handle("/scan", scanHandler(logger, keypath, schemaConfig))
 	mux.Handle("/metrics", promhttp.Handler())
 	mux.HandleFunc("/healthz", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
@@ -98,7 +106,7 @@ func retrieveRequestData(r *http.Request) ([]byte, error) {
 	return body, nil
 }
 
-func scanHandler(logger *zap.SugaredLogger, keypath string) http.Handler {
+func scanHandler(logger *zap.SugaredLogger, keypath string, schemaConfig ruler.SchemaConfig) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == http.MethodGet {
 			http.Redirect(w, r, "https://kubesec.io", http.StatusSeeOther)
@@ -121,7 +129,7 @@ func scanHandler(logger *zap.SugaredLogger, keypath string) http.Handler {
 		}
 
 		var payload interface{}
-		reports, err := ruler.NewRuleset(logger).Run(fileName, body, "")
+		reports, err := ruler.NewRuleset(logger).Run(fileName, body, schemaConfig)
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
 			w.Write([]byte(err.Error() + "\n"))

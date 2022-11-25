@@ -1,6 +1,7 @@
 NAME := kubesec
 GITHUB_ORG = controlplaneio
 DOCKER_HUB_ORG = controlplane
+K8S_SCHEMA_VER = 1.25.4
 
 ### github.com/controlplaneio/ensure-content.git makefile-header START ###
 ifeq ($(NAME),)
@@ -126,7 +127,7 @@ prune: ## golang dependency prune
 .PHONY: docker-build
 docker-build: ## builds a docker image
 	@echo "+ $@"
-	docker build --tag "${CONTAINER_NAME}" .
+	docker build --tag "${CONTAINER_NAME}" --build-arg "K8S_SCHEMA_VER=${K8S_SCHEMA_VER}" .
 	docker tag "${CONTAINER_NAME}" "${CONTAINER_NAME_LATEST}"
 	@echo "Successfully tagged ${CONTAINER_NAME} as ${CONTAINER_NAME_LATEST}"
 
