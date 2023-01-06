@@ -21,6 +21,23 @@ on:
       - "**.bats"
 
 jobs:
+  unit:
+    name: Go Unit Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Go
+        uses: actions/setup-go@v3
+        id: go
+        with:
+          go-version: ^1.16
+
+      - name: Run go unit tests
+        run: |
+          make test-unit
+
   build:
     name: Build kubesec
     runs-on: ubuntu-latest

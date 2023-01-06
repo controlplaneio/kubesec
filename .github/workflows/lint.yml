@@ -1,0 +1,75 @@
+---
+name: Linting
+on:
+  push:
+    branches: [master]
+    paths:
+      - "**.bash"
+      - "**.bats"
+      - "Dockerfile"
+      - "Dockerfile.*"
+      - "**.go"
+      - "go.mod"
+      - "go.sum"
+      - "**.yml"
+      - "**.yaml"
+  pull_request:
+    branches: [master]
+    paths:
+      - "**.bash"
+      - "**.bats"
+      - "Dockerfile"
+      - "Dockerfile.*"
+      - "**.go"
+      - "go.mod"
+      - "go.sum"
+      - "**.yml"
+      - "**.yaml"
+
+jobs:
+  shellcheck:
+    name: shellcheck
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        extention: ["bash", "bats"]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Run shellcheck
+        uses: reviewdog/action-shellcheck@v1
+        with:
+          pattern: "*.${{ matrix.extention }}"
+          exclude: "./test/bin/*"
+
+  hadolint:
+    name: hadolint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Run hadolint
+        uses: reviewdog/action-hadolint@v1
+
+  golangci-lint:
+    name: golangci-lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Run golangci-lint
+        uses: reviewdog/action-golangci-lint@v2
+
+  yamllint:
+    name: yamllint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Run yamllint
+        uses: reviewdog/action-yamllint@v1
