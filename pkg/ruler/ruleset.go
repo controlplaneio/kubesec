@@ -239,7 +239,7 @@ func NewRuleset(logger *zap.SugaredLogger) *Ruleset {
 		Predicate: rules.VolumeClaimAccessModeReadWriteOnce,
 		ID:        "VolumeClaimAccessModeReadWriteOnce",
 		Selector:  ".spec .volumeClaimTemplates[] .spec .accessModes | index(\"ReadWriteOnce\")",
-		Reason:    "Setting the access mode of ReadWriteOnce on volumeClaimTemplates (if any exist) allows only one node to mount the persistentVolume.",
+		Reason:    "Setting the access mode of ReadWriteOnce on volumeClaimTemplates (if any exist) allows only one node to mount the persistentVolume",
 		Kinds:     []string{"StatefulSet"},
 		Points:    1,
 	}
@@ -259,7 +259,7 @@ func NewRuleset(logger *zap.SugaredLogger) *Ruleset {
 		Predicate: rules.AllowPrivilegeEscalation,
 		ID:        "AllowPrivilegeEscalation",
 		Selector:  "containers[] .securityContext .allowPrivilegeEscalation == true",
-		Reason:    "",
+		Reason:    "Ensure a non-root process can not gain more privileges",
 		Kinds:     []string{"Pod", "Deployment", "StatefulSet", "DaemonSet"},
 		Points:    -7,
 	}
@@ -466,7 +466,6 @@ func eval(json []byte, rule Rule, ch chan RuleRef, wg *sync.WaitGroup) {
 		Points:     rule.Points,
 		Reason:     rule.Reason,
 		Selector:   rule.Selector,
-		Weight:     rule.Weight,
 		Link:       rule.Link,
 	}
 
