@@ -5,12 +5,11 @@ go 1.17
 require (
 	github.com/ghodss/yaml v1.0.0
 	github.com/in-toto/in-toto-golang v0.5.0
-	github.com/instrumenta/kubeval v0.16.1
 	github.com/prometheus/client_golang v1.13.0
 	github.com/spf13/cobra v1.6.1
 	github.com/thedevsaddam/gojsonq/v2 v2.5.2
 	github.com/yannh/kubeconform v0.5.0
-	go.uber.org/zap v1.23.0
+	go.uber.org/zap v1.24.0
 )
 
 require (
