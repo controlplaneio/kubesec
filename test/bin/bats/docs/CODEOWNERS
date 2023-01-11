@@ -1,4 +1,0 @@
-# This enables automatic code review requests per:
-# - https://help.github.com/articles/about-codeowners/
-# - https://help.github.com/articles/enabling-required-reviews-for-pull-requests/
-* @bats-core/bats-core

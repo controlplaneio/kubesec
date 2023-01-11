@@ -90,13 +90,19 @@ test: ## unit and local acceptance tests
 	@echo "+ $@"
 	make test-unit build test-acceptance
 
+test/bin/%:
+	git submodule update --init -- $@
+
+.PHONY: bats
+bats: test/bin/bats test/bin/bats-assert test/bin/bats-support ## fetch bats dependencies
+
 .PHONY: test-acceptance
-test-acceptance: ## acceptance tests
+test-acceptance: bats build ## acceptance tests
 	@echo "+ $@"
 	bash -xc 'cd test && ./bin/bats/bin/bats $(BATS_PARALLEL_JOBS) .'
 
 .PHONY: test-remote
-test-remote: ## acceptance tests against remote URL
+test-remote: bats build ## acceptance tests against remote URL
 	@echo "+ $@"
 	bash -xc 'cd test && REMOTE_URL=$(REMOTE_URL) ./bin/bats/bin/bats $(BATS_PARALLEL_JOBS) .'
 

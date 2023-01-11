@@ -1,3 +1,0 @@
-@test "foo" {
-  echo "foo"
-}
