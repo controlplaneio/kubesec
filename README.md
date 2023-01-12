@@ -145,6 +145,37 @@ environments, the `kubesec` image embeds schemas. If you are looking to change
 the schema location, you'll need to change the `K8S_SCHEMA_VER` and `SCHEMA_LOCATION`
 environment variables at runtime.
 
+#### Print the scanning rules with their associated scores
+
+All the scanning rules can be printed in in different formats (json (default),
+yaml and table). This is useful to easily get the point associated with
+each rule:
+
+```bash
+kubesec print-rules
+```
+
+which produces the following output:
+
+```json
+[
+  {
+    "id": "AllowPrivilegeEscalation",
+    "selector": "containers[] .securityContext .allowPrivilegeEscalation == true",
+    "reason": "Ensure a non-root process can not gain more privileges",
+    "kinds": [
+      "Pod",
+      "Deployment",
+      "StatefulSet",
+      "DaemonSet"
+    ],
+    "points": -7,
+    "advise": 0
+  },
+...
+]
+```
+
 ## Kubesec HTTP Server
 
 Kubesec includes a bundled HTTP server

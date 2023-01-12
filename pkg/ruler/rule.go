@@ -3,6 +3,7 @@ package ruler
 import (
 	"bytes"
 	"fmt"
+
 	"github.com/thedevsaddam/gojsonq/v2"
 )
 
@@ -15,16 +16,14 @@ func (e *NotSupportedError) Error() string {
 }
 
 type Rule struct {
-	Selector  string
-	ID        string
-	Title     string
-	Reason    string
-	Link      string
-	Kinds     []string
-	Points    int
-	Weight    int
-	Advise    int
-	Predicate func([]byte) int
+	ID        string           `json:"id" yaml:"id"`
+	Selector  string           `json:"selector" yaml:"selector"`
+	Reason    string           `json:"reason" yaml:"reason"`
+	Link      string           `json:"link,omitempty" yaml:"link,omitempty"`
+	Kinds     []string         `json:"kinds" yaml:"kinds"`
+	Points    int              `json:"points" yaml:"points"`
+	Advise    int              `json:"advise" yaml:"advise"`
+	Predicate func([]byte) int `json:"-" yaml:"-"`
 }
 
 // Eval executes the predicate if the kind matches the rule
