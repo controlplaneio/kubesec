@@ -256,3 +256,69 @@ teardown() {
   assert [ "${RUN_1_SIGNATURE}" = "${RUN_2_SIGNATURE}" ]
   assert [ "${RUN_1_SIGNATURE}" = "${RUN_3_SIGNATURE}" ]
 }
+
+## Pod Security Standard (PSS) tests
+
+@test "PSS - pod satisfies default restricted policy (local)" {
+  skip_if_not_local
+  SUBCOMMAND="pss-scan" run _app "${TEST_DIR}/asset/pss/pod-restricted.yaml"
+  assert_pss_rsc_valid
+}
+
+@test "PSS - pod (JSON) satisfies default restricted policy (local)" {
+  skip_if_not_local
+  SUBCOMMAND="pss-scan" run _app "${TEST_DIR}/asset/pss/pod-restricted.json"
+  assert_pss_rsc_valid
+}
+
+@test "PSS - pods satisfy default restricted policy (local)" {
+  skip_if_not_local
+  SUBCOMMAND="pss-scan" run _app "${TEST_DIR}/asset/pss/pods-restricted.yaml"
+  assert_pss_rsc_valid 3
+}
+
+@test "PSS - pods (JSON) satisfy default restricted policy (local)" {
+  skip_if_not_local
+  SUBCOMMAND="pss-scan" run _app "${TEST_DIR}/asset/pss/pods-restricted.json"
+  assert_pss_rsc_valid 3
+}
+
+@test "PSS - pod does not satisfy the restricted profile (local)" {
+  skip_if_not_local
+  SUBCOMMAND="pss-scan" run _app "${TEST_DIR}/asset/pss/pod-baseline.yaml"
+  [ "$status" -eq 2 ]
+  assert_pss_rsc_invalid
+}
+
+@test "PSS - pod does not satisfy the restricted profile, customized exit code (local)" {
+  skip_if_not_local
+  SUBCOMMAND="pss-scan" run _app --exit-code 22 "${TEST_DIR}/asset/pss/pod-baseline.yaml"
+  [ "$status" -eq 22 ]
+  assert_pss_rsc_invalid
+}
+
+@test "PSS - pod satisfies baseline policy on k8s latest version (local)" {
+  skip_if_not_local
+  SUBCOMMAND="pss-scan" run _app --profile baseline --kubernetes-version latest "${TEST_DIR}/asset/pss/pod-baseline.yaml"
+  assert_pss_rsc_valid
+}
+
+@test "PSS - pod satisfies baseline policy on 1.22 version (local)" {
+  skip_if_not_local
+  SUBCOMMAND="pss-scan" run _app --profile baseline --kubernetes-version 1.22 "${TEST_DIR}/asset/pss/pod-baseline.yaml"
+  assert_pss_rsc_valid
+}
+
+@test "PSS - pod1 satisfies the restricted profile, pod2 does not (local)" {
+  skip_if_not_local
+  SUBCOMMAND="pss-scan" run _app "${TEST_DIR}/asset/pss/pods-mixed-profiles.yaml"
+  # one invalid object is enough to exit on error
+  [ "$status" -eq 2 ]
+  assert_pss_rsc_invalid 1
+}
+
+@test "PSS - only supported resources from a full helm template are scanned and satisfy the baseline policy(local)" {
+  skip_if_not_local
+  SUBCOMMAND="pss-scan" run _app --profile baseline "${TEST_DIR}/asset/pss/helm-vault-baseline.yaml"
+  assert_pss_rsc_valid 3
+}

@@ -1,0 +1,31 @@
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: hello
+spec:
+  schedule: "* * * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+            - name: hello
+              image: busybox:1.28
+              imagePullPolicy: IfNotPresent
+              command:
+                - /bin/sh
+                - -c
+                - date; echo Hello from the Kubernetes cluster
+              # required for PSS restricted
+              securityContext:
+                allowPrivilegeEscalation: false
+                capabilities:
+                  drop: ["ALL"]
+                  add: ["NET_BIND_SERVICE"] # Optional, the only allowed value
+                runAsNonRoot: true
+                runAsUser: 10000 # Optional, must not be 0
+                seccompProfile:
+                  type: RuntimeDefault # or "Localhost"
+
+          restartPolicy: OnFailure

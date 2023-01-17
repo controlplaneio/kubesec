@@ -32,18 +32,19 @@ This uses ControlPlane's hosted API at [v2.kubesec.io/scan](https://v2.kubesec.i
   - [Command line usage](#command-line-usage)
   - [Usage example](#usage-example)
   - [Docker usage](#docker-usage)
+  - [Example output](#example-output)
+  - [Specify custom schema](#specify-custom-schema)
 - [Kubesec HTTP Server](#kubesec-http-server)
   - [CLI usage example](#cli-usage-example)
   - [Docker usage example](#docker-usage-example)
 - [Kubesec-as-a-Service](#kubesec-as-a-service)
   - [Command line usage](#command-line-usage-1)
   - [Usage example](#usage-example-1)
-- [Example output](#example-output)
+- [Kubesec Pod Security Standards (PSS) compliance scanner](#kubesec-pod-security-standards-pss-compliance-scanner)
 - [Contributors](#contributors)
 - [Getting Help](#getting-help)
 - [Contributing](/CONTRIBUTING.md)
 - [Changelog](/CHANGELOG.md)
-
 
 ## Download Kubesec
 
@@ -98,6 +99,40 @@ Run the same command in Docker:
 
 ```bash
 $ docker run -i kubesec/kubesec:v2 scan /dev/stdin < kubesec-test.yaml
+```
+
+#### Example output
+
+Kubesec returns a returns a JSON array, and can scan multiple YAML documents in a single input file.
+
+```json
+[
+  {
+    "object": "Pod/security-context-demo.default",
+    "valid": true,
+    "message": "Failed with a score of -30 points",
+    "score": -30,
+    "scoring": {
+      "critical": [
+        {
+          "selector": "containers[] .securityContext .capabilities .add == SYS_ADMIN",
+          "reason": "CAP_SYS_ADMIN is the most privileged capability and should always be avoided",
+          "points": -30
+        }
+      ],
+      "advise": [
+        {
+          "selector": "containers[] .securityContext .runAsNonRoot == true",
+          "reason": "Force the running image to run as a non-root user to ensure least privilege",
+          "points": 1
+        },
+        {
+          // ...
+        }
+      ]
+    }
+  }
+]
 ```
 
 #### Specify custom schema
@@ -290,38 +325,102 @@ $ kubesec ./score-9-deployment.yml | jq --exit-status '.score > 10' >/dev/null
 # status code 1
 ```
 
-## Example output
+## Kubesec Pod Security Standards (PSS) compliance scanner
 
-Kubesec returns a returns a JSON array, and can scan multiple YAML documents in a single input file.
+[Pod Security Standards](https://kubernetes.io/docs/concepts/security/pod-security-standards)
+define different isolation levels for Pods. These standards are defined in three
+different profiles:
+* Restricted (Kubesec default): Heavily restricted policy, following current Pod hardening best practices.
+* Baseline:	Minimally restrictive policy which prevents known privilege escalations.
+  Allows the default (minimally specified) Pod configuration.
+* Privileged:	Unrestricted policy, providing the widest possible level of permissions.
+  This policy allows for known privilege escalations.
+
+These profiles can then be enforced at the namespace level using the Kubernetes built-in
+[Pod Security Admission controller](https://kubernetes.io/docs/concepts/security/pod-security-admission).
+
+Kubesec provides a convenient feature to validate your Kubernetes resources are compliant
+with the specified profiles. This makes it a **perfect feature for CI and development purposes**.
+
+Supported resources include:
+
+* Pod, CronJob, Job
+* DaemonSet, Deployment, StatefulSet
+
+#### CLI usage example:
+
+Reusing the `kubesec-demo` example pod from above, we can scan this pod against different profiles.
+
+Let's scan with the default profile (resticted):
+
+```bash
+kubesec pss-scan kubesec-test.yaml
+```
+
+Since the pod does not specify enough restriction, the validation failed:
 
 ```json
 [
   {
-    "object": "Pod/security-context-demo.default",
-    "valid": true,
-    "message": "Failed with a score of -30 points",
-    "score": -30,
-    "scoring": {
-      "critical": [
-        {
-          "selector": "containers[] .securityContext .capabilities .add == SYS_ADMIN",
-          "reason": "CAP_SYS_ADMIN is the most privileged capability and should always be avoided",
-          "points": -30
-        }
-      ],
-      "advise": [
-        {
-          "selector": "containers[] .securityContext .runAsNonRoot == true",
-          "reason": "Force the running image to run as a non-root user to ensure least privilege",
-          "points": 1
-        },
-        {
-          // ...
-        }
-      ]
-    }
+    "object": "Pod/kubesec-demo.default",
+    "valid": false,
+    "fileName": "kubesec-test.yaml",
+    "profile": "restricted",
+    "profileVersion": "latest",
+    "forbiddenChecks": [
+      {
+        "reason": "allowPrivilegeEscalation != false",
+        "detail": "container \"kubesec-demo\" must set securityContext.allowPrivilegeEscalation=false"
+      },
+      {
+        "reason": "unrestricted capabilities",
+        "detail": "container \"kubesec-demo\" must set securityContext.capabilities.drop=[\"ALL\"]"
+      },
+      {
+        "reason": "runAsNonRoot != true",
+        "detail": "pod or container \"kubesec-demo\" must set securityContext.runAsNonRoot=true"
+      },
+      {
+        "reason": "seccompProfile",
+        "detail": "pod or container \"kubesec-demo\" must set securityContext.seccompProfile.type to \"RuntimeDefault\" or \"Localhost\""
+      }
+    ]
   }
 ]
+```
+
+The second one (baseline) is more relaxed:
+
+```bash
+kubesec pss-scan --profile baseline kubesec-test.yaml
+```
+
+This time the validation succeeded.
+
+```json
+[
+  {
+    "object": "Pod/kubesec-demo.default",
+    "valid": true,
+    "fileName": "kubesec-test.yaml",
+    "profile": "baseline",
+    "profileVersion": "latest",
+    "forbiddenChecks": null
+  }
+]
+```
+
+There is a third policy (privileged) allows everything so the validation will always succeed.
+
+```bash
+kubesec pss-scan --profile privileged kubesec-test.yaml
+```
+
+Finally, profiles are versioned by Kubernetes version, this is useful to pin the policy version
+to the version of the target cluster. All you need is then to specify the Kubernetes version:
+
+```bash
+kubesec pss-scan --profile baseline --kubernetes-version v1.22 kubesec-test.yaml
 ```
 
 ---

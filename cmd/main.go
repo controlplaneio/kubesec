@@ -43,9 +43,12 @@ func Execute() {
 	if err := rootCmd.Execute(); err != nil {
 		e := err.Error()
 
+		exitCode = exitCodeError
+
 		fmt.Println(strings.ToUpper(e[:1]) + e[1:])
-		os.Exit(1)
 	}
+
+	os.Exit(exitCode)
 }
 
 // NewLogger creates a logger
