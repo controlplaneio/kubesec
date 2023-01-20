@@ -44,8 +44,8 @@ type Report struct {
 	Object          string           `json:"object" yaml:"object"`
 	Valid           bool             `json:"valid" yaml:"valid"`
 	FileName        string           `json:"fileName,omitempty" yaml:"fileName,omitempty"`
-	Profile         string           `json:"profile" yaml:"profile"`
-	ProfileVersion  string           `json:"profileVersion" yaml:"profileVersion"`
+	Policy          string           `json:"policy" yaml:"policy"`
+	PolicyVersion   string           `json:"policyVersion" yaml:"policyVersion"`
 	ForbiddenChecks []ForbiddenCheck `json:"forbiddenChecks" yaml:"forbiddenChecks"`
 }
 
@@ -55,30 +55,30 @@ type ForbiddenCheck struct {
 	Detail string `json:"detail" yaml:"detail"`
 }
 
-// ProfileNotSatisfiedError is the occurs happening when a resource does not
+// PolicyNotSatisfiedError is the occurs happening when a resource does not
 // satisfies a policy.
-type ProfileNotSatisfiedError struct {
-	Profile        string
-	ProfileVersion string
+type PolicyNotSatisfiedError struct {
+	Policy        string
+	PolicyVersion string
 }
 
 // Error satisfies the Error interface.
-func (e *ProfileNotSatisfiedError) Error() string {
-	return fmt.Sprintf("One or more resources do not satisfy the PSS profile: %s/%s", e.Profile, e.ProfileVersion)
+func (e *PolicyNotSatisfiedError) Error() string {
+	return fmt.Sprintf("One or more resources do not satisfy the PSS policy: %s/%s", e.Policy, e.PolicyVersion)
 }
 
 // Run checks the content of a manifest as bytes (fileName is only used for the report)
-// against a versioned PSS profile and returns a Report with the results.
-func (e *Evaluator) Run(fileName string, fileBytes []byte, profile, profileVersion string) ([]Report, error) {
+// against a versioned PSS policy and returns a Report with the results.
+func (e *Evaluator) Run(fileName string, fileBytes []byte, policy, policyVersion string) ([]Report, error) {
 	reports := make([]Report, 0)
 
-	lvl, err := api.ParseLevel(profile)
+	lvl, err := api.ParseLevel(policy)
 	if err != nil {
-		return reports, fmt.Errorf("Invalid profile: %s", profile)
+		return reports, fmt.Errorf("Invalid policy: %s", policy)
 	}
-	ver, err := api.ParseVersion(profileVersion)
+	ver, err := api.ParseVersion(policyVersion)
 	if err != nil {
-		return reports, fmt.Errorf("Invalid profile version: %s", profileVersion)
+		return reports, fmt.Errorf("Invalid policy version: %s", policyVersion)
 	}
 	levelVersion := api.LevelVersion{
 		Level:   lvl,
@@ -112,9 +112,9 @@ func (e *Evaluator) Run(fileName string, fileBytes []byte, profile, profileVersi
 
 	for _, report := range reports {
 		if !report.Valid {
-			return reports, &ProfileNotSatisfiedError{
-				Profile:        profile,
-				ProfileVersion: profileVersion,
+			return reports, &PolicyNotSatisfiedError{
+				Policy:        policy,
+				PolicyVersion: policyVersion,
 			}
 		}
 	}
@@ -165,10 +165,10 @@ func (e *Evaluator) eval(obj runtime.Object, lv api.LevelVersion) (Report, error
 	results := e.EvaluatePod(lv, &podMetadata, &podSpec)
 	aggregate := policy.AggregateCheckResults(results)
 	report := Report{
-		Object:         objName,
-		Profile:        string(lv.Level),
-		ProfileVersion: lv.Version.String(),
-		Valid:          aggregate.Allowed,
+		Object:        objName,
+		Policy:        string(lv.Level),
+		PolicyVersion: lv.Version.String(),
+		Valid:         aggregate.Allowed,
 	}
 
 	// Report the forbidden checks

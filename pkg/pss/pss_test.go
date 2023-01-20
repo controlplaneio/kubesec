@@ -16,153 +16,153 @@ const manifestBasePath = "../../test/asset/pss"
 
 func TestRun(t *testing.T) {
 	var tests = []struct {
-		name                    string // Name of the test
-		valid                   bool   // Should the resource to be allowed
-		unsupported             bool   // Define if the resource kind is supported
-		manifestFilepath        string // Path to manifest file
-		profile, profileVersion string // Profile name and version
-		expectedReports         int    // Number or reports to expect
+		name                  string // Name of the test
+		valid                 bool   // Should the resource to be allowed
+		unsupported           bool   // Define if the resource kind is supported
+		manifestFilepath      string // Path to manifest file
+		policy, policyVersion string // Policy name and version
+		expectedReports       int    // Number or reports to expect
 	}{
 		{
-			name:             "Pod satisfies the restricted profile",
-			profile:          "restricted",
-			profileVersion:   "latest",
+			name:             "Pod satisfies the restricted policy",
+			policy:           "restricted",
+			policyVersion:    "latest",
 			valid:            true,
 			manifestFilepath: "pod-restricted.yaml",
 			expectedReports:  1,
 		},
 		{
-			name:             "Pod (JSON) satisfies the restricted profile",
-			profile:          "restricted",
-			profileVersion:   "latest",
+			name:             "Pod (JSON) satisfies the restricted policy",
+			policy:           "restricted",
+			policyVersion:    "latest",
 			valid:            true,
 			manifestFilepath: "pod-restricted.json",
 			expectedReports:  1,
 		},
 		{
-			name:             "Pods satisfy the restricted profile",
-			profile:          "restricted",
-			profileVersion:   "latest",
+			name:             "Pods satisfy the restricted policy",
+			policy:           "restricted",
+			policyVersion:    "latest",
 			valid:            true,
 			manifestFilepath: "pods-restricted.yaml",
 			expectedReports:  3,
 		},
 		{
-			name:             "Pods (JSON) satisfy the restricted profile",
-			profile:          "restricted",
-			profileVersion:   "latest",
+			name:             "Pods (JSON) satisfy the restricted policy",
+			policy:           "restricted",
+			policyVersion:    "latest",
 			valid:            true,
 			manifestFilepath: "pods-restricted.json",
 			expectedReports:  3,
 		},
 		{
-			name:             "Pod does not satisfy the restricted profile",
-			profile:          "restricted",
-			profileVersion:   "latest",
+			name:             "Pod does not satisfy the restricted policy",
+			policy:           "restricted",
+			policyVersion:    "latest",
 			valid:            false,
 			manifestFilepath: "pod-baseline.yaml",
 			expectedReports:  1,
 		},
 		{
-			name:             "Pod satisfies the baseline profile",
-			profile:          "baseline",
-			profileVersion:   "latest",
+			name:             "Pod satisfies the baseline policy",
+			policy:           "baseline",
+			policyVersion:    "latest",
 			valid:            true,
 			manifestFilepath: "pod-baseline.yaml",
 			expectedReports:  1,
 		},
 		{
-			name:             "Pod satisfies the privileged profile",
-			profile:          "privileged",
-			profileVersion:   "latest",
+			name:             "Pod satisfies the privileged policy",
+			policy:           "privileged",
+			policyVersion:    "latest",
 			valid:            true,
 			manifestFilepath: "pod-privileged.yaml",
 			expectedReports:  1,
 		},
 		{
-			name:             "CronJob satisfies the restricted profile",
-			profile:          "restricted",
-			profileVersion:   "latest",
+			name:             "CronJob satisfies the restricted policy",
+			policy:           "restricted",
+			policyVersion:    "latest",
 			valid:            true,
 			manifestFilepath: "cronjob-restricted.yaml",
 			expectedReports:  1,
 		},
 		{
-			name:             "Job satisfies the baseline profile",
-			profile:          "baseline",
-			profileVersion:   "latest",
+			name:             "Job satisfies the baseline policy",
+			policy:           "baseline",
+			policyVersion:    "latest",
 			valid:            true,
 			manifestFilepath: "job-baseline.yaml",
 			expectedReports:  1,
 		},
 		{
-			name:             "DaemonSet does not satisfy the baseline profile",
-			profile:          "baseline",
-			profileVersion:   "latest",
+			name:             "DaemonSet does not satisfy the baseline policy",
+			policy:           "baseline",
+			policyVersion:    "latest",
 			valid:            false,
 			manifestFilepath: "daemonset-privileged.yaml",
 			expectedReports:  1,
 		},
 		{
-			name:             "DaemonSet satisfies the privileged profile",
-			profile:          "privileged",
-			profileVersion:   "latest",
+			name:             "DaemonSet satisfies the privileged policy",
+			policy:           "privileged",
+			policyVersion:    "latest",
 			valid:            true,
 			manifestFilepath: "daemonset-privileged.yaml",
 			expectedReports:  1,
 		},
 		{
-			name:             "Deployment satisfies the baseline profile",
-			profile:          "baseline",
-			profileVersion:   "latest",
+			name:             "Deployment satisfies the baseline policy",
+			policy:           "baseline",
+			policyVersion:    "latest",
 			valid:            true,
 			manifestFilepath: "deployment-baseline.yaml",
 			expectedReports:  1,
 		},
 		{
 			name:             "Deployment from v1beta1 apiVersion is not supported",
-			profile:          "privileged", // ignored during test
-			profileVersion:   "latest",     // ignored during test
+			policy:           "privileged", // ignored during test
+			policyVersion:    "latest",     // ignored during test
 			unsupported:      true,
 			manifestFilepath: "deployment-v1beta1.yaml",
 			expectedReports:  0,
 		},
 		{
-			name:             "StatefulSet satisfies the baseline profile",
-			profile:          "baseline",
-			profileVersion:   "latest",
+			name:             "StatefulSet satisfies the baseline policy",
+			policy:           "baseline",
+			policyVersion:    "latest",
 			valid:            true,
 			manifestFilepath: "statefulset-baseline.yaml",
 			expectedReports:  1,
 		},
 		{
 			name:             "ServiceAccount is not supported",
-			profile:          "restricted", // ignored during test
-			profileVersion:   "latest",     // ignored during test
+			policy:           "restricted", // ignored during test
+			policyVersion:    "latest",     // ignored during test
 			unsupported:      true,
 			manifestFilepath: "serviceaccount.yaml",
 			expectedReports:  0,
 		},
 		{
 			name:             "CRDs are not supported",
-			profile:          "restricted", // ignored during test
-			profileVersion:   "latest",     // ignored during test
+			policy:           "restricted", // ignored during test
+			policyVersion:    "latest",     // ignored during test
 			unsupported:      true,
 			manifestFilepath: "crds.yaml",
 			expectedReports:  0,
 		},
 		{
 			name:             "Only supported resources are scanned and satisfy the baseline policy",
-			profile:          "baseline",
-			profileVersion:   "latest",
+			policy:           "baseline",
+			policyVersion:    "latest",
 			valid:            true,
 			manifestFilepath: "mixed-baseline.yaml",
 			expectedReports:  12,
 		},
 		{
 			name:             "Only supported resources from a full helm template are scanned and satisfy the baseline policy",
-			profile:          "baseline",
-			profileVersion:   "latest",
+			policy:           "baseline",
+			policyVersion:    "latest",
 			valid:            true,
 			manifestFilepath: "helm-vault-baseline.yaml",
 			expectedReports:  3,
@@ -179,17 +179,17 @@ func TestRun(t *testing.T) {
 			}
 
 			manifest := readFixtureFile(t, tt.manifestFilepath)
-			reports, err := evaluator.Run(tt.manifestFilepath, manifest, tt.profile, tt.profileVersion)
+			reports, err := evaluator.Run(tt.manifestFilepath, manifest, tt.policy, tt.policyVersion)
 			if err != nil && tt.valid {
 				t.Fatal(err)
 			}
 
 			// Make sure we get the expected error when the resources
-			// do not satisfy the required profile. Unsupported do not return
+			// do not satisfy the required policy. Unsupported do not return
 			// any error as they are simply ignored.
-			e := &ProfileNotSatisfiedError{}
+			e := &PolicyNotSatisfiedError{}
 			if !tt.valid && !errors.As(err, &e) && !tt.unsupported {
-				t.Fatalf("Scanning should have failed with ProfileNotSatisfiedError, got: %v", err)
+				t.Fatalf("Scanning should have failed with PolicyNotSatisfiedError, got: %v", err)
 			}
 
 			if len(reports) != tt.expectedReports {
@@ -210,21 +210,21 @@ func TestRun(t *testing.T) {
 	}
 
 	var tests2 = []struct {
-		name                    string // Name of the test
-		manifestFilepath        string // Path to manifest file
-		profile, profileVersion string // Profile name and version
-		expectedReports         int    // Number or reports to expect
+		name                  string // Name of the test
+		manifestFilepath      string // Path to manifest file
+		policy, policyVersion string // Policy name and version
+		expectedReports       int    // Number or reports to expect
 	}{
 		{
-			name:             "Invalid Profile",
-			profile:          "notsurethisprofileexists",
-			profileVersion:   "latest",
+			name:             "Invalid Policy",
+			policy:           "notsurethispolicyexists",
+			policyVersion:    "latest",
 			manifestFilepath: "pod-restricted.yaml",
 		},
 		{
-			name:             "Invalid Profile",
-			profile:          "baseline",
-			profileVersion:   "notsurethisversionexists",
+			name:             "Invalid Policy",
+			policy:           "baseline",
+			policyVersion:    "notsurethisversionexists",
 			manifestFilepath: "pod-baseline.yaml",
 		},
 	}
@@ -239,7 +239,7 @@ func TestRun(t *testing.T) {
 			}
 
 			manifest := readFixtureFile(t, tt.manifestFilepath)
-			reports, err := evaluator.Run(tt.manifestFilepath, manifest, tt.profile, tt.profileVersion)
+			reports, err := evaluator.Run(tt.manifestFilepath, manifest, tt.policy, tt.policyVersion)
 			if err == nil {
 				t.Fatalf("Scan should have failed")
 			}
@@ -253,15 +253,15 @@ func TestRun(t *testing.T) {
 	var tests3 = []struct {
 		name                                     string // Name of the test
 		manifestFilepath                         string // Path to manifest file
-		profile, profileVersion                  string // Profile name and version
+		policy, policyVersion                    string // Policy name and version
 		expectedReports                          int    // Number or reports to expect
 		invalidObjectReports, validObjectReports int
 	}{
 		{
-			name:                 "Invalid Profile",
-			profile:              "baseline",
-			profileVersion:       "latest",
-			manifestFilepath:     "pods-mixed-profiles.yaml",
+			name:                 "Invalid Policy",
+			policy:               "baseline",
+			policyVersion:        "latest",
+			manifestFilepath:     "pods-mixed-policies.yaml",
 			expectedReports:      3,
 			invalidObjectReports: 1,
 			validObjectReports:   2,
@@ -278,14 +278,14 @@ func TestRun(t *testing.T) {
 			}
 
 			manifest := readFixtureFile(t, tt.manifestFilepath)
-			reports, err := evaluator.Run(tt.manifestFilepath, manifest, tt.profile, tt.profileVersion)
+			reports, err := evaluator.Run(tt.manifestFilepath, manifest, tt.policy, tt.policyVersion)
 
 			// Make sure we get the expected error when at least one resource
-			// does not satisfy the required profile. Unsupported do not return
+			// does not satisfy the required policy. Unsupported do not return
 			// any error as they are simply ignored.
-			e := &ProfileNotSatisfiedError{}
+			e := &PolicyNotSatisfiedError{}
 			if !errors.As(err, &e) {
-				t.Fatalf("Scanning should have failed with ProfileNotSatisfiedError, got: %v", err)
+				t.Fatalf("Scanning should have failed with PolicyNotSatisfiedError, got: %v", err)
 			}
 
 			if len(reports) > tt.expectedReports {

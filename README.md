@@ -329,18 +329,18 @@ $ kubesec ./score-9-deployment.yml | jq --exit-status '.score > 10' >/dev/null
 
 [Pod Security Standards](https://kubernetes.io/docs/concepts/security/pod-security-standards)
 define different isolation levels for Pods. These standards are defined in three
-different profiles:
+different policies:
 * Restricted (Kubesec default): Heavily restricted policy, following current Pod hardening best practices.
 * Baseline:	Minimally restrictive policy which prevents known privilege escalations.
   Allows the default (minimally specified) Pod configuration.
 * Privileged:	Unrestricted policy, providing the widest possible level of permissions.
   This policy allows for known privilege escalations.
 
-These profiles can then be enforced at the namespace level using the Kubernetes built-in
+These policies can then be enforced at the namespace level using the Kubernetes built-in
 [Pod Security Admission controller](https://kubernetes.io/docs/concepts/security/pod-security-admission).
 
 Kubesec provides a convenient feature to validate your Kubernetes resources are compliant
-with the specified profiles. This makes it a **perfect feature for CI and development purposes**.
+with the specified policies. This makes it a **perfect feature for CI and development purposes**.
 
 Supported resources include:
 
@@ -349,9 +349,9 @@ Supported resources include:
 
 #### CLI usage example:
 
-Reusing the `kubesec-demo` example pod from above, we can scan this pod against different profiles.
+Reusing the `kubesec-demo` example pod from above, we can scan this pod against different policies.
 
-Let's scan with the default profile (resticted):
+Let's scan with the default policy (resticted):
 
 ```bash
 kubesec pss-scan kubesec-test.yaml
@@ -365,8 +365,8 @@ Since the pod does not specify enough restriction, the validation failed:
     "object": "Pod/kubesec-demo.default",
     "valid": false,
     "fileName": "kubesec-test.yaml",
-    "profile": "restricted",
-    "profileVersion": "latest",
+    "policy": "restricted",
+    "policyVersion": "latest",
     "forbiddenChecks": [
       {
         "reason": "allowPrivilegeEscalation != false",
@@ -392,7 +392,7 @@ Since the pod does not specify enough restriction, the validation failed:
 The second one (baseline) is more relaxed:
 
 ```bash
-kubesec pss-scan --profile baseline kubesec-test.yaml
+kubesec pss-scan --policy baseline kubesec-test.yaml
 ```
 
 This time the validation succeeded.
@@ -403,8 +403,8 @@ This time the validation succeeded.
     "object": "Pod/kubesec-demo.default",
     "valid": true,
     "fileName": "kubesec-test.yaml",
-    "profile": "baseline",
-    "profileVersion": "latest",
+    "policy": "baseline",
+    "policyVersion": "latest",
     "forbiddenChecks": null
   }
 ]
@@ -413,14 +413,14 @@ This time the validation succeeded.
 There is a third policy (privileged) allows everything so the validation will always succeed.
 
 ```bash
-kubesec pss-scan --profile privileged kubesec-test.yaml
+kubesec pss-scan --policy privileged kubesec-test.yaml
 ```
 
-Finally, profiles are versioned by Kubernetes version, this is useful to pin the policy version
+Finally, policies are versioned by Kubernetes version, this is useful to pin the policy version
 to the version of the target cluster. All you need is then to specify the Kubernetes version:
 
 ```bash
-kubesec pss-scan --profile baseline --kubernetes-version v1.22 kubesec-test.yaml
+kubesec pss-scan --policy baseline --kubernetes-version v1.22 kubesec-test.yaml
 ```
 
 ---

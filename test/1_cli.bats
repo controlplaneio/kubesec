@@ -283,14 +283,14 @@ teardown() {
   assert_pss_rsc_valid 3
 }
 
-@test "PSS - pod does not satisfy the restricted profile (local)" {
+@test "PSS - pod does not satisfy the restricted policy (local)" {
   skip_if_not_local
   SUBCOMMAND="pss-scan" run _app "${TEST_DIR}/asset/pss/pod-baseline.yaml"
   [ "$status" -eq 2 ]
   assert_pss_rsc_invalid
 }
 
-@test "PSS - pod does not satisfy the restricted profile, customized exit code (local)" {
+@test "PSS - pod does not satisfy the restricted policy, customized exit code (local)" {
   skip_if_not_local
   SUBCOMMAND="pss-scan" run _app --exit-code 22 "${TEST_DIR}/asset/pss/pod-baseline.yaml"
   [ "$status" -eq 22 ]
@@ -299,19 +299,19 @@ teardown() {
 
 @test "PSS - pod satisfies baseline policy on k8s latest version (local)" {
   skip_if_not_local
-  SUBCOMMAND="pss-scan" run _app --profile baseline --kubernetes-version latest "${TEST_DIR}/asset/pss/pod-baseline.yaml"
+  SUBCOMMAND="pss-scan" run _app --policy baseline --kubernetes-version latest "${TEST_DIR}/asset/pss/pod-baseline.yaml"
   assert_pss_rsc_valid
 }
 
 @test "PSS - pod satisfies baseline policy on 1.22 version (local)" {
   skip_if_not_local
-  SUBCOMMAND="pss-scan" run _app --profile baseline --kubernetes-version 1.22 "${TEST_DIR}/asset/pss/pod-baseline.yaml"
+  SUBCOMMAND="pss-scan" run _app --policy baseline --kubernetes-version 1.22 "${TEST_DIR}/asset/pss/pod-baseline.yaml"
   assert_pss_rsc_valid
 }
 
-@test "PSS - pod1 satisfies the restricted profile, pod2 does not (local)" {
+@test "PSS - pod1 satisfies the restricted policy, pod2 does not (local)" {
   skip_if_not_local
-  SUBCOMMAND="pss-scan" run _app "${TEST_DIR}/asset/pss/pods-mixed-profiles.yaml"
+  SUBCOMMAND="pss-scan" run _app "${TEST_DIR}/asset/pss/pods-mixed-policies.yaml"
   # one invalid object is enough to exit on error
   [ "$status" -eq 2 ]
   assert_pss_rsc_invalid 1
@@ -319,6 +319,6 @@ teardown() {
 
 @test "PSS - only supported resources from a full helm template are scanned and satisfy the baseline policy(local)" {
   skip_if_not_local
-  SUBCOMMAND="pss-scan" run _app --profile baseline "${TEST_DIR}/asset/pss/helm-vault-baseline.yaml"
+  SUBCOMMAND="pss-scan" run _app --policy baseline "${TEST_DIR}/asset/pss/helm-vault-baseline.yaml"
   assert_pss_rsc_valid 3
 }
