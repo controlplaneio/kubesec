@@ -1,6 +1,6 @@
 module github.com/controlplaneio/kubesec/v2
 
-go 1.17
+go 1.19
 
 require (
 	github.com/ghodss/yaml v1.0.0
