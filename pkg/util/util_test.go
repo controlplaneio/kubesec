@@ -36,7 +36,8 @@ func TestPrint(t *testing.T) {
     "val1",
     "val2"
   ]
-}`,
+}
+`,
 			wantErr: false,
 		},
 		{
@@ -45,8 +46,8 @@ func TestPrint(t *testing.T) {
 			printTableFn: nil,
 			want: `name: test
 values:
-- val1
-- val2
+    - val1
+    - val2
 `,
 			wantErr: false,
 		},

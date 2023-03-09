@@ -31,17 +31,18 @@ var (
 	schemaLocations = []string{}
 	outputLocation  string
 	exitCode        int
+	exitCodeError   int
 )
 
 func init() {
-	scanCmd.Flags().BoolVar(&debug, "debug", false, "turn on debug logs")
-	scanCmd.Flags().BoolVar(&absolutePath, "absolute-path", false, "use the absolute path for the file name")
+	scanCmd.Flags().BoolVar(&debug, "debug", false, "Turn on debug logs")
+	scanCmd.Flags().BoolVar(&absolutePath, "absolute-path", false, "Use the absolute path for the file name")
 	scanCmd.Flags().StringVarP(&format, "format", "f", "json", "Set output format (json, template)")
 	scanCmd.Flags().StringVar(&k8sVersion, "kubernetes-version", "", "Kubernetes version to validate manifets")
 	scanCmd.Flags().StringSliceVar(&schemaLocations, "schema-location", []string{}, "Override schema location search path, local or http (can be specified multiple times)")
 	scanCmd.Flags().StringVarP(&template, "template", "t", "", "Set output template, it will check for a file or read input as the")
 	scanCmd.Flags().StringVarP(&outputLocation, "output", "o", "", "Set output location")
-	scanCmd.Flags().IntVar(&exitCode, "exit-code", 2, "Set the exit-code to use on failure")
+	scanCmd.Flags().IntVar(&exitCodeError, "exit-code", 2, "Set the exit-code to use on failure")
 	rootCmd.AddCommand(scanCmd)
 }
 
@@ -87,7 +88,7 @@ func getInput(args []string) (File, error) {
 
 var scanCmd = &cobra.Command{
 	Use:   `scan [file]`,
-	Short: "Scans Kubernetes resource YAML or JSON",
+	Short: "Scan Kubernetes resources (yaml, json) against kubesec rules",
 	Example: `  kubesec scan ./deployment.yaml
   cat file.json | kubesec scan -
   helm template -f values.yaml ./chart | kubesec scan /dev/stdin`,
@@ -159,11 +160,13 @@ var scanCmd = &cobra.Command{
 		out := buff.String()
 		fmt.Println(out)
 
-		if len(reports) > 0 && !lowScore {
+		if len(reports) > 0 {
+			if lowScore {
+				exitCode = exitCodeError
+			}
 			return nil
 		}
 
-		os.Exit(exitCode)
 		return &ScanFailedValidationError{}
 	},
 }

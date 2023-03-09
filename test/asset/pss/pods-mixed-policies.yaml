@@ -1,0 +1,55 @@
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx0
+spec:
+  containers:
+    - name: nginx
+      image: nginx:1.14.2
+      ports:
+        - containerPort: 80
+      # required for PSS restricted
+      securityContext:
+        allowPrivilegeEscalation: false
+        capabilities:
+          drop: ["ALL"]
+          add: ["NET_BIND_SERVICE"] # Optional, the only allowed value
+        runAsNonRoot: true
+        runAsUser: 10000 # Optional, must not be 0
+        seccompProfile:
+          type: RuntimeDefault # or "Localhost"
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx1
+spec:
+  containers:
+    - name: nginx
+      image: nginx:1.14.2
+      ports:
+        - containerPort: 80
+      # required for PSS restricted
+      securityContext:
+        allowPrivilegeEscalation: false
+        capabilities:
+          drop: ["ALL"]
+          add: ["NET_BIND_SERVICE"] # Optional, the only allowed value
+        runAsNonRoot: true
+        runAsUser: 10000 # Optional, must not be 0
+        seccompProfile:
+          type: RuntimeDefault # or "Localhost"
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx2
+spec:
+  containers:
+    - name: nginx
+      image: nginx:1.14.2
+      ports:
+        - containerPort: 80
+      securityContext:
+        privileged: true

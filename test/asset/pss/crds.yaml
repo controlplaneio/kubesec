@@ -1,0 +1,20 @@
+---
+apiVersion: controlplane.io/v1
+kind: AwesomeCRD
+metadata:
+  name: awesome-crd0
+spec:
+  overwrite: true
+  templatize:
+    title: false
+    datasource: true
+---
+apiVersion: controlplane.io/v1
+kind: AwesomeCRD
+metadata:
+  name: awesome-crd1
+spec:
+  overwrite: true
+  templatize:
+    title: false
+    datasource: true

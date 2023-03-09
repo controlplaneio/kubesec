@@ -1,0 +1,59 @@
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx
+  annotations:
+    # Only allowed in Privileged
+    container.apparmor.security.beta.kubernetes.io/hello: localhost/k8s-apparmor-example
+spec:
+  securityContext:
+    # Only allowed in Privileged,
+    seLinuxOptions:
+      type: container_t  # also can be container_init_t, container_kvm_t
+    # Windows specific
+    windowsOptions:
+      hostProcess: true
+    seccompProfile:
+      type: Unconfined
+    sysctls:
+      - name: kernel.shm_rmid_forced
+        value: "0"
+      - name: net.ipv4.ip_local_port_range
+        value: "1024 65000"
+      - name: net.ipv4.ip_unprivileged_port_start
+        value: "1024"
+      - name: net.ipv4.tcp_syncookies
+        value: "1"
+      - name: net.ipv4.ping_group_range
+        value: "0 2000000"
+  containers:
+    - name: nginx
+      image: nginx:1.14.2
+      ports:
+        - containerPort: 80
+        # BELOW THIS LINE, everything is only allowed in Privileged
+        - hostPort: 30000
+      hostNetwork: true
+      hotPID: true
+      hostIPC: true
+      securityContext:
+        capabilites:
+          add: [ 'AUDIT_WRITE', 'CHOWN', 'DAC_OVERRIDE', 'FOWNER', 'FSETID', 'KILL', 'MKNOD', 'NET_BIND_SERVICE', 'SETFCAP', 'SETGID', 'SETPCAP', 'SETUID', 'SYS_CHROOT' ]
+        # Windows specific
+        windowsOptions:
+          hostProcess: true
+        seLinuxOptions:
+          type: container_t # also can be container_init_t, container_kvm_t
+        procMount: Unmasked
+        seccompProfile:
+          type: Unconfined
+
+      volumes:
+        - name: hostVolume
+          hostPath:
+            path: /
+            type: directory
+
+      # Same privileged "containers" options can be applied to "initContainers" 
+      # and "ephemeralContainers"

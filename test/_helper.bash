@@ -7,6 +7,8 @@ export TEST_DIR="."
 
 export BIN_DIR='../dist/'
 
+export SUBCOMMAND="${SUBCOMMAND:-scan}"
+
 _global_setup() {
   [ ! -f "${BATS_PARENT_TMPNAME}".skip ] || skip "skip remaining tests"
 }
@@ -96,7 +98,7 @@ else
       # remove --json flags
       ARGS=("${@/--json/}")
     fi
-    "${BIN_DIR}"/kubesec scan "${ARGS[@]}"
+    "${BIN_DIR}"/kubesec "${SUBCOMMAND}" "${ARGS[@]}"
   }
 
   assert_gt_zero_points() {
@@ -129,6 +131,28 @@ else
   }
 
   assert_failure_local() {
+    assert_failure
+  }
+
+  ## Pod Security Standard (PSS) tests
+
+  assert_pss_rsc_valid() {
+    local expected_objects
+    expected_objects=${1:-1}
+
+    OBJECTS=$(jq -r '[.[] | select(.valid == true)] | length' <<<"${output:-}")
+    ((OBJECTS == expected_objects))
+
+    assert_success
+  }
+
+  assert_pss_rsc_invalid() {
+    local expected_objects
+    expected_objects=${1:-1}
+
+    OBJECTS=$(jq -r '[.[] | select(.valid == false)] | length' <<<"${output:-}")
+    ((OBJECTS == expected_objects))
+
     assert_failure
   }
 
