@@ -58,7 +58,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: Run Trufflehog
-        uses: trufflesecurity/trufflehog@v3.29.0
+        uses: trufflesecurity/trufflehog@v3.29.1
         with:
           path: ./
           base: ${{ github.event.repository.default_branch }}
