@@ -145,6 +145,16 @@ func NewRuleset(logger *zap.SugaredLogger) *Ruleset {
 	}
 	list = append(list, dockerSockRule)
 
+	procRule := Rule{
+		Predicate: rules.ProcMount,
+		ID:        "ProcMount",
+		Selector:  "volumes[] .hostPath .path == /proc",
+		Reason:    "Mounting the proc directory from the host system into a container gives access to information about other containers running on the same host and can allow container breakout",
+		Kinds:     []string{"Pod", "Deployment", "StatefulSet", "DaemonSet"},
+		Points:    -9,
+	}
+	list = append(list, procRule)
+
 	requestsCPURule := Rule{
 		Predicate: rules.RequestsCPU,
 		ID:        "RequestsCPU",
