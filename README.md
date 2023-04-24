@@ -67,6 +67,11 @@ $ go install github.com/controlplaneio/kubesec/v2@latest
 ```bash
 $ GO111MODULE="on" go get github.com/controlplaneio/kubesec/v2
 ```
+#### Add Alias (linux)
+
+```bash
+$ alias kubesec="~/go/bin/kubesec"
+```
 
 #### Command line usage:
 
