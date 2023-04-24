@@ -72,6 +72,12 @@ $ GO111MODULE="on" go get github.com/controlplaneio/kubesec/v2
 ```bash
 $ alias kubesec="~/go/bin/kubesec"
 ```
+#### Move Binary file
+
+```bash
+$ mv ~/go/bin/kubesec /usr/bin/
+```
+mv kubesec /usr/bin/
 
 #### Command line usage:
 
