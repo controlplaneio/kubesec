@@ -17,8 +17,8 @@ github.com/golang/protobuf v1.5.3 h1:KhyjKVUg7Usr/dYsdSqoFveMYd5ko72D+zANwlG1mmg
 github.com/golang/protobuf v1.5.3/go.mod h1:XVQd3VNwM+JqD3oG2Ue2ip4fOMUkwXdXDdiuN0vRsmY=
 github.com/google/go-cmp v0.5.5/go.mod h1:v8dTdLbMG2kIc/vJvl+f65V22dbkXbowE6jgT/gNBxE=
 github.com/google/go-cmp v0.5.9 h1:O2Tfq5qg4qc4AmwVlvv0oLiVAGB7enBSJ2x2DqQFi38=
-github.com/in-toto/in-toto-golang v0.7.1 h1:IzOB18y7/4KoEp4/RiWnuIXUpqi9+5yGlRy/t/QRDWE=
-github.com/in-toto/in-toto-golang v0.7.1/go.mod h1:m7HiDiYvPz+7SkqU9Tnt9hNgJfA31/nr1GSlDlxrQmE=
+github.com/in-toto/in-toto-golang v0.8.0 h1:MTVK138TdSUbScuy3XQiRlV5U5a1UkFdz+2gyvF42V0=
+github.com/in-toto/in-toto-golang v0.8.0/go.mod h1:u8GkjDht81AcD7GrNAPLZl4jsRF//f306QDHZ5mBIyI=
 github.com/inconshreveable/mousetrap v1.1.0 h1:wN+x4NVGpMsO7ErUn/mUI3vEoE6Jt13X2s0bqwp9tc8=
 github.com/inconshreveable/mousetrap v1.1.0/go.mod h1:vpF70FUmC8bwa3OWnCshd2FqLfsEA9PFc4w1p2J65bw=
 github.com/kr/pretty v0.3.1 h1:flRD4NNwYAUpkphVc1HcthR4KEIFJ65n8Mw5qdRn3LE=
