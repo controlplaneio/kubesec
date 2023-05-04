@@ -5,7 +5,7 @@ go 1.19
 require (
 	github.com/ghodss/yaml v1.0.0
 	github.com/in-toto/in-toto-golang v0.8.0
-	github.com/prometheus/client_golang v1.15.0
+	github.com/prometheus/client_golang v1.15.1
 	github.com/spf13/cobra v1.7.0
 	github.com/thedevsaddam/gojsonq/v2 v2.5.2
 	github.com/yannh/kubeconform v0.5.0
