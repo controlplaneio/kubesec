@@ -65,7 +65,7 @@ teardown() {
 
   run jq -r .[].message <<<"${output}"
 
-  assert_output --partial 'Additional property fake is not allowed'
+  assert_output --partial "additionalProperties 'fake' not allowed"
 }
 
 @test "passes deployment with cgroup resource limits" {
@@ -87,7 +87,6 @@ teardown() {
   run _app "${TEST_DIR}/asset/score-1-statefulset-novolumeclaimtemplate.yml"
   assert_gt_zero_points
 }
-
 
 @test "fails StatefulSet with no security" {
   run _app "${TEST_DIR}/asset/score-0-statefulset-no-sec.yml"

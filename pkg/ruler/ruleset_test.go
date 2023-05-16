@@ -211,7 +211,9 @@ spec:
         - name: c1
         - name: c2
 `,
-			expectedMessage: "For field spec: selector is required",
+			// problem validating schema. Check JSON formatting: jsonschema: '/spec' does not validate with
+			// https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/master-standalone-strict/deployment-apps-v1.json#/properties/spec/required: missing properties: 'selector'
+			expectedMessage: "/properties/spec/required: missing properties: 'selector'",
 		},
 		{
 			name: "replicas has wrong type string",
@@ -232,7 +234,9 @@ spec:
         - name: c1
         - name: c2
 `,
-			expectedMessage: "For field spec.replicas: Invalid type",
+			// problem validating schema. Check JSON formatting: jsonschema: '/spec/replicas' does not validate
+			// with https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/master-standalone-strict/deployment-apps-v1.json#/properties/spec/properties/replicas/type: expected integer or null, but got string
+			expectedMessage: "/properties/spec/properties/replicas/type: expected integer or null, but got string",
 		},
 		{
 			name: "resource kind does not exist",

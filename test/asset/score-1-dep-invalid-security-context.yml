@@ -7,11 +7,14 @@ metadata:
     name: carts-db
   namespace: sock-shop
 spec:
+  selector:
+    matchLabels:
+      app: carts-db
   replicas: 1
   template:
     spec:
       containers:
-      - name: carts-db
-        image: mongo
-        securityContext:
-          fake: entry
+        - name: carts-db
+          image: mongo
+          securityContext:
+            fake: entry
