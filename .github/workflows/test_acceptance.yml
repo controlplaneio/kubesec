@@ -57,6 +57,9 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
+        with:
+          # needed for bats tests
+          submodules: true
 
       - name: Download kubesec
         uses: actions/download-artifact@v3

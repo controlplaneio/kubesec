@@ -147,7 +147,12 @@ impact a given change will have.
 
 To build the project you can use `make build`. The resulting binary will be in `./dist`.
 
-To test the project you can run `make test` for unit and command-line acceptance testing. For http testing also run `make test-remote`.
+To test the project you can run `make test` for unit and `make test-acceptance` command-line acceptance testing.
+For http testing also run `make test-remote`.
+
+Note: The acceptance tests require some dependencies fetched via submodules. You can either clone the repo with
+`--recurse-submodules` or it will automatically fetch them if they're missing when running
+`make test-acceptance`/`make test-remote`.
 
 ### Pull Requests
 
