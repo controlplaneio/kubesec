@@ -12,6 +12,8 @@ on:
 jobs:
   codeql:
     name: CodeQL
+    # "Initialize CodeQL" fails on forks and the results would not submit either
+    if: github.repository_owner == 'controlplaneio'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -45,6 +47,8 @@ jobs:
           output: trivy-results.sarif
 
       - name: Upload Trivy results to the Security tab
+        # can't submit scan results on forks
+        if: github.repository_owner == 'controlplaneio'
         uses: github/codeql-action/upload-sarif@v2
         with:
           sarif_file: trivy-results.sarif
