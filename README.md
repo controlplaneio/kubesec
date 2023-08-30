@@ -44,7 +44,6 @@ This uses ControlPlane's hosted API at [v2.kubesec.io/scan](https://v2.kubesec.i
 - [Contributing](/CONTRIBUTING.md)
 - [Changelog](/CHANGELOG.md)
 
-
 ## Download Kubesec
 
 Kubesec is available as a:
@@ -179,6 +178,10 @@ which produces the following output:
 ## Kubesec HTTP Server
 
 Kubesec includes a bundled HTTP server
+
+The listen address for the HTTP server can be configured by setting
+`KUBESEC_ADDR` environment variable. The value can be a single port
+such as `8080` or an address in the form of `ip:port` or `[ipv6]:port`.
 
 #### CLI usage example:
 
@@ -346,15 +349,11 @@ Your feedback is always welcome!
 
 [testing_workflow]: https://github.com/controlplaneio/kubesec/actions?query=workflow%3ATesting
 [testing_workflow_badge]: https://github.com/controlplaneio/kubesec/workflows/Testing/badge.svg
-
 [security_workflow]: https://github.com/controlplaneio/kubesec/actions?query=workflow%3A%22Security+Analysis%22
 [security_workflow_badge]: https://github.com/controlplaneio/kubesec/workflows/Security%20Analysis/badge.svg
-
 [release_workflow]: https://github.com/controlplaneio/kubesec/actions?query=workflow%3ARelease
 [release_workflow_badge]: https://github.com/controlplaneio/kubesec/workflows/Release/badge.svg
-
 [goreportcard]: https://goreportcard.com/report/github.com/controlplaneio/kubesec
 [goreportcard_badge]: https://goreportcard.com/badge/github.com/controlplaneio/kubesec
-
 [go_dev]: https://pkg.go.dev/github.com/controlplaneio/kubesec/v2
 [go_dev_badge]: https://pkg.go.dev/badge/github.com/controlplaneio/kubesec/v2
