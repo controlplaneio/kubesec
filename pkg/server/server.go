@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 	"time"
 
@@ -37,8 +38,13 @@ func ListenAndServe(
 		w.Write([]byte("OK\n"))
 	})
 
+	// Bind to INADDR_ANY if no IP was included
+	if !strings.Contains(port, ":") {
+		port = ":" + port
+	}
+
 	srv := &http.Server{
-		Addr:         ":" + port,
+		Addr:         port,
 		Handler:      mux,
 		ReadTimeout:  5 * time.Second,
 		WriteTimeout: 1 * time.Minute,

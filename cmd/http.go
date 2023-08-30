@@ -23,8 +23,8 @@ func init() {
 }
 
 var httpCmd = &cobra.Command{
-	Use:   `http [port]`,
-	Short: "Starts kubesec HTTP server on the specified port",
+	Use:   `http [[ip:]port]`,
+	Short: "Starts kubesec HTTP server on the specified ip and port",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		if len(args) < 1 {
 			return fmt.Errorf("port is required")
