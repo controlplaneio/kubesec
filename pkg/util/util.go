@@ -4,6 +4,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"net"
+	"strconv"
+	"strings"
 	"text/tabwriter"
 
 	"gopkg.in/yaml.v2"
@@ -46,4 +49,30 @@ func Print(format string, in interface{}, w io.Writer, fn PrintTable) error {
 
 	_, err = fmt.Fprint(w, string(out))
 	return err
+}
+
+// Sanitize and validate HTTP listen address.
+// It accepts "port", ":port", "ip:port", "[ipv6]:port" as valid addresses
+// if only "port" is provided, the semi-colon prefix is added
+func SanitizeAddr(addr string) (string, error) {
+	if !strings.Contains(addr, ":") {
+		addr = ":" + addr
+	}
+
+	ip, port, err := net.SplitHostPort(addr)
+	if err != nil {
+		return "", err
+	}
+
+	if ip != "" {
+		if i := net.ParseIP(ip); i == nil {
+			return "", fmt.Errorf("invalid IP address: %q", ip)
+		}
+	}
+
+	if p, err := strconv.ParseInt(port, 10, 32); err != nil || p < 1 || p > 65535 {
+		return "", fmt.Errorf("invalid port: %q", port)
+	}
+
+	return addr, nil
 }

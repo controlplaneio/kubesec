@@ -20,7 +20,7 @@ import (
 
 // ListenAndServe starts a web server and waits for SIGTERM
 func ListenAndServe(
-	port string,
+	addr string,
 	timeout time.Duration,
 	logger *zap.SugaredLogger,
 	stopCh <-chan struct{},
@@ -38,14 +38,14 @@ func ListenAndServe(
 	})
 
 	srv := &http.Server{
-		Addr:         ":" + port,
+		Addr:         addr,
 		Handler:      mux,
 		ReadTimeout:  5 * time.Second,
 		WriteTimeout: 1 * time.Minute,
 		IdleTimeout:  15 * time.Second,
 	}
 
-	logger.Infof("Starting HTTP server on port %s", port)
+	logger.Infof("Starting HTTP server on %s", addr)
 
 	// run server in background
 	go func() {
