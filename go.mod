@@ -9,7 +9,7 @@ require (
 	github.com/spf13/cobra v1.7.0
 	github.com/thedevsaddam/gojsonq/v2 v2.5.2
 	github.com/yannh/kubeconform v0.6.3
-	go.uber.org/zap v1.25.0
+	go.uber.org/zap v1.26.0
 	gopkg.in/yaml.v2 v2.4.0
 )
 
