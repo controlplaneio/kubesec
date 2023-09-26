@@ -10,11 +10,12 @@ import (
 	"sort"
 	"sync"
 
-	"github.com/controlplaneio/kubesec/v2/pkg/rules"
 	"github.com/ghodss/yaml"
 	"github.com/in-toto/in-toto-golang/in_toto"
 	"github.com/thedevsaddam/gojsonq/v2"
 	"go.uber.org/zap"
+
+	"github.com/controlplaneio/kubesec/v2/pkg/rules"
 )
 
 type Ruleset struct {
@@ -274,6 +275,17 @@ func NewRuleset(logger *zap.SugaredLogger) *Ruleset {
 		Points:    -7,
 	}
 	list = append(list, allowPrivilegeEscalation)
+
+	automountServiceAccountTokenRule := Rule{
+		Predicate: rules.AutomountServiceAccountToken,
+		ID:        "AutomountServiceAccountToken",
+		Selector:  ".spec .automountServiceAccountToken == false",
+		Reason:    "Disabling the automounting of Service Account Token reduces the attack surface of the API server",
+		Kinds:     []string{"Pod", "Deployment", "StatefulSet", "DaemonSet"},
+		Points:    1,
+	}
+
+	list = append(list, automountServiceAccountTokenRule)
 
 	return &Ruleset{
 		Rules:  list,

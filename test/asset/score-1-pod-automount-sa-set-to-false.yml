@@ -1,0 +1,14 @@
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: automount-sa-token-set-to-false
+  namespace: example
+spec:
+  automountServiceAccountToken: false
+  containers:
+    - name: sec-ctx-demo
+      image: gcr.io/google-samples/node-hello:1.0
+      ports:
+      - containerPort: 8080
+        protocol: TCP
