@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"os"
 	"os/signal"
@@ -93,7 +93,7 @@ func retrieveRequestData(r *http.Request) ([]byte, error) {
 	formPrefix := "file="
 	formPrefixLen := len(formPrefix)
 
-	body, err := ioutil.ReadAll(r.Body)
+	body, err := io.ReadAll(r.Body)
 	if err != nil {
 		return nil, errors.New("Error reading request body")
 	}

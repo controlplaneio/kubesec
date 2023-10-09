@@ -3,7 +3,7 @@ package cmd
 import (
 	"bytes"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"log"
 	"os"
 	"path/filepath"
@@ -55,7 +55,7 @@ func getInput(args []string) (File, error) {
 	var file File
 
 	if len(args) == 1 && (args[0] == "-" || args[0] == "/dev/stdin") {
-		fileBytes, err := ioutil.ReadAll(os.Stdin)
+		fileBytes, err := io.ReadAll(os.Stdin)
 		if err != nil {
 			return file, err
 		}
@@ -74,7 +74,7 @@ func getInput(args []string) (File, error) {
 		fileName = filePath
 	}
 
-	fileBytes, err := ioutil.ReadFile(filePath)
+	fileBytes, err := os.ReadFile(filePath)
 	if err != nil {
 		return file, err
 	}
@@ -150,7 +150,7 @@ var scanCmd = &cobra.Command{
 		}
 
 		if outputLocation != "" {
-			err = ioutil.WriteFile(outputLocation, buff.Bytes(), 0644)
+			err = os.WriteFile(outputLocation, buff.Bytes(), 0644)
 			if err != nil {
 				logger.Debugf("Couldn't write output to %s", outputLocation)
 			}

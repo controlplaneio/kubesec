@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"html"
 	"io"
-	"io/ioutil"
 	"os"
 	"strings"
 	"text/template"
@@ -94,7 +93,7 @@ type TemplateWriter struct {
 func NewTemplateWriter(output io.Writer, outputTemplate string) (*TemplateWriter, error) {
 	// if outputTemplate is a file read it and use that
 	if _, err := os.Stat(outputTemplate); err == nil {
-		buf, err := ioutil.ReadFile(outputTemplate)
+		buf, err := os.ReadFile(outputTemplate)
 		if err != nil {
 			return nil, err
 		}
