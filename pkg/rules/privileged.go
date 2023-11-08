@@ -1,24 +1,28 @@
 package rules
 
 import (
-	"bytes"
 	"github.com/thedevsaddam/gojsonq/v2"
 )
 
 func Privileged(json []byte) int {
-	spec := getSpecSelector(json)
+	return checkSecurityContext(
+		json,
+		false, // not present in PodSecurityContext
+		func(jq *gojsonq.JSONQ) checkSecurityContextResult {
+			value := jq.From("securityContext.privileged").Get()
 
-	jqContainers := gojsonq.New().Reader(bytes.NewReader(json)).
-		From(spec+".containers").
-		Where("securityContext", "!=", nil).
-		Where("securityContext.privileged", "!=", nil).
-		Where("securityContext.privileged", "=", true)
+			v, ok := value.(bool)
 
-	jqInitContainers := gojsonq.New().Reader(bytes.NewReader(json)).
-		From(spec+".initContainers").
-		Where("securityContext", "!=", nil).
-		Where("securityContext.privileged", "!=", nil).
-		Where("securityContext.privileged", "=", true)
+			res := checkSecurityContextResult{}
+			if !ok {
+				res.unset = true
+				return res
+			}
 
-	return jqContainers.Count() + jqInitContainers.Count()
+			if v {
+				res.valid = true
+			}
+
+			return res
+		})
 }

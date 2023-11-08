@@ -1,24 +1,28 @@
 package rules
 
 import (
-	"bytes"
 	"github.com/thedevsaddam/gojsonq/v2"
 )
 
 func RunAsNonRoot(json []byte) int {
-	spec := getSpecSelector(json)
+	return checkSecurityContext(
+		json,
+		true,
+		func(jq *gojsonq.JSONQ) checkSecurityContextResult {
+			value := jq.From("securityContext.runAsNonRoot").Get()
 
-	jqContainers := gojsonq.New().Reader(bytes.NewReader(json)).
-		From(spec+".containers").
-		Where("securityContext", "!=", nil).
-		Where("securityContext.runAsNonRoot", "!=", nil).
-		Where("securityContext.runAsNonRoot", "=", true)
+			v, ok := value.(bool)
 
-	jqInitContainers := gojsonq.New().Reader(bytes.NewReader(json)).
-		From(spec+".initContainers").
-		Where("securityContext", "!=", nil).
-		Where("securityContext.runAsNonRoot", "!=", nil).
-		Where("securityContext.runAsNonRoot", "=", true)
+			res := checkSecurityContextResult{}
+			if !ok {
+				res.unset = true
+				return res
+			}
 
-	return jqContainers.Count() + jqInitContainers.Count()
+			if v {
+				res.valid = true
+			}
+
+			return res
+		})
 }

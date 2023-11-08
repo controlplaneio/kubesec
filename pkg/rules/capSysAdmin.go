@@ -1,31 +1,30 @@
 package rules
 
 import (
-	"bytes"
 	"fmt"
-	"github.com/thedevsaddam/gojsonq/v2"
 	"strings"
+
+	"github.com/thedevsaddam/gojsonq/v2"
 )
 
 func CapSysAdmin(json []byte) int {
-	spec := getSpecSelector(json)
-	containers := 0
+	return checkSecurityContext(
+		json,
+		false, // not present in PodSecurityContext
+		func(jq *gojsonq.JSONQ) checkSecurityContextResult {
+			value := jq.From("securityContext.capabilities.add").Get()
 
-	capAdd := gojsonq.New().Reader(bytes.NewReader(json)).
-		From(spec + ".containers").
-		Only("securityContext.capabilities.add")
+			res := checkSecurityContextResult{}
+			if value == nil {
+				res.unset = true
+				return res
+			}
 
-	if capAdd != nil && strings.Contains(fmt.Sprintf("%v", capAdd), "SYS_ADMIN") {
-		containers++
-	}
+			if strings.Contains(fmt.Sprintf("%v", value), "SYS_ADMIN") {
+				res.valid = true
+				return res
+			}
 
-	capAddInit := gojsonq.New().Reader(bytes.NewReader(json)).
-		From(spec + ".initContainers").
-		Only("securityContext.capabilities.add")
-
-	if capAddInit != nil && strings.Contains(fmt.Sprintf("%v", capAddInit), "SYS_ADMIN") {
-		containers++
-	}
-
-	return containers
+			return res
+		})
 }

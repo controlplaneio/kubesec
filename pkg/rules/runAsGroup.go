@@ -1,20 +1,28 @@
 package rules
 
 import (
-	"bytes"
 	"github.com/thedevsaddam/gojsonq/v2"
 )
 
 func RunAsGroup(json []byte) int {
-	spec := getSpecSelector(json)
+	return checkSecurityContext(
+		json,
+		true,
+		func(jq *gojsonq.JSONQ) checkSecurityContextResult {
+			value := jq.From("securityContext.runAsGroup").Get()
 
-	jqContainers := gojsonq.New().Reader(bytes.NewReader(json)).
-		From(spec+".containers").
-		Where("securityContext.runAsGroup", ">", 10000)
+			v, ok := value.(float64)
 
-	jqInitContainers := gojsonq.New().Reader(bytes.NewReader(json)).
-		From(spec+".initContainers").
-		Where("securityContext.runAsGroup", ">", 10000)
+			res := checkSecurityContextResult{}
+			if !ok {
+				res.unset = true
+				return res
+			}
 
-	return jqContainers.Count() + jqInitContainers.Count()
+			if v > 10000 {
+				res.valid = true
+			}
+
+			return res
+		})
 }

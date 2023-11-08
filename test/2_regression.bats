@@ -42,7 +42,7 @@ teardown() {
   run _app "${TEST_DIR}/asset/score-0-podsecuritypolicy-permissive.yml"
   assert_output --regexp ".*Only kinds .* accepted.*" \
     || assert_output --regexp ".*could not find schema for PodSecurityPolicy*" \
-    || assert_output --regexp ".*This resource kind is not supported*" 
+    || assert_output --regexp ".*This resource kind is not supported*"
   if _is_local; then
     assert_failure
   fi

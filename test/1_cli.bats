@@ -40,9 +40,19 @@ teardown() {
   assert_gt_zero_points
 }
 
+@test "passes deployment with pod securitycontext runAsNonRoot" {
+  run _app "${TEST_DIR}/asset/score-1-dep-podseccon-run-as-non-root.yml"
+  assert_gt_zero_points
+}
+
 @test "passes deployment with securitycontext runAsNonRoot" {
   run _app "${TEST_DIR}/asset/score-1-dep-seccon-run-as-non-root.yml"
   assert_gt_zero_points
+}
+
+@test "fails deployment with pod securitycontext runAsUser 1" {
+  run _app "${TEST_DIR}/asset/score-1-dep-podseccon-run-as-user-1.yml"
+  assert_zero_points
 }
 
 @test "fails deployment with securitycontext runAsUser 1" {
@@ -50,8 +60,33 @@ teardown() {
   assert_zero_points
 }
 
+@test "passes deployment with pod securitycontext runAsUser > 10000" {
+  run _app "${TEST_DIR}/asset/score-1-dep-podseccon-run-as-user-10001.yml"
+  assert_gt_zero_points
+}
+
 @test "passes deployment with securitycontext runAsUser > 10000" {
   run _app "${TEST_DIR}/asset/score-1-dep-seccon-run-as-user-10001.yml"
+  assert_gt_zero_points
+}
+
+@test "fails deployment with pod securitycontext runAsGroup 1" {
+  run _app "${TEST_DIR}/asset/score-1-dep-podseccon-run-as-group-1.yml"
+  assert_zero_points
+}
+
+@test "fails deployment with securitycontext runAsGroup 1" {
+  run _app "${TEST_DIR}/asset/score-1-dep-seccon-run-as-group-1.yml"
+  assert_zero_points
+}
+
+@test "passes deployment with pod securitycontext runAsGroup > 10000" {
+  run _app "${TEST_DIR}/asset/score-1-dep-podseccon-run-as-group-10001.yml"
+  assert_gt_zero_points
+}
+
+@test "passes deployment with securitycontext runAsGroup > 10000" {
+  run _app "${TEST_DIR}/asset/score-1-dep-seccon-run-as-group-10001.yml"
   assert_gt_zero_points
 }
 

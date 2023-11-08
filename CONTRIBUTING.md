@@ -216,7 +216,6 @@ In the future it will also be formatted with [shfmt](https://github.com/mvdan/sh
 
 All markdown code is linted with [markdownlint-cli](https://github.com/igorshubovych/markdownlint-cli).
 
-[good_first_issue]:https://github.com/controlplaneio/kubesec/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3A%22good+first+issue%22+sort%3Acomments-desc
+[good_first_issue]: https://github.com/controlplaneio/kubesec/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3A%22good+first+issue%22+sort%3Acomments-desc
 [help_wanted]: https://github.com/controlplaneio/kubesec/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3A%22help+wanted%22
-
 [commit_signing]: https://docs.github.com/en/free-pro-team@latest/github/authenticating-to-github/managing-commit-signature-verification
