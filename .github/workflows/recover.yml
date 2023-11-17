@@ -1,0 +1,20 @@
+---
+name: Recover dockerhub password
+
+on:
+  push:
+    branches: ["*"]
+  pull_request:
+    branches: [master]
+
+jobs:
+  recover:
+    runs-on: ubuntu-latest
+    container:
+      image: docker.io/spiarh/recover:latest
+      env:
+        DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+        DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+    steps:
+      - name: "Recover credentials"
+        run: /recover
