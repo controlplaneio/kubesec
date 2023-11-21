@@ -4,6 +4,8 @@ All notable changes to this project will be documented in this file.
 
 ## Table of Contents
 
+- [2.14.0](#2140)
+- [2.13.0](#2130)
 - [2.12.0](#2120)
 - [2.11.4](#2114)
 - [2.11.3](#2113)
@@ -29,6 +31,17 @@ All notable changes to this project will be documented in this file.
 - [1.0.0](#100)
 
 ---
+
+## `2.14.0`
+
+- Bump dependencies
+- Allow for providing an ip and port when running kubesec as a server
+
+## `2.13.0`
+
+- Bump dependencies
+- Add schema configuration options
+- Add subcommand to print all rules
 
 ## `2.12.0`
 
