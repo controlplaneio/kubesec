@@ -32,7 +32,7 @@ jobs:
         uses: actions/setup-go@v4
         id: go
         with:
-          go-version: ^1.19
+          go-version-file: go.mod
 
       - name: Build kubesec
         run: |
@@ -77,6 +77,6 @@ jobs:
           echo "REMOTE_URL=localhost:$REMOTE_PORT" >> $GITHUB_ENV
           ./dist/kubesec http $REMOTE_PORT 2>error.log >output.log &
 
-      - name: Run bats acceptance tests
+      - name: Run bats acceptance tests against built binary
         run: |
-          make test-${{ matrix.test }}
+          make test-${{ matrix.test }}-built

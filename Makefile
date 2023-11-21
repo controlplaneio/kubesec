@@ -90,19 +90,27 @@ test: ## unit and local acceptance tests
 	@echo "+ $@"
 	make test-unit build test-acceptance
 
+# fetch the parent directory of a file we expect to exist
+# don't go deeper than the root of the directory
 test/bin/%:
-	git submodule update --init -- $@
+	git submodule update --init -- $(dirname $@)
 
 .PHONY: bats
-bats: test/bin/bats test/bin/bats-assert test/bin/bats-support ## fetch bats dependencies
+bats: test/bin/bats/README.md test/bin/bats-assert/README.md test/bin/bats-support/README.md ## fetch bats dependencies
 
 .PHONY: test-acceptance
-test-acceptance: bats build ## acceptance tests
+test-acceptance: build test-acceptance-built ## acceptance tests
+
+.PHONY: test-acceptance-built
+test-acceptance-built: bats ## run acceptance tests with existing kubesec binary
 	@echo "+ $@"
 	bash -xc 'cd test && ./bin/bats/bin/bats $(BATS_PARALLEL_JOBS) .'
 
 .PHONY: test-remote
-test-remote: bats build ## acceptance tests against remote URL
+test-remote: build test-remote-built ## acceptance tests against remote URL
+
+.PHONY: test-remote-built
+test-remote-built: bats ## acceptance tests against remote URL with existing kubesec binary
 	@echo "+ $@"
 	bash -xc 'cd test && REMOTE_URL=$(REMOTE_URL) ./bin/bats/bin/bats $(BATS_PARALLEL_JOBS) .'
 

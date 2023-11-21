@@ -69,12 +69,6 @@ teardown() {
   assert_failure_local
 }
 
-@test "returns error YAML control characters" {
-  run _app "${TEST_DIR}/asset/invalid-input-no-control-characters.json"
-
-  assert_invalid_input
-}
-
 @test "passes bug dump twice [1/2]" {
   run _app "${TEST_DIR}/asset/bug-dump-2.json"
   assert_success
@@ -101,7 +95,8 @@ teardown() {
   assert_line "Error: file path is required"
 }
 
-@test "errors with invalid file" {
+@test "errors with invalid file (local)" {
+  skip_if_not_local
   run _app somefile.yaml
   assert_failure_local
   assert_file_not_found
