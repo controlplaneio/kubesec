@@ -4,17 +4,21 @@ updates:
   - package-ecosystem: github-actions
     directory: /
     schedule:
-      interval: daily
+      interval: weekly
       time: "06:00"
       timezone: UTC
     open-pull-requests-limit: 10
     commit-message:
       prefix: chore
       include: scope
+    groups:
+      gha:
+        patterns:
+          - "*"
   - package-ecosystem: gomod
     directory: /
     schedule:
-      interval: daily
+      interval: weekly
       time: "06:00"
       timezone: UTC
     allow:
@@ -23,12 +27,20 @@ updates:
     commit-message:
       prefix: chore
       include: scope
+    groups:
+      gomod:
+        patterns:
+          - "*"
   - package-ecosystem: docker
     directory: /
     schedule:
-      interval: daily
+      interval: weekly
       time: "06:00"
       timezone: UTC
     commit-message:
       prefix: chore
       include: scope
+    groups:
+      docker:
+        patterns:
+          - "*"
