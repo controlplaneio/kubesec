@@ -11,14 +11,13 @@ jobs:
     name: Release on GitHub
     runs-on: ubuntu-latest
     steps:
-      - name: Set up Go
-        uses: actions/setup-go@v4
-        id: go
-        with:
-          go-version-file: go.mod
-
       - name: Check out code
         uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version-file: go.mod
 
       - name: Launch goreleaser
         uses: goreleaser/goreleaser-action@v5

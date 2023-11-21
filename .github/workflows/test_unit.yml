@@ -26,7 +26,6 @@ jobs:
 
       - name: Set up Go
         uses: actions/setup-go@v4
-        id: go
         with:
           go-version-file: go.mod
 

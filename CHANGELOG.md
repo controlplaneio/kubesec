@@ -36,6 +36,7 @@ All notable changes to this project will be documented in this file.
 
 - Bump dependencies
 - Allow for providing an ip and port when running kubesec as a server
+- CI improvements
 
 ## `2.13.0`
 
