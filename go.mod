@@ -1,6 +1,8 @@
 module github.com/controlplaneio/kubesec/v2
 
-go 1.19
+go 1.21
+
+toolchain go1.21.4
 
 require (
 	github.com/ghodss/yaml v1.0.0
@@ -8,7 +10,7 @@ require (
 	github.com/prometheus/client_golang v1.17.0
 	github.com/spf13/cobra v1.8.0
 	github.com/thedevsaddam/gojsonq/v2 v2.5.2
-	github.com/yannh/kubeconform v0.6.3
+	github.com/yannh/kubeconform v0.6.4
 	go.uber.org/zap v1.26.0
 	gopkg.in/yaml.v2 v2.4.0
 )
