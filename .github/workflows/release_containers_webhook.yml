@@ -1,0 +1,69 @@
+---
+name: Release Containers
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'kubesec-webhook tag'
+        required: true
+        type: string
+
+jobs:
+  release-containers:
+    name: Build and Push container - ${{ matrix.containers.name }}
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        containers:
+          - name: kubesec-webhook
+            file: ./Dockerfile
+            suffix: ""
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          repository: controlplaneio/kubesec-webhook
+          ref: ${{ inputs.tag }}
+
+      - name: Generate container tags and labels
+        id: docker_meta
+        uses: docker/metadata-action@v5
+        with:
+          # images: kubesec/kubesec,ghcr.io/controlplaneio/kubesec
+          images: kubesec/kubesec-webhook
+          tags: |
+            type=semver,pattern=v{{version}}
+            type=semver,pattern=v{{major}}
+          flavor: |
+            latest=${{ matrix.containers.suffix == '' }}
+            suffix=${{ matrix.containers.suffix }}
+          labels: |
+            org.opencontainers.image.vendor=controlplane
+            org.opencontainers.image.url=https://kubesec.io/
+
+      - name: Login to Docker Hub Registry
+        uses: docker/login-action@v3
+        with:
+          registry: docker.io
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      # - name: Login to GitHub Container Registry
+      #   uses: docker/login-action@v3
+      #   with:
+      #     registry: ghcr.io
+      #     username: ${{ github.repository_owner }}
+      #     password: ${{ secrets.CR_PAT }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build container and push tags
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: ${{ github.event_name != 'pull_request' }}
+          file: ${{ matrix.containers.file }}
+          tags: ${{ steps.docker_meta.outputs.tags }}
+          labels: ${{ steps.docker_meta.outputs.labels }}
