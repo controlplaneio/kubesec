@@ -1,5 +1,5 @@
 ---
-name: Release Containers
+name: Release Containers kubesec-webhook
 on:
   workflow_dispatch:
     inputs:
@@ -33,8 +33,7 @@ jobs:
           # images: kubesec/kubesec,ghcr.io/controlplaneio/kubesec
           images: kubesec/kubesec-webhook
           tags: |
-            type=semver,pattern=v{{version}}
-            type=semver,pattern=v{{major}}
+            types=raw,value=${{ inputs.tag }}
           flavor: |
             latest=${{ matrix.containers.suffix == '' }}
             suffix=${{ matrix.containers.suffix }}
