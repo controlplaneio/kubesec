@@ -22,7 +22,7 @@ jobs:
       # provide a more modern go until resolved in codeql action
       # https://github.com/github/codeql-action/issues/1842#issuecomment-1704398087
       - name: Set up Go
-        uses: actions/setup-go@v4
+        uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
 
@@ -46,7 +46,7 @@ jobs:
           docker build . -t kubesec:${{ github.sha }}
 
       - name: Run Trivy
-        uses: aquasecurity/trivy-action@0.14.0
+        uses: aquasecurity/trivy-action@0.16.0
         with:
           image-ref: kubesec:${{ github.sha }}
           format: template
@@ -69,7 +69,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: Run Trufflehog
-        uses: trufflesecurity/trufflehog@v3.63.1
+        uses: trufflesecurity/trufflehog@v3.63.2
         with:
           path: ./
           base: ${{ github.event.repository.default_branch }}
