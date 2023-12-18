@@ -22,17 +22,17 @@ jobs:
       # provide a more modern go until resolved in codeql action
       # https://github.com/github/codeql-action/issues/1842#issuecomment-1704398087
       - name: Set up Go
-        uses: actions/setup-go@v4
+        uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
 
       - name: Initialize CodeQL
-        uses: github/codeql-action/init@v2
+        uses: github/codeql-action/init@v3
         with:
           languages: go
 
       - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v2
+        uses: github/codeql-action/analyze@v3
 
   trivy:
     name: Trivy
@@ -46,7 +46,7 @@ jobs:
           docker build . -t kubesec:${{ github.sha }}
 
       - name: Run Trivy
-        uses: aquasecurity/trivy-action@0.14.0
+        uses: aquasecurity/trivy-action@0.16.0
         with:
           image-ref: kubesec:${{ github.sha }}
           format: template
@@ -56,7 +56,7 @@ jobs:
       - name: Upload Trivy results to the Security tab
         # can't submit scan results on forks
         if: github.repository_owner == 'controlplaneio'
-        uses: github/codeql-action/upload-sarif@v2
+        uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: trivy-results.sarif
 
@@ -69,7 +69,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: Run Trufflehog
-        uses: trufflesecurity/trufflehog@v3.63.1
+        uses: trufflesecurity/trufflehog@v3.63.4
         with:
           path: ./
           base: ${{ github.event.repository.default_branch }}
