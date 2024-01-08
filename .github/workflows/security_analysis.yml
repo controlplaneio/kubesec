@@ -46,7 +46,7 @@ jobs:
           docker build . -t kubesec:${{ github.sha }}
 
       - name: Run Trivy
-        uses: aquasecurity/trivy-action@0.16.0
+        uses: aquasecurity/trivy-action@0.16.1
         with:
           image-ref: kubesec:${{ github.sha }}
           format: template
@@ -69,7 +69,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: Run Trufflehog
-        uses: trufflesecurity/trufflehog@v3.63.4
+        uses: trufflesecurity/trufflehog@v3.63.7
         with:
           path: ./
           base: ${{ github.event.repository.default_branch }}
