@@ -26,7 +26,7 @@ RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o kubesec .
 
 # ===
 
-FROM alpine:3.18
+FROM alpine:3.19
 
 ARG K8S_SCHEMA_VER
 ENV K8S_SCHEMA_VER=${K8S_SCHEMA_VER:-}
