@@ -1,4 +1,4 @@
-FROM golang:1.21 AS downloader
+FROM golang:1.22 AS downloader
 
 ARG K8S_SCHEMA_VER=master
 
@@ -14,7 +14,7 @@ RUN set -x && \
     curl -sSL --output-dir "${SCHEMA_PATH}" -O "${BASE_URL}/${SCHEMA_PATH}/deployment-apps-v1.json" && \
     curl -sSL --output-dir "${SCHEMA_PATH}" -O "${BASE_URL}/${SCHEMA_PATH}/statefulset-apps-v1.json"
 
-FROM golang:1.21 AS builder
+FROM golang:1.22 AS builder
 
 WORKDIR /kubesec
 
