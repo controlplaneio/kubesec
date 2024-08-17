@@ -39,13 +39,11 @@ RUN addgroup -S kubesec \
 
 WORKDIR /home/kubesec
 
+COPY --from=builder /kubesec/kubesec /bin/kubesec
+COPY --chown=kubesec ./templates/ /templates
 # This directory must follow the same structure ($SCHEMA_PATH) as the upstream
 # schema location: github.com/yannh/kubernetes-json-schema
-COPY --from=downloader /schemas /schemas
-COPY --from=builder /kubesec/kubesec /bin/kubesec
-COPY ./templates/ /templates
-
-RUN chown -R kubesec:kubesec ./ /schemas /templates
+COPY --from=downloader --chown=kubesec /schemas /schemas
 
 USER kubesec
 
