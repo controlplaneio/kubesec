@@ -1,7 +1,7 @@
 NAME := kubesec
 GITHUB_ORG = controlplaneio
 DOCKER_HUB_ORG = controlplane
-K8S_SCHEMA_VER = 1.25.4
+K8S_SCHEMA_VER = 1.31.0
 
 ### github.com/controlplaneio/ensure-content.git makefile-header START ###
 ifeq ($(NAME),)
