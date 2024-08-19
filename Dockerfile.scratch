@@ -1,4 +1,21 @@
-FROM golang:1.21-alpine AS builder
+FROM alpine:3.20 AS downloader
+
+ARG K8S_SCHEMA_VER=master
+
+WORKDIR /schemas
+
+RUN set -x && \
+    apk add --no-cache curl && \
+    if [ "${K8S_SCHEMA_VER}" != "master" ]; then K8S_SCHEMA_VER="v${K8S_SCHEMA_VER}"; fi && \
+    BASE_URL="https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master" && \
+    SCHEMA_PATH="${K8S_SCHEMA_VER}-standalone-strict" && \
+    mkdir "${SCHEMA_PATH}" && \
+    curl -sSL --output-dir "${SCHEMA_PATH}" -O "${BASE_URL}/${SCHEMA_PATH}/pod-v1.json" && \
+    curl -sSL --output-dir "${SCHEMA_PATH}" -O "${BASE_URL}/${SCHEMA_PATH}/daemonset-apps-v1.json" && \
+    curl -sSL --output-dir "${SCHEMA_PATH}" -O "${BASE_URL}/${SCHEMA_PATH}/deployment-apps-v1.json" && \
+    curl -sSL --output-dir "${SCHEMA_PATH}" -O "${BASE_URL}/${SCHEMA_PATH}/statefulset-apps-v1.json"
+
+FROM golang:1.23-alpine AS builder
 
 RUN echo "kubesec:x:31012:31012:kubesec:/home/kubesec:/sbin/nologin" > /passwd && \
   echo "kubesec:x:31012:" > /group
@@ -10,13 +27,16 @@ RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o kubesec .
 # ===
 
 FROM scratch
+ARG K8S_SCHEMA_VER
+ENV K8S_SCHEMA_VER=${K8S_SCHEMA_VER:-}
+ENV SCHEMA_LOCATION=/schemas
 WORKDIR /home/kubsec
-COPY --from=stefanprodan/kubernetes-json-schema:latest /schemas/master-standalone /schemas/master-standalone-strict
-COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 COPY --from=builder /passwd /group /etc/
-COPY --from=builder /kubesec/kubesec /kubesec
-COPY ./templates/ /templates
+COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
+COPY --from=builder /kubesec/kubesec /bin/kubesec
+COPY --from=downloader --chown=kubesec /schemas /schemas
+COPY --chown=kubesec ./templates/ /templates
 USER kubesec
 
-ENTRYPOINT ["/kubesec"]
+ENTRYPOINT ["/bin/kubesec"]
 CMD ["http", "8080"]

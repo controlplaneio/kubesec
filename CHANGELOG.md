@@ -4,6 +4,7 @@ All notable changes to this project will be documented in this file.
 
 ## Table of Contents
 
+- [2.14.1](#2141)
 - [2.14.0](#2140)
 - [2.13.0](#2130)
 - [2.12.0](#2120)
@@ -31,6 +32,10 @@ All notable changes to this project will be documented in this file.
 - [1.0.0](#100)
 
 ---
+
+## `2.14.1`
+
+- Bump dependencies
 
 ## `2.14.0`
 
