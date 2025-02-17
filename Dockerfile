@@ -15,7 +15,7 @@ RUN set -x && \
     curl -sSL --output-dir "${SCHEMA_PATH}" -O "${BASE_URL}/${SCHEMA_PATH}/deployment-apps-v1.json" && \
     curl -sSL --output-dir "${SCHEMA_PATH}" -O "${BASE_URL}/${SCHEMA_PATH}/statefulset-apps-v1.json"
 
-FROM golang:1.23 AS builder
+FROM golang:1.24 AS builder
 
 WORKDIR /kubesec
 
