@@ -1,0 +1,10 @@
+---
+blank_issues_enabled: false
+contact_links:
+  - name: Kubesec Discussions
+    url: https://github.com/controlplaneio/kubesec/discussions
+    about: Please ask and answer questions here!
+# not required, auto picks up SECURITY.md
+#   - name: Security
+#     url: X
+#     about: Please report security vulnerabilities here.
