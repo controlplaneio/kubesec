@@ -1,18 +1,12 @@
----
-name: Pull Request
-about: A pull request
-title: ''
-labels: ''
-assignees: ''
----
-
+<!-- Please skip over these links :) -->
 [pull_requests]: https://github.com/controlplaneio/kubesec/pulls?q=is%3Apr+is%3Aopen+sort%3Aupdated-desc
+[contributing]: https://github.com/controlplaneio/kubesec/blob/master/CONTRIBUTING.md
 
 <!-- You can erase any parts of this template not applicable to your Pull Request. -->
 
 **All Submissions.**
 
-- [ ] Have you followed the guidelines in our [Contributing document](../../CONTRIBUTING.md)?
+- [ ] Have you followed the guidelines in our [Contributing document][contributing]?
 - [ ] Have you checked to ensure there aren't other open [Pull Requests][pull_requests] for the same update/change?
 
 **Code Submissions.**
