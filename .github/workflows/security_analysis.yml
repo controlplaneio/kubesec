@@ -69,7 +69,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: Run Trufflehog
-        uses: trufflesecurity/trufflehog@v3.88.12
+        uses: trufflesecurity/trufflehog@v3.88.14
         with:
           path: ./
           base: ""
