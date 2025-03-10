@@ -5,7 +5,7 @@ go 1.23.1
 require (
 	github.com/ghodss/yaml v1.0.0
 	github.com/in-toto/in-toto-golang v0.9.0
-	github.com/prometheus/client_golang v1.21.0
+	github.com/prometheus/client_golang v1.21.1
 	github.com/spf13/cobra v1.9.1
 	github.com/thedevsaddam/gojsonq/v2 v2.5.2
 	github.com/yannh/kubeconform v0.6.7
@@ -29,8 +29,8 @@ require (
 	github.com/shibumi/go-pathspec v1.3.0 // indirect
 	github.com/spf13/pflag v1.0.6 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
-	golang.org/x/crypto v0.35.0 // indirect
-	golang.org/x/sys v0.30.0 // indirect
+	golang.org/x/crypto v0.36.0 // indirect
+	golang.org/x/sys v0.31.0 // indirect
 	google.golang.org/protobuf v1.36.5 // indirect
 	sigs.k8s.io/yaml v1.4.0 // indirect
 )
