@@ -188,6 +188,12 @@ teardown() {
   assert_gt_zero_points
 }
 
+@test "passes Pod with hostUsers set to false" {
+  run _app "${TEST_DIR}/asset/score-1-pod-hostUsers-set-to-false.yml"
+  assert_gt_zero_points
+}
+
+
 @test "returns integer point score for each advice element" {
   run _app "${TEST_DIR}/asset/score-2-pod-serviceaccount.yml"
   assert_success

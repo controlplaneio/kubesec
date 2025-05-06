@@ -298,6 +298,17 @@ func NewRuleset(logger *zap.SugaredLogger) *Ruleset {
 
 	list = append(list, automountServiceAccountTokenRule)
 
+	hostUsersRule := Rule{
+		Predicate: rules.HostUsers,
+		ID:        "HostUsers",
+		Selector:  ".spec .hostUsers == false",
+		Reason:    "A user namespace for a Pod is enabled by setting the hostUsers field of Pod .spec, which can prevent various attacks",
+		Kinds:     []string{"Pod", "Deployment", "StatefulSet", "DaemonSet"},
+		Points:    1,
+	}
+
+	list = append(list, hostUsersRule)
+
 	return &Ruleset{
 		Rules:  list,
 		logger: logger,
