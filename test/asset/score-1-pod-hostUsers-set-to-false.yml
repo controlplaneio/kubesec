@@ -1,0 +1,16 @@
+---
+# ref https://kubernetes.io/docs/tasks/configure-pod-container/user-namespaces/
+apiVersion: v1
+kind: Pod
+metadata:
+  name: userns
+  namespace: test
+  labels:
+    app: userns
+spec:
+  hostUsers: false
+  containers:
+  - name: shell
+    command: ["sleep", "infinity"]
+    image: debian
+
