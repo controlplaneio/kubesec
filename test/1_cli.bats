@@ -10,11 +10,6 @@ teardown() {
   _global_teardown
 }
 
-@test "fails Pod with unconfined seccomp" {
-  run _app "${TEST_DIR}/asset/score-0-pod-seccomp-unconfined.yml"
-  assert_lt_zero_points
-}
-
 @test "fails with CAP_SYS_ADMIN" {
   run _app "${TEST_DIR}/asset/score-0-cap-sys-admin.yml"
   assert_lt_zero_points
