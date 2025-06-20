@@ -1,4 +1,4 @@
-FROM alpine:3.21 AS downloader
+FROM alpine:3.22 AS downloader
 
 ARG K8S_SCHEMA_VER=master
 
@@ -27,7 +27,7 @@ RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o kubesec .
 
 # ===
 
-FROM alpine:3.21
+FROM alpine:3.22
 
 ARG K8S_SCHEMA_VER
 ENV K8S_SCHEMA_VER=${K8S_SCHEMA_VER:-}

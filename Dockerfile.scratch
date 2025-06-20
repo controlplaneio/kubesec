@@ -1,4 +1,4 @@
-FROM alpine:3.21 AS downloader
+FROM alpine:3.22 AS downloader
 
 ARG K8S_SCHEMA_VER=master
 
