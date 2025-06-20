@@ -1,7 +1,6 @@
 package ruler
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/controlplaneio/kubesec/v2/pkg/rules"
@@ -37,7 +36,7 @@ spec:
 		t.Fatal(err.Error())
 	}
 	if matchedContainerCount != 0 {
-		t.Errorf(fmt.Sprintf("Rule failed when it shouldn't with count %d", matchedContainerCount))
+		t.Errorf("Rule failed when it shouldn't with count %d", matchedContainerCount)
 	}
 }
 

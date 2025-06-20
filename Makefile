@@ -117,12 +117,12 @@ test-remote-built: bats ## acceptance tests against remote URL with existing kub
 .PHONY: test-unit
 test-unit: ## golang unit tests
 	@echo "+ $@"
-	go test -race $$(go list ./... | grep -v '/vendor/') -run "$${RUN:-.*}"
+	CGO_ENABLED=1 go test -race $$(go list ./... | grep -v '/vendor/') -run "$${RUN:-.*}"
 
 .PHONY: test-unit-verbose
 test-unit-verbose: ## golang unit tests (verbose)
 	@echo "+ $@"
-	go test -race -v $$(go list ./... | grep -v '/vendor/') -run "$${RUN:-.*}"
+	CGO_ENABLED=1 go test -race -v $$(go list ./... | grep -v '/vendor/') -run "$${RUN:-.*}"
 
 # ---
 

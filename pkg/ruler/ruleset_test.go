@@ -211,9 +211,9 @@ spec:
         - name: c1
         - name: c2
 `,
-			// problem validating schema. Check JSON formatting: jsonschema: '/spec' does not validate with
-			// https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/master-standalone-strict/deployment-apps-v1.json#/properties/spec/required: missing properties: 'selector'
-			expectedMessage: "/properties/spec/required: missing properties: 'selector'",
+			// Got error problem validating schema. Check JSON formatting: jsonschema: '/spec' does not validate with
+			// 'https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/master-standalone-strict/deployment-apps-v1.json#' - at '/spec': missing property 'selector'
+			expectedMessage: " - at '/spec': missing property 'selector'",
 		},
 		{
 			name: "replicas has wrong type string",
@@ -234,9 +234,9 @@ spec:
         - name: c1
         - name: c2
 `,
-			// problem validating schema. Check JSON formatting: jsonschema: '/spec/replicas' does not validate
-			// with https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/master-standalone-strict/deployment-apps-v1.json#/properties/spec/properties/replicas/type: expected integer or null, but got string
-			expectedMessage: "/properties/spec/properties/replicas/type: expected integer or null, but got string",
+			// Got error problem validating schema. Check JSON formatting: jsonschema validation failed with
+			// 'https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/master-standalone-strict/deployment-apps-v1.json#' - at '/spec/replicas': got string, want null or integer
+			expectedMessage: " - at '/spec/replicas': got string, want null or integer",
 		},
 		{
 			name: "resource kind does not exist",
