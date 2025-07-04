@@ -11,20 +11,6 @@ func SeccompUnconfined(json []byte) int {
 		json,
 		true, // present in PodSecurityContext
 		func(jq *gojsonq.JSONQ) checkSecurityContextResult {
-			value := jq.From("securityContext.seccompProfile.type").Get()
-
-			v, ok := value.(string)
-
-			res := checkSecurityContextResult{}
-			if !ok {
-				res.unset = true
-				return res
-			}
-
-			if v == "Unconfined" {
-				res.valid = true
-			}
-
-			return res
+			return isSeccompUnconfined(jq, true)
 		})
 }
