@@ -46,7 +46,7 @@ jobs:
           docker build . -t kubesec:${{ github.sha }}
 
       - name: Run Trivy
-        uses: aquasecurity/trivy-action@0.31.0
+        uses: aquasecurity/trivy-action@0.32.0
         with:
           image-ref: kubesec:${{ github.sha }}
           format: template
