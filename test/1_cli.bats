@@ -10,11 +10,6 @@ teardown() {
   _global_teardown
 }
 
-@test "fails Pod with unconfined seccomp" {
-  run _app "${TEST_DIR}/asset/score-0-pod-seccomp-unconfined.yml"
-  assert_lt_zero_points
-}
-
 @test "fails with CAP_SYS_ADMIN" {
   run _app "${TEST_DIR}/asset/score-0-cap-sys-admin.yml"
   assert_lt_zero_points
@@ -143,14 +138,49 @@ teardown() {
   assert_gt_zero_points
 }
 
-@test "fails Pod with unconfined seccomp for all containers" {
-  run _app "${TEST_DIR}/asset/score-0-pod-seccomp-unconfined.yml"
+@test "fails Deployment with unconfined seccomp for all containers" {
+  run _app "${TEST_DIR}/asset/score-0-dep-seccomp-empty-securitycontext.yml"
+  assert_zero_points
+}
+
+@test "passes Deployment with non-unconfined seccomp on the .spec section" {
+  run _app "${TEST_DIR}/asset/score-1-dep-seccomp-nonunconfined-spec-securitycontext.yml"
+  assert_gt_zero_points
+}
+
+@test "fails Deployment with unconfined seccomp on the .spec section" {
+  run _app "${TEST_DIR}/asset/score-0-dep-seccomp-unconfined-spec-securitycontext.yml"
   assert_lt_zero_points
 }
 
-@test "passes Pod with non-unconfined seccomp for all containers" {
-  run _app "${TEST_DIR}/asset/score-0-pod-seccomp-non-unconfined.yml"
+@test "passes Deployment with non-unconfined seccomp on the .spec.containers section" {
+  run _app "${TEST_DIR}/asset/score-1-dep-seccomp-nonunconfined-container.yml"
   assert_gt_zero_points
+}
+
+@test "fails Deployment with unconfined seccomp on the .spec.containers section" {
+  run _app "${TEST_DIR}/asset/score-0-dep-seccomp-unconfined-container.yml"
+  assert_lt_zero_points
+}
+
+@test "passes Deployment with non-unconfined seccomp on the .spec.initContainers section" {
+  run _app "${TEST_DIR}/asset/score-1-dep-seccomp-nonunconfined-initcontainer.yml"
+  assert_gt_zero_points
+}
+
+@test "fails Deployment with unconfined seccomp on the .spec.initcontainers section" {
+  run _app "${TEST_DIR}/asset/score-0-dep-seccomp-unconfined-initcontainer.yml"
+  assert_lt_zero_points
+}
+
+@test "passes Deployment with non-unconfined seccomp on the .spec.ephemeralContainers section" {
+  run _app "${TEST_DIR}/asset/score-1-dep-seccomp-nonunconfined-ephemeralcontainer.yml"
+  assert_gt_zero_points
+}
+
+@test "fails Deployment with unconfined seccomp on the .spec.ephemeralContainers section" {
+  run _app "${TEST_DIR}/asset/score-0-dep-seccomp-unconfined-ephemeralcontainer.yml"
+  assert_lt_zero_points
 }
 
 @test "fails DaemonSet with hostNetwork" {
