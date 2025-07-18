@@ -133,9 +133,49 @@ teardown() {
   assert_lt_zero_points
 }
 
-@test "passes Pod with apparmor annotation" {
-  run _app "${TEST_DIR}/asset/score-3-pod-apparmor.yaml"
+@test "fails Deployment with unconfined apparmor for all containers" {
+  run _app "${TEST_DIR}/asset/score-0-dep-apparmor-empty-securitycontext.yml"
+  assert_zero_points
+}
+
+@test "passes Deployment with non-unconfined apparmor on the .spec section" {
+  run _app "${TEST_DIR}/asset/score-1-dep-apparmor-nonunconfined-spec-securitycontext.yml"
   assert_gt_zero_points
+}
+
+@test "fails Deployment with unconfined apparmor on the .spec section" {
+  run _app "${TEST_DIR}/asset/score-0-dep-apparmor-unconfined-spec-securitycontext.yml"
+  assert_lt_zero_points
+}
+
+@test "passes Deployment with non-unconfined apparmor on the .spec.containers section" {
+  run _app "${TEST_DIR}/asset/score-1-dep-apparmor-nonunconfined-container.yml"
+  assert_gt_zero_points
+}
+
+@test "fails Deployment with unconfined apparmor on the .spec.containers section" {
+  run _app "${TEST_DIR}/asset/score-0-dep-apparmor-unconfined-container.yml"
+  assert_lt_zero_points
+}
+
+@test "passes Deployment with non-unconfined apparmor on the .spec.initContainers section" {
+  run _app "${TEST_DIR}/asset/score-1-dep-apparmor-nonunconfined-initcontainer.yml"
+  assert_gt_zero_points
+}
+
+@test "fails Deployment with unconfined apparmor on the .spec.initcontainers section" {
+  run _app "${TEST_DIR}/asset/score-0-dep-apparmor-unconfined-initcontainer.yml"
+  assert_lt_zero_points
+}
+
+@test "passes Deployment with non-unconfined apparmor on the .spec.ephemeralContainers section" {
+  run _app "${TEST_DIR}/asset/score-1-dep-apparmor-nonunconfined-ephemeralcontainer.yml"
+  assert_gt_zero_points
+}
+
+@test "fails Deployment with unconfined apparmor on the .spec.ephemeralContainers section" {
+  run _app "${TEST_DIR}/asset/score-0-dep-apparmor-unconfined-ephemeralcontainer.yml"
+  assert_lt_zero_points
 }
 
 @test "fails Deployment with unconfined seccomp for all containers" {
