@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: trustworthy-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: trustworthy-deployment
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: trustworthy-deployment
+    spec:
+      containers:
+      - image: sotrustworthy:latest
+        name: sotrustworthy-container
+      ephemeralContainers:
+      - image: sotrustworthy:latest
+        name: sotrustworthy-initcontainer
+        securityContext:
+          appArmorProfile:
+            type: RuntimeDefault
