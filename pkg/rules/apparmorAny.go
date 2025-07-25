@@ -1,42 +1,33 @@
 package rules
 
-import (
-	"bytes"
-	"fmt"
-	"github.com/thedevsaddam/gojsonq/v2"
-	"regexp"
-	"strings"
-)
+import "github.com/thedevsaddam/gojsonq/v2"
 
-// TODO(ajm): tighten these matches, they could be "[apparmor..." or " apparmor...", and "unconfined]" or "unconfined "
-// TODO(ajm): space delimiting matches is insufficient as this could be set to `unconfined blah`
-func ApparmorAny(json []byte) int {
-	containers := 0
-	startWordBoundaryRegex := "[\\[ ]"
-	endWordBoundaryRegex := "[\\] ]"
+// isApparmorUnconfined checks the appArmorProfile.type field and returns a checkSecurityContextResult struct.
+// If the field is set then unset=false. If, on top of that, the value of Unconfined matches the expected value
+// then return valid=true.
+func isApparmorUnconfined(jq *gojsonq.JSONQ, expectedUnconfined bool) checkSecurityContextResult {
+	value := jq.From("securityContext.appArmorProfile.type").Get()
 
-	annotations := gojsonq.New().Reader(bytes.NewReader(json)).
-		From("metadata.annotations").Get()
+	v, ok := value.(string)
 
-	annotationsString := fmt.Sprintf("%v", annotations)
+	res := checkSecurityContextResult{}
 
-	if annotations != nil && strings.Contains(annotationsString, "container.apparmor.security.beta.kubernetes.io/pod:") {
-		if !strings.Contains(annotationsString, "container.apparmor.security.beta.kubernetes.io/pod:unconfined") {
-			containers++
-		}
-	} else if annotations != nil {
-
-		keyNameRegex := "container\\.apparmor\\.security\\.beta\\.kubernetes\\.io/[a-zA-Z-.]+"
-		// TODO(ajm) match end of string in regex
-		isNamedPodMatch, _ := regexp.MatchString(startWordBoundaryRegex+keyNameRegex+":", annotationsString)
-
-		if isNamedPodMatch {
-			isUnconfinedNamedPodMatch, _ := regexp.MatchString(startWordBoundaryRegex+keyNameRegex+":unconfined"+endWordBoundaryRegex, annotationsString)
-			if !isUnconfinedNamedPodMatch {
-				containers++
-			}
-		}
+	if !ok {
+		res.unset = true
+		return res
 	}
 
-	return containers
+	return checkSecurityContextResult{
+		valid: (v == "Unconfined") == expectedUnconfined,
+	}
+}
+
+func ApparmorAny(json []byte) int {
+	return checkSecurityContext(
+		json,
+		true, // present in Pod Security Context
+		func(jq *gojsonq.JSONQ) checkSecurityContextResult {
+			return isApparmorUnconfined(jq, false)
+		},
+	)
 }
