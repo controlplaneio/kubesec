@@ -41,6 +41,7 @@ func checkSecurityContext(json []byte, checkPodSecurityContext bool, checkFn che
 
 	containersLen := jq.Copy().From(spec + ".containers").Count()
 	initContainersLen := jq.Copy().From(spec + ".initContainers").Count()
+	ephemeralContainersLen := jq.Copy().From(spec + ".ephemeralContainers").Count()
 
 	var valid int
 
@@ -60,6 +61,7 @@ func checkSecurityContext(json []byte, checkPodSecurityContext bool, checkFn che
 
 	ctnFn(initContainersLen, "initContainers")
 	ctnFn(containersLen, "containers")
+	ctnFn(ephemeralContainersLen, "ephemeralContainers")
 
 	return valid
 }

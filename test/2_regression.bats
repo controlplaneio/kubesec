@@ -183,7 +183,7 @@ teardown() {
   skip_if_not_remote
 
   run _app "${TEST_DIR}/asset/form-prefix-file.yml"
-  assert_gt_zero_points
+  assert_zero_points
   assert_success
 }
 
@@ -191,7 +191,7 @@ teardown() {
   skip_if_not_remote
 
   run _app "${TEST_DIR}/asset/form-prefix-file.json"
-  assert_gt_zero_points
+  assert_zero_points
   assert_success
 }
 
