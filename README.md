@@ -295,7 +295,7 @@ $ kubesec ./score-9-deployment.yml | jq --exit-status '.score > 10' >/dev/null
 
 ## Example output
 
-Kubesec returns a returns a JSON array, and can scan multiple YAML documents in a single input file.
+Kubesec returns a JSON array, and can scan multiple YAML documents in a single input file.
 
 ```json
 [
@@ -327,15 +327,21 @@ Kubesec returns a returns a JSON array, and can scan multiple YAML documents in 
 ]
 ```
 
+> [!NOTE]
+> You can also cat multiple files, as long as they're correctly formatted as multiple documents separated by `---`. E.g.
+> ```
+> { cat test/asset/multi.yml;
+> echo "---";
+> cat test/asset/critical-double-multiple.yml;
+> } | dist/kubesec scan -
+> ```
+
 ---
 
-## Contributors
 
-Thanks to our awesome contributors!
+## Contributing
 
-- [Andrew Martin](@sublimino)
-- [Stefan Prodan](@stefanprodan)
-- [Jack Kelly](@06kellyjac)
+Check out [CONTRIBUTING.md](CONTRIBUTING.md) for more information.
 
 ## Getting Help
 
@@ -348,7 +354,7 @@ If you have any questions about Kubesec and Kubernetes security:
 Your feedback is always welcome!
 
 [testing_workflow]: https://github.com/controlplaneio/kubesec/actions?query=workflow%3ATesting
-[testing_workflow_badge]: https://github.com/controlplaneio/kubesec/workflows/Testing/badge.svg
+[testing_workflow_badge]: https://github.com/controlplaneio/kubesec/actions/workflows/test_acceptance.yml/badge.svg
 [security_workflow]: https://github.com/controlplaneio/kubesec/actions?query=workflow%3A%22Security+Analysis%22
 [security_workflow_badge]: https://github.com/controlplaneio/kubesec/workflows/Security%20Analysis/badge.svg
 [release_workflow]: https://github.com/controlplaneio/kubesec/actions?query=workflow%3ARelease
