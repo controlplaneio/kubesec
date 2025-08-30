@@ -1,42 +1,35 @@
 package rules
 
 import (
-	"bytes"
-	"fmt"
 	"github.com/thedevsaddam/gojsonq/v2"
-	"regexp"
-	"strings"
 )
 
-// TODO(ajm): tighten these matches, they could be "[seccomp..." or " seccomp...", and "unconfined]" or "unconfined "
-// TODO(ajm): space delimiting matches is insufficient as this could be set to `unconfined blah`
-func SeccompAny(json []byte) int {
-	containers := 0
-	startWordBoundaryRegex := "[\\[ ]"
-	endWordBoundaryRegex := "[\\] ]"
+// isSeccompUnconfined checks the seccompProfile.type field and returns a checkSecurityContextResult struct.
+// If the field is set then unset=false. If, on top of that, the value of Unconfined matches the expected value
+// then return valid=true.
+func isSeccompUnconfined(jq *gojsonq.JSONQ, expectedUnconfined bool) checkSecurityContextResult {
+	value := jq.From("securityContext.seccompProfile.type").Get()
 
-	capDrop := gojsonq.New().Reader(bytes.NewReader(json)).
-		From("metadata.annotations").Get()
+	v, ok := value.(string)
 
-	capDropString := fmt.Sprintf("%v", capDrop)
-
-	if capDrop != nil && strings.Contains(capDropString, "seccomp.security.alpha.kubernetes.io/pod:") {
-		if !strings.Contains(capDropString, "seccomp.security.alpha.kubernetes.io/pod:unconfined") {
-			containers++
-		}
-	} else if capDrop != nil {
-
-		keyNameRegex := "seccomp\\.security\\.alpha\\.kubernetes\\.io/[a-zA-Z-.]+"
-		// TODO(ajm) match end of string in regex
-		isNamedPodMatch, _ := regexp.MatchString(startWordBoundaryRegex+keyNameRegex+":", capDropString)
-
-		if isNamedPodMatch {
-			isUnconfinedNamedPodMatch, _ := regexp.MatchString(startWordBoundaryRegex+keyNameRegex+":unconfined"+endWordBoundaryRegex, capDropString)
-			if !isUnconfinedNamedPodMatch {
-				containers++
-			}
-		}
+	res := checkSecurityContextResult{}
+	if !ok {
+		res.unset = true
+		return res
 	}
 
-	return containers
+	return checkSecurityContextResult{
+		valid: (v == "Unconfined") == expectedUnconfined,
+	}
+}
+
+// SeccompAny retrieves the number of instances in a manifest where the Seccomp profile has been specified
+// to a value other than 'Unconfined'
+func SeccompAny(json []byte) int {
+	return checkSecurityContext(
+		json,
+		true, // present in PodSecurityContext
+		func(jq *gojsonq.JSONQ) checkSecurityContextResult {
+			return isSeccompUnconfined(jq, false)
+		})
 }
