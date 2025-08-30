@@ -174,7 +174,7 @@ const (
 	tcprofSeccompProfileMissing tcSeccompProfileType = ""
 	tcprofSeccompUnconfined     tcSeccompProfileType = "Unconfined"
 	tcprofSeccompRuntimeDefault tcSeccompProfileType = "RuntimeDefault"
-	tcprofSeccompLocalhost      tcSeccompProfileType = "LocalHost"
+	tcprofSeccompLocalHost      tcSeccompProfileType = "LocalHost"
 )
 
 var testCasesSeccomp = []struct {
@@ -199,7 +199,7 @@ var testCasesSeccomp = []struct {
 	},
 	{
 		description:         "LocalHost seccompProfile found inside .spec.securityContext",
-		expectedProfileType: tcprofSeccompLocalhost,
+		expectedProfileType: tcprofSeccompLocalHost,
 		manifest:            tcmanSeccompProfileInSecCtxLH,
 	},
 	{
@@ -214,11 +214,11 @@ var testCasesSeccomp = []struct {
 	},
 	{
 		description:         "LocalHost seccompProfile found inside .spec.containers[*].securityContext",
-		expectedProfileType: tcprofSeccompLocalhost,
+		expectedProfileType: tcprofSeccompLocalHost,
 		manifest:            tcmanSeccompProfileInContainerLH,
 	},
 	{
-		description:         "seccompProfile found inside .spec.initContainers[*].securityContext",
+		description:         "RuntimeDefault seccompProfile found inside .spec.initContainers[*].securityContext",
 		expectedProfileType: tcprofSeccompRuntimeDefault,
 		manifest:            tcmanSeccompProfileInInitRD,
 	},
@@ -229,7 +229,7 @@ var testCasesSeccomp = []struct {
 	},
 	{
 		description:         "LocalHost seccompProfile found inside .spec.initContainers[*].securityContext",
-		expectedProfileType: tcprofSeccompLocalhost,
+		expectedProfileType: tcprofSeccompLocalHost,
 		manifest:            tcmanSeccompProfileInInitLH,
 	},
 	{
@@ -244,7 +244,7 @@ var testCasesSeccomp = []struct {
 	},
 	{
 		description:         "LocalHost seccompProfile found inside .spec.ephemeralContainers[*].securityContext",
-		expectedProfileType: tcprofSeccompLocalhost,
+		expectedProfileType: tcprofSeccompLocalHost,
 		manifest:            tcmanSeccompProfileInEphLH,
 	},
 }

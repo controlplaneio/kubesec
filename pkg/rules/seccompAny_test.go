@@ -98,7 +98,7 @@ func Test_SeccompAny(t *testing.T) {
 
 			count := SeccompAny(json)
 			expectedCount := 0
-			if tc.expectedProfileType == tcprofSeccompRuntimeDefault || tc.expectedProfileType == tcprofSeccompLocalhost {
+			if tc.expectedProfileType == tcprofSeccompRuntimeDefault || tc.expectedProfileType == tcprofSeccompLocalHost {
 				expectedCount = 1
 			}
 
