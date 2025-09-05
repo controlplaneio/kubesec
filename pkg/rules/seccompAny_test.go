@@ -1,188 +1,110 @@
 package rules
 
 import (
-	"github.com/ghodss/yaml"
 	"testing"
+
+	"github.com/ghodss/yaml"
+	"github.com/thedevsaddam/gojsonq/v2"
 )
 
-func Test_SeccompAny_Pod(t *testing.T) {
-	var data = `
----
-apiVersion: v1
-kind: Pod
-metadata:
-  annotations:
-    other: runtime/default
-    seccomp.security.alpha.kubernetes.io/pod: runtime/default
-    something: runtime/default
-spec:
-  containers:
-    - name: trustworthy-container
-      image: sotrustworthy:latest
-`
-
-	json, err := yaml.YAMLToJSON([]byte(data))
-	if err != nil {
-		t.Fatal(err.Error())
+func Test_isSeccompUnconfined(t *testing.T) {
+	testCases := []struct {
+		description        string
+		json               string
+		expectedUnconfined bool
+		expectedResult     *checkSecurityContextResult
+	}{
+		{
+			description:        "field missing",
+			json:               `{}`,
+			expectedUnconfined: true,
+			expectedResult: &checkSecurityContextResult{
+				unset: true,
+				valid: false,
+			},
+		},
+		{
+			description:        "non-string field",
+			json:               `{"securityContext":{"seccompProfile":{"type":123}}}`,
+			expectedUnconfined: true,
+			expectedResult: &checkSecurityContextResult{
+				unset: true,
+				valid: false,
+			},
+		},
+		{
+			description:        "Unconfined when expectedUnconfined=true",
+			json:               `{"securityContext":{"seccompProfile":{"type":"Unconfined"}}}`,
+			expectedUnconfined: true,
+			expectedResult: &checkSecurityContextResult{
+				unset: false,
+				valid: true,
+			},
+		},
+		{
+			description:        "Unconfined when expectedUnconfined=false",
+			json:               `{"securityContext":{"seccompProfile":{"type":"Unconfined"}}}`,
+			expectedUnconfined: false,
+			expectedResult: &checkSecurityContextResult{
+				unset: false,
+				valid: false,
+			},
+		},
+		{
+			description:        "Profile=RuntimeDefault when expectedUnconfined=false",
+			json:               `{"securityContext":{"seccompProfile":{"type":"RuntimeDefault"}}}`,
+			expectedUnconfined: false,
+			expectedResult: &checkSecurityContextResult{
+				unset: false,
+				valid: true,
+			},
+		},
+		{
+			description:        "Profile=RuntimeDefault when expectedUnconfined=true",
+			json:               `{"securityContext":{"seccompProfile":{"type":"RuntimeDefault"}}}`,
+			expectedUnconfined: true,
+			expectedResult: &checkSecurityContextResult{
+				unset: false,
+				valid: false,
+			},
+		},
 	}
 
-	containers := SeccompAny(json)
-	if containers != 1 {
-		t.Errorf("Got %v containers wanted %v", containers, 1)
-	}
-}
+	for _, tc := range testCases {
+		t.Run(tc.description, func(t *testing.T) {
+			jq := gojsonq.New().FromString(tc.json)
+			result := isSeccompUnconfined(jq, tc.expectedUnconfined)
 
-func Test_SeccompAny_Pod_Unconfined(t *testing.T) {
-	var data = `
----
-apiVersion: v1
-kind: Pod
-metadata:
-  annotations:
-    seccomp.security.alpha.kubernetes.io/pod: unconfined
-spec:
-  containers:
-    - name: trustworthy-container
-      image: sotrustworthy:latest
-`
+			if tc.expectedResult.unset != result.unset {
+				t.Errorf("expected 'checkSecurityContextResult.unset' value for test was %v but received %v instead",
+					tc.expectedResult.unset, result.unset)
+			}
 
-	json, err := yaml.YAMLToJSON([]byte(data))
-	if err != nil {
-		t.Fatal(err.Error())
-	}
-
-	containers := SeccompAny(json)
-	if containers != 0 {
-		t.Errorf("Got %v containers wanted %v", containers, 0)
-	}
-}
-
-func Test_SeccompAny_No_Seccomp(t *testing.T) {
-	var data = `
----
-apiVersion: v1
-kind: Pod
-spec:
-  containers:
-  - name: c1
-    securityContext:
-      capabilities:
-        drop:
-  - name: c2
-    securityContext:
-      capabilities:
-  - name: c3
-`
-
-	json, err := yaml.YAMLToJSON([]byte(data))
-	if err != nil {
-		t.Fatal(err.Error())
-	}
-
-	containers := SeccompAny(json)
-	if containers != 0 {
-		t.Errorf("Got %v containers wanted %v", containers, 0)
-	}
-}
-
-func Test_SeccompAny_Named_Pod(t *testing.T) {
-	var data = `
----
-apiVersion: v1
-kind: Pod
-metadata:
-  annotations:
-    seccomp.security.alpha.kubernetes.io/somePodName: runtime/default
-spec:
-  containers:
-    - name: somePodName
-      image: sotrustworthy:latest
-`
-
-	json, err := yaml.YAMLToJSON([]byte(data))
-	if err != nil {
-		t.Fatal(err.Error())
-	}
-
-	containers := SeccompAny(json)
-	if containers != 1 {
-		t.Errorf("Got %v containers wanted %v", containers, 1)
+			if tc.expectedResult.valid != result.valid {
+				t.Errorf("expected 'checkSecurityContextResult.valid' value for test was %v but received %v instead",
+					tc.expectedResult.valid, result.valid)
+			}
+		})
 	}
 }
 
-func Test_SeccompAny_Named_Pod_Special_Chars(t *testing.T) {
-	var data = `
----
-apiVersion: v1
-kind: Pod
-metadata:
-  annotations:
-    seccomp.security.alpha.kubernetes.io/my-Named.Pod: runtime/default
-spec:
-  containers:
-    - name: trustworthy-container
-      image: sotrustworthy:latest
-`
+func Test_SeccompAny(t *testing.T) {
+	for _, tc := range testCasesSeccomp {
+		t.Run(tc.description, func(t *testing.T) {
+			json, err := yaml.YAMLToJSON([]byte(tc.manifest))
+			if err != nil {
+				t.Fatal(err.Error())
+			}
 
-	json, err := yaml.YAMLToJSON([]byte(data))
-	if err != nil {
-		t.Fatal(err.Error())
-	}
+			count := SeccompAny(json)
+			expectedCount := 0
+			if tc.expectedProfileType == tcprofSeccompRuntimeDefault || tc.expectedProfileType == tcprofSeccompLocalHost {
+				expectedCount = 1
+			}
 
-	containers := SeccompAny(json)
-	if containers != 1 {
-		t.Errorf("Got %v containers wanted %v", containers, 1)
+			if count != expectedCount {
+				t.Errorf("Expected count was %v but received %v", expectedCount, count)
+			}
+		})
 	}
 }
-
-func Test_SeccompAny_Named_Pod_Special_Chars_Unconfined(t *testing.T) {
-	var data = `
----
-apiVersion: v1
-kind: Pod
-metadata:
-  annotations:
-    seccomp.security.alpha.kubernetes.io/my-Named.Pod: unconfined
-spec:
-  containers:
-    - name: trustworthy-container
-      image: sotrustworthy:latest
-`
-
-	json, err := yaml.YAMLToJSON([]byte(data))
-	if err != nil {
-		t.Fatal(err.Error())
-	}
-
-	containers := SeccompAny(json)
-	if containers != 0 {
-		t.Errorf("Got %v containers wanted %v", containers, 0)
-	}
-}
-
-func Test_SeccompAny_Named_Pod_Illegal_Name(t *testing.T) {
-	var data = `
----
-apiVersion: v1
-kind: Pod
-metadata:
-  annotations:
-    seccomp.security.alpha.kubernetes.io/my-Named.Pod(illegal name): runtime/default
-spec:
-  containers:
-    - name: trustworthy-container
-      image: sotrustworthy:latest
-`
-
-	json, err := yaml.YAMLToJSON([]byte(data))
-	if err != nil {
-		t.Fatal(err.Error())
-	}
-
-	containers := SeccompAny(json)
-	if containers != 0 {
-		t.Errorf("Got %v containers wanted %v", containers, 0)
-	}
-}
-
-// TODO(ajm) more seccomp tests for deployments
