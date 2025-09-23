@@ -15,7 +15,7 @@ RUN set -x && \
     curl -sSL --output-dir "${SCHEMA_PATH}" -O "${BASE_URL}/${SCHEMA_PATH}/deployment-apps-v1.json" && \
     curl -sSL --output-dir "${SCHEMA_PATH}" -O "${BASE_URL}/${SCHEMA_PATH}/statefulset-apps-v1.json"
 
-FROM golang:1.24-alpine AS builder
+FROM golang:1.25-alpine AS builder
 
 RUN echo "kubesec:x:31012:31012:kubesec:/home/kubesec:/sbin/nologin" > /passwd && \
   echo "kubesec:x:31012:" > /group
