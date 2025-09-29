@@ -26,10 +26,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Set up Go
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@v6
         with:
           go-version-file: go.mod
 
@@ -55,13 +55,13 @@ jobs:
         test: ["acceptance", "remote"]
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           # needed for bats tests
           submodules: true
 
       - name: Download kubesec
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: kubesec
           path: dist
