@@ -250,12 +250,22 @@ func NewRuleset(logger *zap.SugaredLogger) *Ruleset {
 	apparmorAnyRule := Rule{
 		Predicate: rules.ApparmorAny,
 		ID:        "ApparmorAny",
-		Selector:  ".metadata .annotations .\"container.apparmor.security.beta.kubernetes.io/nginx\"",
-		Reason:    "Well defined AppArmor policies may provide greater protection from unknown threats. WARNING: NOT PRODUCTION READY",
+		Selector:  ".spec .securityContext .appArmorProfile .type | .spec .containers[] .securityContext .appArmorProfile .type | .spec .initContainers[] .securityContext .appArmorProfile .type | .spec .ephemeralContainers[] .securityContext .appArmorProfile .type",
+		Reason:    "Well defined AppArmor policies may provide greater protection from unknown threats.",
 		Kinds:     []string{"Pod", "Deployment", "StatefulSet", "DaemonSet"},
 		Points:    3,
 	}
 	list = append(list, apparmorAnyRule)
+
+	apparmorUnconfinedRule := Rule{
+		Predicate: rules.ApparmorUnconfined,
+		ID:        "ApparmorUnconfined",
+		Selector:  ".spec .securityContext .appArmorProfile .type | .spec .containers[] .securityContext .appArmorProfile .type | .spec .initContainers[] .securityContext .appArmorProfile .type | .spec .ephemeralContainers[] .securityContext .appArmorProfile .type",
+		Reason:    "Unconfined AppArmor profiles disable AppArmor enforcement on the workloads",
+		Kinds:     []string{"Pod", "Deployment", "StatefulSet", "DaemonSet"},
+		Points:    -1,
+	}
+	list = append(list, apparmorUnconfinedRule)
 
 	volumeClaimAccessModeReadWriteOnce := Rule{
 		Predicate: rules.VolumeClaimAccessModeReadWriteOnce,
