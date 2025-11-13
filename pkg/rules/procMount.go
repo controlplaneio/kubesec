@@ -12,12 +12,15 @@ func ProcMount(json []byte) int {
 	spec := getSpecSelector(json)
 	found := 0
 
-	paths := gojsonq.New().Reader(bytes.NewReader(json)).
+	data := gojsonq.New().Reader(bytes.NewReader(json)).
 		From(spec + ".volumes").
 		Only("hostPath.path")
 
-	if paths != nil && strings.Contains(fmt.Sprintf("%v", paths), "/proc") {
-		found++
+	paths, ok := data.([]interface{})
+	if ok && paths != nil {
+		if strings.Contains(fmt.Sprintf("%v", paths), "/proc") {
+			found++
+		}
 	}
 
 	return found

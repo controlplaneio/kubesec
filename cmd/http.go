@@ -66,7 +66,7 @@ var httpCmd = &cobra.Command{
 		stopCh := server.SetupSignalHandler()
 		jsonLogger, err := NewLogger("info", "json")
 		if err != nil {
-			return fmt.Errorf("Unable to create new logger: %w", err)
+			return fmt.Errorf("unable to create new logger: %w", err)
 		}
 
 		ver := os.Getenv("K8S_SCHEMA_VER")
