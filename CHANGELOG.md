@@ -4,6 +4,7 @@ All notable changes to this project will be documented in this file.
 
 ## Table of Contents
 
+- [2.15.0](#2150)
 - [2.14.2](#2142)
 - [2.14.1](#2141)
 - [2.14.0](#2140)
@@ -33,6 +34,15 @@ All notable changes to this project will be documented in this file.
 - [1.0.0](#100)
 
 ---
+
+## `2.15.0`
+
+- Update support for AppArmor
+  - thanks @esticansat
+- Resolve linting issues
+- More explicit error handling
+- Bump dependencies
+  - Including catching up to latest and dropping stale dependencies
 
 ## `2.14.2`
 
