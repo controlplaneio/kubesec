@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/controlplaneio/kubesec/v2/pkg/rules"
-	"github.com/ghodss/yaml"
+	"sigs.k8s.io/yaml"
 )
 
 func TestRule_Eval(t *testing.T) {
