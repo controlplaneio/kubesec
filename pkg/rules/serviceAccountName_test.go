@@ -1,8 +1,9 @@
 package rules
 
 import (
-	"github.com/ghodss/yaml"
 	"testing"
+
+	"sigs.k8s.io/yaml"
 )
 
 func Test_ServiceAccountName(t *testing.T) {
@@ -38,7 +39,7 @@ kind: Pod
 metadata:
   name: my-pod
 spec:
-  serviceAccountName: 
+  serviceAccountName:
   automountServiceAccountToken: false
 `
 

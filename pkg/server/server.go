@@ -18,6 +18,124 @@ import (
 	"go.uber.org/zap"
 )
 
+type HandlerFunc func(c context.Context) error
+
+type HTTPError interface {
+	error
+	Unwrap() error
+	Msg() string
+	Status() int
+}
+
+type httpError struct {
+	err        error
+	statusCode int
+	msg        string // public message to provide to users
+}
+
+var (
+	// check at compile time that httpError implements HTTPError correctly
+	_ HTTPError = &httpError{}
+)
+
+func (he *httpError) Error() string { return he.err.Error() }
+
+func (he *httpError) Unwrap() error { return he.err }
+
+func (he *httpError) Wrap(err error) *httpError {
+	if he == nil {
+		return nil
+	}
+	he.err = errors.Join(he.err, err)
+	return he
+}
+
+func (he *httpError) Msg() string {
+	// if a public message is set
+	if he.msg != "" {
+		return he.msg
+	}
+
+	// fallback generic responses based on status
+	switch he.statusCode {
+	case http.StatusBadRequest:
+		return "Bad Request"
+	case http.StatusUnauthorized:
+		return "Unauthorized"
+	case http.StatusForbidden:
+		return "Forbidden"
+	case http.StatusNotFound:
+		return "Not Found"
+	default:
+		return "Internal Server Error"
+	}
+}
+func (he *httpError) Status() int { return he.statusCode }
+
+// In wrapping error treat all httpError types as nil-able
+func WrapHTTPError(err error) *httpError {
+	if err == nil {
+		return nil
+	}
+	return &httpError{
+		statusCode: http.StatusBadRequest,
+		err:        err,
+	}
+}
+
+// In wrapping error treat all httpError types as nil-able
+func NewHTTPError(msg string) *httpError {
+	return &httpError{
+		statusCode: http.StatusBadRequest,
+		msg:        msg,
+		err:        errors.New(msg),
+	}
+}
+
+func (he *httpError) WithStatus(status int) *httpError {
+	if he == nil {
+		return nil
+	}
+	he.statusCode = status
+	return he
+}
+
+func (he *httpError) WithMsg(msg string) *httpError {
+	if he == nil {
+		return nil
+	}
+	he.msg = msg
+	return he
+}
+
+func (he *httpError) Public() *httpError {
+	if he == nil {
+		return nil
+	}
+	he.msg = he.err.Error()
+	return he
+}
+
+func (he *httpError) Private() *httpError {
+	if he == nil {
+		return nil
+	}
+	he.msg = ""
+	return he
+}
+
+// errorHandler allows for writing a handler which can return an error then this
+// function can handle it generically conforming to http.HandlerFunc.
+func errorHandler(logger *zap.SugaredLogger, f func(http.ResponseWriter, *http.Request) HTTPError) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		httpError := f(w, r)
+		if httpError != nil {
+			logger.Errorf("%s %+v", httpError.Msg(), httpError.Error())
+			http.Error(w, httpError.Msg(), httpError.Status())
+		}
+	}
+}
+
 // ListenAndServe starts a web server and waits for SIGTERM
 func ListenAndServe(
 	addr string,
@@ -32,10 +150,11 @@ func ListenAndServe(
 	mux.Handle("/", scanHandler(logger, keypath, schemaConfig))
 	mux.Handle("/scan", scanHandler(logger, keypath, schemaConfig))
 	mux.Handle("/metrics", promhttp.Handler())
-	mux.HandleFunc("/healthz", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/healthz", errorHandler(logger, func(w http.ResponseWriter, r *http.Request) HTTPError {
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte("OK\n"))
-	})
+		_, err := w.Write([]byte("OK\n"))
+		return WrapHTTPError(err)
+	}))
 
 	srv := &http.Server{
 		Addr:         addr,
@@ -95,45 +214,45 @@ func retrieveRequestData(r *http.Request) ([]byte, error) {
 
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
-		return nil, errors.New("Error reading request body")
+		return nil, errors.New("failed reading request body")
 	}
-	defer r.Body.Close()
 
 	if string(body[:formPrefixLen]) == formPrefix {
 		body = body[formPrefixLen:]
+	}
+
+	err = r.Body.Close()
+	if err != nil {
+		return nil, err
 	}
 
 	return body, nil
 }
 
 func scanHandler(logger *zap.SugaredLogger, keypath string, schemaConfig ruler.SchemaConfig) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	return errorHandler(logger, func(w http.ResponseWriter, r *http.Request) HTTPError {
 		if r.Method == http.MethodGet {
 			http.Redirect(w, r, "https://kubesec.io", http.StatusSeeOther)
-			return
+			return nil
 		}
 
 		// fail early if no in-toto signing key is configured for this server
 		if r.URL.Query().Get("in-toto") != "" && keypath == "" {
 			logger.Errorf("Attempted to serve an in-toto payload but no key is available")
 			w.WriteHeader(http.StatusInternalServerError)
-			return
+			return NewHTTPError("attempted to serve an in-toto payload but no key is available")
 		}
 
 		const fileName = "API"
 		body, err := retrieveRequestData(r)
 		if err != nil {
-			w.WriteHeader(http.StatusBadRequest)
-			w.Write([]byte(err.Error() + "\n"))
-			return
+			return WrapHTTPError(err).WithStatus(http.StatusBadRequest)
 		}
 
 		var payload interface{}
 		reports, err := ruler.NewRuleset(logger).Run(fileName, body, schemaConfig)
 		if err != nil {
-			w.WriteHeader(http.StatusBadRequest)
-			w.Write([]byte(err.Error() + "\n"))
-			return
+			return WrapHTTPError(err).WithStatus(http.StatusBadRequest).Public() // pass through report error
 		}
 
 		if r.URL.Query().Get("in-toto") != "" {
@@ -141,17 +260,13 @@ func scanHandler(logger *zap.SugaredLogger, keypath string, schemaConfig ruler.S
 
 			err := intotoKey.LoadKey(keypath, "ed25519", []string{"sha256", "sha512"})
 			if err != nil {
-				logger.Errorf("Attempted to serve an in-toto payload but the key is unavailable: %v",
-					err.Error())
-				w.WriteHeader(http.StatusInternalServerError)
-				return
+				return NewHTTPError("attempted to serve an in-toto payload but the key is unavailable").Wrap(err)
 			}
 
 			link := ruler.GenerateInTotoLink(reports, body)
 			err = link.Sign(intotoKey)
 			if err != nil {
-				w.WriteHeader(http.StatusInternalServerError)
-				return
+				return NewHTTPError("could not sign in-toto link").Wrap(err)
 			}
 			payload = map[string]interface{}{
 				"reports": reports,
@@ -163,8 +278,7 @@ func scanHandler(logger *zap.SugaredLogger, keypath string, schemaConfig ruler.S
 
 		res, err := json.Marshal(payload)
 		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			return
+			return NewHTTPError("failed to marshal JSON").Wrap(err)
 		}
 
 		w.Header().Set("Content-Type", "application/json")
@@ -172,8 +286,12 @@ func scanHandler(logger *zap.SugaredLogger, keypath string, schemaConfig ruler.S
 		formattedOutput, err := report.PrettyJSON(res)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
-			return
+			return NewHTTPError("failed to pretty format the JSON report").Wrap(err)
 		}
-		w.Write([]byte(string(formattedOutput) + "\n"))
+		_, err = w.Write([]byte(string(formattedOutput) + "\n"))
+		if err != nil {
+			return WrapHTTPError(err)
+		}
+		return nil
 	})
 }

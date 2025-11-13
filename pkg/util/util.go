@@ -9,7 +9,7 @@ import (
 	"strings"
 	"text/tabwriter"
 
-	"gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v3"
 )
 
 // NewTabWriter returns a default writer to write tables.
@@ -29,7 +29,14 @@ func Print(format string, in interface{}, w io.Writer, fn PrintTable) error {
 
 	switch format {
 	case "yaml":
-		out, err = yaml.Marshal(in)
+		// yaml.Marshal() was producing yaml with 4 space indentation
+		enc := yaml.NewEncoder(w)
+		enc.SetIndent(2)
+		err := enc.Encode(in)
+		if err != nil {
+			return err
+		}
+		err = enc.Close()
 		if err != nil {
 			return err
 		}
@@ -40,11 +47,11 @@ func Print(format string, in interface{}, w io.Writer, fn PrintTable) error {
 		}
 	case "table":
 		if fn == nil {
-			return fmt.Errorf("Print table function can not be nil")
+			return fmt.Errorf("print table function can not be nil")
 		}
 		return fn(w)
 	default:
-		return fmt.Errorf("Unkown printing format: %s", format)
+		return fmt.Errorf("unknown printing format: %s", format)
 	}
 
 	_, err = fmt.Fprint(w, string(out))

@@ -45,8 +45,8 @@ func TestPrint(t *testing.T) {
 			printTableFn: nil,
 			want: `name: test
 values:
-- val1
-- val2
+  - val1
+  - val2
 `,
 			wantErr: false,
 		},
@@ -62,10 +62,16 @@ values:
 			format: "table",
 			printTableFn: func(w io.Writer) error {
 				tw := NewTabWriter(w)
-				fmt.Fprintf(tw, "ID\tValues\n")
-				fmt.Fprintf(tw, "%s\t%s\n",
+				_, err := fmt.Fprintf(tw, "ID\tValues\n")
+				if err != nil {
+					t.Error(err)
+				}
+				_, err = fmt.Fprintf(tw, "%s\t%s\n",
 					TestObject.Name,
 					strings.Join(TestObject.Values, ","))
+				if err != nil {
+					t.Error(err)
+				}
 				return tw.Flush()
 			},
 			want: `ID    |Values
@@ -81,7 +87,6 @@ test  |val1,val2
 	}
 
 	for _, tt := range tests {
-		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			var b bytes.Buffer
 
