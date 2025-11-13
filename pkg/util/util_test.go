@@ -62,10 +62,16 @@ values:
 			format: "table",
 			printTableFn: func(w io.Writer) error {
 				tw := NewTabWriter(w)
-				fmt.Fprintf(tw, "ID\tValues\n")
-				fmt.Fprintf(tw, "%s\t%s\n",
+				_, err := fmt.Fprintf(tw, "ID\tValues\n")
+				if err != nil {
+					t.Error(err)
+				}
+				_, err = fmt.Fprintf(tw, "%s\t%s\n",
 					TestObject.Name,
 					strings.Join(TestObject.Values, ","))
+				if err != nil {
+					t.Error(err)
+				}
 				return tw.Flush()
 			},
 			want: `ID    |Values

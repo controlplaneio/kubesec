@@ -2,7 +2,7 @@ package rules
 
 import (
 	"testing"
-	
+
 	"github.com/ghodss/yaml"
 )
 
@@ -67,7 +67,7 @@ spec:
 			want: 0,
 		},
 	}
-	
+
 	for _, testCase := range testCases {
 		tc := testCase
 		t.Run(tc.name, func(t *testing.T) {
@@ -226,7 +226,7 @@ spec:
 			want: 0,
 		},
 	}
-	
+
 	for _, testCase := range testCases {
 		tc := testCase
 		t.Run(tc.name, func(t *testing.T) {
@@ -354,7 +354,7 @@ spec:
 			want: 0,
 		},
 	}
-	
+
 	for _, testCase := range testCases {
 		tc := testCase
 		t.Run(tc.name, func(t *testing.T) {
@@ -486,7 +486,7 @@ spec:
 			want: 0,
 		},
 	}
-	
+
 	for _, testCase := range testCases {
 		tc := testCase
 		t.Run(tc.name, func(t *testing.T) {
