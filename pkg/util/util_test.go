@@ -87,7 +87,6 @@ test  |val1,val2
 	}
 
 	for _, tt := range tests {
-		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			var b bytes.Buffer
 

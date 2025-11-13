@@ -115,7 +115,6 @@ spec:
 	}
 
 	for _, tt := range tests {
-		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			json, err := yaml.YAMLToJSON([]byte(tt.data))
 			if err != nil {
