@@ -3,8 +3,8 @@ package rules
 import (
 	"testing"
 
-	"github.com/ghodss/yaml"
 	"github.com/thedevsaddam/gojsonq/v2"
+	"sigs.k8s.io/yaml"
 )
 
 func testCheckSecurityContextRule(json []byte) int {
