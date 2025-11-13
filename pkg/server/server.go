@@ -252,7 +252,7 @@ func scanHandler(logger *zap.SugaredLogger, keypath string, schemaConfig ruler.S
 		var payload interface{}
 		reports, err := ruler.NewRuleset(logger).Run(fileName, body, schemaConfig)
 		if err != nil {
-			return WrapHTTPError(err).WithStatus(http.StatusBadRequest)
+			return WrapHTTPError(err).WithStatus(http.StatusBadRequest).Public() // pass through report error
 		}
 
 		if r.URL.Query().Get("in-toto") != "" {
