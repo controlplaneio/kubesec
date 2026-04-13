@@ -22,7 +22,7 @@ jobs:
 
     steps:
       - name: Cache container layers
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: /tmp/.buildx-cache
           key: ${{ runner.os }}${{ matrix.containers.suffix }}-buildx-${{ github.sha }}
@@ -30,7 +30,7 @@ jobs:
             ${{ runner.os }}${{ matrix.containers.suffix }}-buildx-
 
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Generate container tags and labels
         id: docker_meta
