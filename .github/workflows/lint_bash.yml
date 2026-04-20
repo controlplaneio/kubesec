@@ -1,5 +1,6 @@
 ---
 name: Linting - Bash/Bats
+permissions: {}
 # Split until path filtering for jobs added
 # https://github.community/t/path-filtering-for-jobs-and-steps/16447
 on:
@@ -18,16 +19,20 @@ jobs:
   shellcheck:
     name: shellcheck
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+      checks: write
     strategy:
       fail-fast: false
       matrix:
         extention: ["bash", "bats"]
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
       - name: Run shellcheck
-        uses: reviewdog/action-shellcheck@v1
+        uses: reviewdog/action-shellcheck@4c07458293ac342d477251099501a718ae5ef86e # v1
         with:
           pattern: "*.${{ matrix.extention }}"
           exclude: "./test/bin/*"

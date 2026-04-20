@@ -1,5 +1,6 @@
 ---
 name: Linting - Go
+permissions: {}
 # Split until path filtering for jobs added
 # https://github.community/t/path-filtering-for-jobs-and-steps/16447
 on:
@@ -20,9 +21,13 @@ jobs:
   golangci-lint:
     name: golangci-lint
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+      checks: write
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
       - name: Run golangci-lint
-        uses: reviewdog/action-golangci-lint@v2
+        uses: reviewdog/action-golangci-lint@c76cceaaab89abe74e649d2e34c6c9adc26662d2 # v2

@@ -1,6 +1,6 @@
 ---
 name: Security Analysis
-
+permissions: {}
 on:
   push:
     branches: [master]
@@ -15,38 +15,44 @@ jobs:
     # "Initialize CodeQL" fails on forks and the results would not submit either
     if: github.repository_owner == 'controlplaneio'
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
       # provide a more modern go until resolved in codeql action
       # https://github.com/github/codeql-action/issues/1842#issuecomment-1704398087
       - name: Set up Go
-        uses: actions/setup-go@v6
+        uses: actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c # v6
         with:
           go-version-file: go.mod
 
       - name: Initialize CodeQL
-        uses: github/codeql-action/init@v4
+        uses: github/codeql-action/init@95e58e9a2cdfd71adc6e0353d5c52f41a045d225 # v4
         with:
           languages: go
 
       - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v4
+        uses: github/codeql-action/analyze@95e58e9a2cdfd71adc6e0353d5c52f41a045d225 # v4
 
   trivy:
     name: Trivy
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
       - name: Build an image from Dockerfile
         run: |
           docker build . -t kubesec:${{ github.sha }}
 
       - name: Run Trivy
-        uses: aquasecurity/trivy-action@0.33.1
+        uses: aquasecurity/trivy-action@57a97c7e7821a5776cebc9bb87c984fa69cba8f1 # 0.35.0
         with:
           image-ref: kubesec:${{ github.sha }}
           format: template
@@ -56,20 +62,24 @@ jobs:
       - name: Upload Trivy results to the Security tab
         # can't submit scan results on forks
         if: github.repository_owner == 'controlplaneio'
-        uses: github/codeql-action/upload-sarif@v4
+        uses: github/codeql-action/upload-sarif@95e58e9a2cdfd71adc6e0353d5c52f41a045d225 # v4
         with:
           sarif_file: trivy-results.sarif
 
   trufflehog:
     name: TruffleHog
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+      checks: write
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
         with:
           fetch-depth: 0
       - name: Run Trufflehog
-        uses: trufflesecurity/trufflehog@v3.92.3
+        uses: trufflesecurity/trufflehog@47e7b7cd74f578e1e3145d48f669f22fd1330ca6 # v3.94.3
         with:
           path: ./
           base: ""
