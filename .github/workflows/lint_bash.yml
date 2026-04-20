@@ -1,5 +1,6 @@
 ---
 name: Linting - Bash/Bats
+permissions: {}
 # Split until path filtering for jobs added
 # https://github.community/t/path-filtering-for-jobs-and-steps/16447
 on:
@@ -18,6 +19,10 @@ jobs:
   shellcheck:
     name: shellcheck
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+      checks: write
     strategy:
       fail-fast: false
       matrix:

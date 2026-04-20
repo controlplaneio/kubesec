@@ -1,6 +1,6 @@
 ---
 name: Move new issues into To Do
-
+permissions: {}
 on:
   issues:
     types: [opened]

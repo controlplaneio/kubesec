@@ -1,5 +1,6 @@
 ---
 name: Testing - Unit
+permissions: {}
 # Split until path filtering for jobs added
 # https://github.community/t/path-filtering-for-jobs-and-steps/16447
 on:

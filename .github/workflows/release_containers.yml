@@ -1,5 +1,6 @@
 ---
 name: Release Containers
+permissions: {}
 on:
   # https://github.com/actions/runner/issues/1007
   push:

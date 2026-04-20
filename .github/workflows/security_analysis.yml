@@ -1,6 +1,6 @@
 ---
 name: Security Analysis
-
+permissions: {}
 on:
   push:
     branches: [master]
@@ -15,6 +15,9 @@ jobs:
     # "Initialize CodeQL" fails on forks and the results would not submit either
     if: github.repository_owner == 'controlplaneio'
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
     steps:
       - name: Checkout repository
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
@@ -37,6 +40,9 @@ jobs:
   trivy:
     name: Trivy
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
     steps:
       - name: Checkout code
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
@@ -63,6 +69,10 @@ jobs:
   trufflehog:
     name: TruffleHog
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+      checks: write
     steps:
       - name: Checkout code
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
