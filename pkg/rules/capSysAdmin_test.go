@@ -1,8 +1,9 @@
 package rules
 
 import (
-	"github.com/ghodss/yaml"
 	"testing"
+
+	"sigs.k8s.io/yaml"
 )
 
 func Test_CapSysAdmin_Pod(t *testing.T) {

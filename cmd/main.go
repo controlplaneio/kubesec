@@ -1,10 +1,12 @@
 package cmd
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"os"
 	"strings"
+	"syscall"
 
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
@@ -36,8 +38,15 @@ func Execute() {
 	if err != nil {
 		log.Fatalf("can't initialize zap logger: %v", err)
 	}
-
-	defer logger.Sync()
+	defer func() {
+		if err := logger.Sync(); err != nil {
+			// exclude invalid argument error
+			// https://github.com/uber-go/zap/issues/328
+			if !errors.Is(err, syscall.EINVAL) {
+				log.Fatalf("failed to cleanup logger: %+v", err)
+			}
+		}
+	}()
 
 	rootCmd.SetArgs(os.Args[1:])
 	if err := rootCmd.Execute(); err != nil {

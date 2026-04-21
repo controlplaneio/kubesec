@@ -10,10 +10,10 @@ import (
 	"sort"
 	"sync"
 
-	"github.com/ghodss/yaml"
 	"github.com/in-toto/in-toto-golang/in_toto"
 	"github.com/thedevsaddam/gojsonq/v2"
 	"go.uber.org/zap"
+	"sigs.k8s.io/yaml"
 
 	"github.com/controlplaneio/kubesec/v2/pkg/rules"
 )
