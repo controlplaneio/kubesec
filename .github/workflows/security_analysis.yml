@@ -52,7 +52,7 @@ jobs:
           docker build . -t kubesec:${{ github.sha }}
 
       - name: Run Trivy
-        uses: aquasecurity/trivy-action@57a97c7e7821a5776cebc9bb87c984fa69cba8f1 # 0.35.0
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # 0.36.0
         with:
           image-ref: kubesec:${{ github.sha }}
           format: template
@@ -79,7 +79,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: Run Trufflehog
-        uses: trufflesecurity/trufflehog@47e7b7cd74f578e1e3145d48f669f22fd1330ca6 # v3.94.3
+        uses: trufflesecurity/trufflehog@17456f8c7d042d8c82c9a8ca9e937231f9f42e26 # v3.95.2
         with:
           path: ./
           base: ""
