@@ -330,6 +330,17 @@ func NewRuleset(logger *zap.SugaredLogger) *Ruleset {
 
 	list = append(list, secretsAsEnvironmentVariablesRule)
 
+	bindingsToSystemAnonymous := Rule{
+		Predicate: rules.BindingsToSystemAnonymous,
+		ID:        "BindingsToSystemAnonymous",
+		Selector:  ".subjects[] .name == \"system:anonymous\"",
+		Reason:    "Binding a Role or a ClusterRole to user system:anonymous gives any unauthenticated user the permissions granted by that role",
+		Kinds:     []string{"RoleBinding", "ClusterRoleBinding"},
+		Points:    -30,
+	}
+
+	list = append(list, bindingsToSystemAnonymous)
+
 	return &Ruleset{
 		Rules:  list,
 		logger: logger,
