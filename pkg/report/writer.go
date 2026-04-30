@@ -37,7 +37,7 @@ func WriteReports(format string, output io.Writer, reports reports, outputTempla
 			return err
 		}
 	default:
-		return errors.New("Unrecognized format specified")
+		return errors.New("unrecognized format specified")
 	}
 
 	if err := writer.Write(reports); err != nil {

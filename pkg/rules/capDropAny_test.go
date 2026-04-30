@@ -1,8 +1,9 @@
 package rules
 
 import (
-	"github.com/ghodss/yaml"
 	"testing"
+
+	"sigs.k8s.io/yaml"
 )
 
 func Test_CapDropAny_Pod(t *testing.T) {
@@ -45,7 +46,7 @@ spec:
   - name: c1
     securityContext:
       capabilities:
-        drop: 
+        drop:
   - name: c2
     securityContext:
       capabilities:
@@ -130,7 +131,7 @@ spec:
     securityContext:
       capabilities:
         drop:
-        - 
+        -
 `
 
 	json, err := yaml.YAMLToJSON([]byte(data))
@@ -156,8 +157,8 @@ spec:
   - name: c1
     securityContext:
       capabilities:
-        drop: 
-        - 
+        drop:
+        -
 `
 
 	json, err := yaml.YAMLToJSON([]byte(data))

@@ -10,12 +10,13 @@ func LimitsCPU(json []byte) int {
 	spec := getSpecSelector(json)
 	found := 0
 
-	paths := gojsonq.New().Reader(bytes.NewReader(json)).
+	data := gojsonq.New().Reader(bytes.NewReader(json)).
 		From(spec + ".containers").
 		Only("resources.limits.cpu")
 
-	if paths != nil {
-		found += len(paths.([]interface{}))
+	paths, ok := data.([]interface{})
+	if ok && paths != nil {
+		found += len(paths)
 	}
 
 	return found

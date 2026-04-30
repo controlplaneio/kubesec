@@ -19,7 +19,7 @@ teardown() {
 
 # TODO(ajm) BEHAVIOURAL CHANGE (previous scan didn't account for all containers) - FIX BEFORE RELEASE
 @test "passes production dump" {
-  run _app ${TEST_DIR}/asset/score-1-prod-dump.yaml
+  run _app "${TEST_DIR}/asset/score-1-prod-dump.yaml"
 
   assert_lt_zero_points
 }

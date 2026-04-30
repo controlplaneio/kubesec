@@ -36,14 +36,20 @@ func init() {
 
 		printTableFn := func(w io.Writer) error {
 			tw := util.NewTabWriter(w)
-			fmt.Fprintf(tw, "ID\tReason\tPoints\tKinds\n")
+			_, err := fmt.Fprintf(tw, "ID\tReason\tPoints\tKinds\n")
+			if err != nil {
+				logger.Fatalf("could not write to tabwriter: %v", err)
+			}
 			for _, rule := range ruleSet.Rules {
-				fmt.Fprintf(tw, "%s\t%s\t%d\t%s\t\n",
+				_, err = fmt.Fprintf(tw, "%s\t%s\t%d\t%s\t\n",
 					rule.ID,
 					rule.Reason,
 					rule.Points,
 					strings.Join(rule.Kinds, ","),
 				)
+				if err != nil {
+					logger.Fatalf("could not write to tabwriter: %v", err)
+				}
 			}
 			return tw.Flush()
 		}
