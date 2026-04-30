@@ -319,6 +319,17 @@ func NewRuleset(logger *zap.SugaredLogger) *Ruleset {
 
 	list = append(list, hostUsersRule)
 
+	secretsAsEnvironmentVariablesRule := Rule{
+		Predicate: rules.SecretsAsEnvironmentVariables,
+		ID:        "SecretsAsEnvironmentVariables",
+		Selector:  ".spec .containers[] .env[] .valueFrom .secretKeyRef | .spec .initContainers[] .env[] .valueFrom .secretKeyRef | .spec .ephemeralContainers[] .env[] .valueFrom .secretKeyRef | .spec .containers[] .envFrom[] .secretRef | .spec .initContainers[] .envFrom[] .secretRef | .spec .ephemeralContainers[] .envFrom[] .secretRef",
+		Reason:    "Secrets passed as environment variables can be easily exposed through application logs, crash dumps, and system process inspection",
+		Kinds:     []string{"Pod", "Deployment", "StatefulSet", "DaemonSet", "ReplicaSet", "Job", "CronJob"},
+		Points:    -5,
+	}
+
+	list = append(list, secretsAsEnvironmentVariablesRule)
+
 	return &Ruleset{
 		Rules:  list,
 		logger: logger,

@@ -3,6 +3,7 @@ package rules
 import (
 	"bytes"
 	"fmt"
+
 	"github.com/thedevsaddam/gojsonq/v2"
 )
 
@@ -18,6 +19,10 @@ func getSpecSelector(json []byte) string {
 
 	if kind == "Pod" {
 		selector = "spec"
+	}
+
+	if kind == "CronJob" {
+		selector = "spec.jobTemplate." + selector
 	}
 
 	return selector
