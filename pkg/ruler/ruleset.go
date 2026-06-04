@@ -63,7 +63,7 @@ func NewRuleset(logger *zap.SugaredLogger, ruleIDs ...string) (*Ruleset, error) 
 			Selector:  "containers[] .securityContext .readOnlyRootFilesystem == true",
 			Reason:    "An immutable root filesystem can prevent malicious binaries being added to PATH and increase attack cost",
 			Kinds:     []string{"Pod", "Deployment", "StatefulSet", "DaemonSet"},
-			Points:    1,
+			Points:    3,
 			Advise:    3,
 		},
 		{
