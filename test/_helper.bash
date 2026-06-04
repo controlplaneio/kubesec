@@ -96,7 +96,7 @@ else
       # remove --json flags
       ARGS=("${@/--json/}")
     fi
-    "${BIN_DIR}"/kubesec scan "${ARGS[@]}"
+    "${BIN_DIR}"/kubesec scan -f json "${ARGS[@]}"
   }
 
   assert_gt_zero_points() {
