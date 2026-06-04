@@ -182,8 +182,8 @@ spec:
 
 			report := reports[0]
 
-			if report.Score != 2 {
-				t.Errorf("Got score: %d, expected: 2", report.Score)
+			if report.Score != 4 {
+				t.Errorf("Got score: %d, expected: 4", report.Score)
 			}
 
 		})

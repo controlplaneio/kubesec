@@ -69,7 +69,7 @@ func NewRuleset(logger *zap.SugaredLogger) *Ruleset {
 		Selector:  "containers[] .securityContext .readOnlyRootFilesystem == true",
 		Reason:    "An immutable root filesystem can prevent malicious binaries being added to PATH and increase attack cost",
 		Kinds:     []string{"Pod", "Deployment", "StatefulSet", "DaemonSet"},
-		Points:    1,
+		Points:    3,
 		Advise:    3,
 	}
 	list = append(list, readOnlyRootFilesystemRule)
