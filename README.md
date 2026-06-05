@@ -363,3 +363,7 @@ Your feedback is always welcome!
 [goreportcard_badge]: https://goreportcard.com/badge/github.com/controlplaneio/kubesec
 [go_dev]: https://pkg.go.dev/github.com/controlplaneio/kubesec/v2
 [go_dev_badge]: https://pkg.go.dev/badge/github.com/controlplaneio/kubesec/v2
+
+---
+
+Made with ❤ by https://control-plane.io/

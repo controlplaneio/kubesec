@@ -24,7 +24,9 @@ var rootCmd = &cobra.Command{
 	Use:   "kubesec",
 	Short: "kubesec command line",
 	Long: `
-Validate Kubernetes resource security policies`,
+Validate Kubernetes resource security policies
+
+Made with ❤ by https://control-plane.io/`,
 }
 
 // Execute runs kubesec
