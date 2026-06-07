@@ -20,80 +20,34 @@
   <img src="https://casual-hosting.s3.amazonaws.com/kubesec-logo.png">
 </p>
 
-## Live demo
+## 🎬 Demo
 
-[Visit Kubesec.io](https://kubesec.io)
+<img src="doc/images/kubesec-demo.gif" alt="Kubesec CLI demo">
 
-This uses ControlPlane's hosted API at [v2.kubesec.io/scan](https://v2.kubesec.io/scan)
+For more examples visit [Kubesec.io](https://kubesec.io), which uses ControlPlane's hosted API at [v2.kubesec.io/scan](https://v2.kubesec.io/scan).
 
 ---
 
-- [Download Kubesec](#download-kubesec)
-  - [Command line usage](#command-line-usage)
-  - [Usage example](#usage-example)
-  - [Docker usage](#docker-usage)
-- [Kubesec HTTP Server](#kubesec-http-server)
-  - [CLI usage example](#cli-usage-example)
-  - [Docker usage example](#docker-usage-example)
+- [Quick Start](#-quick-start)
+- [Download Kubesec](#-download-kubesec)
+- [Usage Examples](#-usage-examples)
+  - [Scanning](#scanning)
+    - [Docker Usage](#docker-usage)
+    - [Output Formats](#output-formats)
+  - [Print Rules](#print-rules)
+  - [Custom Schemas](#custom-schemas)
+- [HTTP Server Mode](#http-server-mode)
 - [Kubesec-as-a-Service](#kubesec-as-a-service)
-  - [Command line usage](#command-line-usage-1)
-  - [Usage example](#usage-example-1)
-- [Example output](#example-output)
-- [Contributors](#contributors)
-- [Getting Help](#getting-help)
 - [Contributing](/CONTRIBUTING.md)
+- [Getting Help](#getting-help)
 - [Changelog](/CHANGELOG.md)
 
-## Download Kubesec
+## 🚀 Quick Start
 
-Kubesec is available as a:
+### 1. Prepare Your Manifest
 
-- [Docker container image](https://hub.docker.com/r/kubesec/kubesec/tags) at `docker.io/kubesec/kubesec:v2`
-- Linux/MacOS/Win binary (get the [latest release](https://github.com/controlplaneio/kubesec/releases))
-- [Kubernetes Admission Controller](https://github.com/controlplaneio/kubesec-webhook)
-- [Kubectl plugin](https://github.com/controlplaneio/kubectl-kubesec)
-
-Or install the latest commit from GitHub with:
-
-#### Go 1.16+
-
-```bash
-$ go install github.com/controlplaneio/kubesec/v2@latest
-```
-
-#### Go version < 1.16
-
-```bash
-$ GO111MODULE="on" go get github.com/controlplaneio/kubesec/v2
-```
-
-#### Command line usage:
-
-```bash
-$ kubesec scan --help
-Scans Kubernetes resource YAML or JSON
-
-Usage:
-  kubesec scan [file] [flags]
-
-Examples:
-  kubesec scan ./deployment.yaml
-  cat file.json | kubesec scan -
-  helm template -f values.yaml ./chart | kubesec scan /dev/stdin
-
-Flags:
-      --absolute-path               use the absolute path for the file name
-      --debug                       turn on debug logs
-      --exit-code int               Set the exit-code to use on failure (default 2)
-  -f, --format string               Set output format (json, table, template) (default "json")
-  -h, --help                        help for scan
-      --kubernetes-version string   Kubernetes version to validate manifets
-  -o, --output string               Set output location
-      --schema-location strings     Override schema location search path, local or http (can be specified multiple times)
-  -t, --template string             Set output template, it will check for a file or read input as the template
-```
-
-#### Usage example:
+Create a Kubernetes resource file (e.g., `kubesec-test.yaml`) to scan. For a quick test, you can save the following Pod
+manifest:
 
 ```bash
 $ cat <<EOF > kubesec-test.yaml
@@ -108,228 +62,100 @@ spec:
     securityContext:
       readOnlyRootFilesystem: true
 EOF
-$ kubesec scan kubesec-test.yaml
 ```
 
-#### Docker usage:
+### 2. Run Your First Scan
 
-Run the same command in Docker:
+Execute a scan against your manifest file:
+
+```shell
+# Using the local binary
+kubesec scan kubesec-test.yaml
+
+# Or using Docker
+docker run -i kubesec/kubesec:v2 scan /dev/stdin < kubesec-test.yaml
+
+# Using the local binary with a human-readable table output format
+kubesec scan kubesec-test.yaml --format table
+```
+
+> [!TIP]
+> To view the results in a human-readable table instead of the default JSON format, use the `--format table` flag
+
+`kubesec` will output a security score and a detailed analysis of your resource.
+
+## 📦 Download Kubesec
+
+Kubesec is available as a:
+
+- [Docker container image](https://hub.docker.com/r/kubesec/kubesec/tags) at `docker.io/kubesec/kubesec:v2`
+- Linux/MacOS/Win binary (get the [latest release](https://github.com/controlplaneio/kubesec/releases))
+- [Kubernetes Admission Controller](https://github.com/controlplaneio/kubesec-webhook)
+- [Kubectl plugin](https://github.com/controlplaneio/kubectl-kubesec)
+
+Or install the latest commit from GitHub with:
+
+### Go 1.16+
 
 ```bash
-$ docker run -i kubesec/kubesec:v2 scan /dev/stdin < kubesec-test.yaml
+$ go install github.com/controlplaneio/kubesec/v2@latest
 ```
 
-#### Specify custom schema
-
-Kubesec leverages kubeconform (thanks @yannh) to validate the manifests to scan.
-This implies that specifying different schema locations follows the rules as
-described in [the kubeconform README](https://github.com/yannh/kubeconform#overriding-schemas-location).
-
-Here is a quick overview on how this work for scanning a pod manifest:
-
-- I want to use the latest available schema from upstream.
+### Go version < 1.16
 
 ```bash
-kubesec [scan|http]
+$ GO111MODULE="on" go get github.com/controlplaneio/kubesec/v2
 ```
 
-Schema will be fetched from: https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/master-standalone-strict/pod-v1.json
+## 📖 Usage Examples
 
-- I want to use a specific schema version from upstream. (Formatted x.y.z with no v prefix)
+### Scanning
+
+Scan Kubernetes resources from local files or standard input.
+
+Kubesec can scan multiple YAML documents in a single input file, or scan documents from multiple files at once, as long
+as they are correctly formatted as multiple documents separated by `---`.
 
 ```bash
-kubesec [scan|http] --kubernetes-version <version>
+# Scan a specific local YAML file
+kubesec scan ./deployment.yaml
+
+# Scan from standard input (JSON or YAML)
+cat file.json | kubesec scan -
+
+# Scan a rendered Helm chart
+helm template -f values.yaml ./chart | kubesec scan /dev/stdin
+
+# Scan multiple YAML documents separated by '---'
+{ cat test/asset/multi.yml; echo "---"; cat test/asset/critical.yml; } | kubesec scan -
 ```
 
-Schema will be fetched from: https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/v1.25.3-standalone-strict/pod-v1.json
+#### Docker Usage
 
-- I want to use a specific schema version in an airgap environment over HTTP.
+You can run the same scanning commands using the official Docker image:
 
 ```bash
-kubesec [scan|http] --kubernetes-version <version> --schema-location https://host.server
+# Scan a file via Docker using standard input
+docker run -i kubesec/kubesec:v2 scan /dev/stdin < kubesec-test.yaml
 ```
 
-Schema will be fetched from: `https://host.server/v<version>-standalone-strict/pod-v1.json`
-
-- I want to use a specific schema version in an airgap environment with local files:
-
-```bash
-kubesec [scan|http] --kubernetes-version <version> --schema-location /opt/schemas
-```
-
-Schema will be read from: `/opt/schemas/v<version>-standalone-strict/pod-v1.json`
-
-**Note:** in order to limit external network calls and allow usage in airgap
-environments, the `kubesec` image embeds schemas. If you are looking to change
-the schema location, you'll need to change the `K8S_SCHEMA_VER` and `SCHEMA_LOCATION`
-environment variables at runtime.
-
-#### Print the scanning rules with their associated scores
-
-All the scanning rules can be printed in in different formats (json (default),
-yaml and table). This is useful to easily get the point associated with
-each rule:
-
-```bash
-kubesec print-rules
-```
-
-which produces the following output:
-
-```json
-[
-  {
-    "id": "AllowPrivilegeEscalation",
-    "selector": "containers[] .securityContext .allowPrivilegeEscalation == true",
-    "reason": "Ensure a non-root process can not gain more privileges",
-    "kinds": [
-      "Pod",
-      "Deployment",
-      "StatefulSet",
-      "DaemonSet"
-    ],
-    "points": -7,
-    "advise": 0
-  },
-...
-]
-```
-
-## Kubesec HTTP Server
-
-Kubesec includes a bundled HTTP server
-
-The listen address for the HTTP server can be configured by setting
-`KUBESEC_ADDR` environment variable. The value can be a single port
-such as `8080` or an address in the form of `ip:port` or `[ipv6]:port`.
-
-#### CLI usage example:
-
-Start the HTTP server in the background
-
-<!-- markdownlint-disable line-length -->
-
-```bash
-$ kubesec http 8080 &
-[1] 12345
-{"severity":"info","timestamp":"2019-05-12T11:58:34.662+0100","caller":"server/server.go:69","message":"Starting HTTP server on port 8080"}
-```
-
-<!-- markdownlint-enable line-length -->
-
-Use curl to POST a file to the server
-
-```bash
-$ curl -sSX POST --data-binary @test/asset/score-0-cap-sys-admin.yml http://localhost:8080/scan
-[
-  {
-    "object": "Pod/security-context-demo.default",
-    "valid": true,
-    "message": "Failed with a score of -30 points",
-    "score": -30,
-    "scoring": {
-      "critical": [
-        {
-          "selector": "containers[] .securityContext .capabilities .add == SYS_ADMIN",
-          "reason": "CAP_SYS_ADMIN is the most privileged capability and should always be avoided",
-          "points": -30
-        },
-        {
-          "selector": "containers[] .securityContext .runAsNonRoot == true",
-          "reason": "Force the running image to run as a non-root user to ensure least privilege",
-          "points": 1
-        },
-  // ...
-```
-
-Finally, stop the Kubesec server by killing the background process
-
-```bash
-$ kill %
-```
-
-#### Docker usage example:
-
-Start the HTTP server using Docker
-
-```bash
-$ docker run -d -p 8080:8080 kubesec/kubesec:v2 http 8080
-```
-
-Use curl to POST a file to the server
-
-```bash
-$ curl -sSX POST --data-binary @test/asset/score-0-cap-sys-admin.yml http://localhost:8080/scan
-...
-```
-
-Don't forget to stop the server.
-
-## Kubesec-as-a-Service
-
-Kubesec is also available via HTTPS at [v2.kubesec.io/scan](https://v2.kubesec.io/scan)
-
-Please do not submit sensitive YAML to this service.
-
-The service is ran on a good faith best effort basis.
-
-#### Command line usage:
-
-```bash
-$ curl -sSX POST --data-binary @"k8s-deployment.yaml" https://v2.kubesec.io/scan
-```
-
-#### Usage example:
-
-Define a BASH function
-
-```bash
-$ kubesec ()
-{
-    local FILE="${1:-}";
-    [[ ! -e "${FILE}" ]] && {
-        echo "kubesec: ${FILE}: No such file" >&2;
-        return 1
-    };
-    curl --silent \
-      --compressed \
-      --connect-timeout 5 \
-      -sSX POST \
-      --data-binary=@"${FILE}" \
-      https://v2.kubesec.io/scan
-}
-```
-
-POST a Kubernetes resource to v2.kubesec.io/scan
-
-```bash
-$ kubesec ./deployment.yml
-```
-
-Return non-zero status code is the score is not greater than 10
-
-```bash
-$ kubesec ./score-9-deployment.yml | jq --exit-status '.score > 10' >/dev/null
-# status code 1
-```
-
-## Example output
+#### Output Formats
 
 Kubesec supports three different output formats, specified by the `--format` / `-f` flag: `json` (default),
 `table`, and `template`, and can scan multiple YAML documents in a single input file.
 
-> [!NOTE]
-> You can also cat multiple files, as long as they're correctly formatted as multiple documents separated by `---`. E.g.
-> ```bash
-> { cat test/asset/multi.yml;
-> echo "---";
-> cat test/asset/critical-double-multiple.yml;
-> } | dist/kubesec scan -
-> ```
+```bash
+# JSON array output (default behaviour)
+kubesec scan ./deployment.yaml --format json
 
-### JSON
+# Human-readable table output
+kubesec scan ./deployment.yaml --format table
 
-When running a scan with the default `json` format, Kubesec returns a JSON array:
+# Use a custom template for the output
+kubesec scan ./deployment.yaml --format template --template report-template.tmpl
+```
+
+##### Example JSON Output
 
 ```json
 [
@@ -361,11 +187,142 @@ When running a scan with the default `json` format, Kubesec returns a JSON array
 ]
 ```
 
-### Table
-
-When running a scan with the `--format table`, Kubesec outputs the same information as a human-readable table.
+##### Example Table Output
 
 ![Table output](/doc/images/table-output.png)
+
+### Print Rules
+
+```bash
+# Print all scanning rules with their associated point scores
+kubesec print-rules
+
+# Print all scanning rules with their associated point scores as a table
+kubesec print-rules --format table
+```
+
+#### Example Rules Output JSON
+
+```json
+[
+  {
+    "id": "AllowPrivilegeEscalation",
+    "selector": "containers[] .securityContext .allowPrivilegeEscalation == true",
+    "reason": "Ensure a non-root process can not gain more privileges",
+    "kinds": [
+      "Pod",
+      "Deployment",
+      "StatefulSet",
+      "DaemonSet"
+    ],
+    "points": -7,
+    "advise": 0
+  },
+...
+]
+```
+
+### Custom Schemas
+
+Kubesec leverages kubeconform (thanks @yannh) to validate the manifests to scan.
+This implies that specifying different schema locations follows the rules as
+described in [the kubeconform README](https://github.com/yannh/kubeconform#overriding-schemas-location).
+
+```bash
+# Usees the latest schema from upstream
+# Schema will be fetched from: https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/master-standalone-strict/pod-v1.json
+kubesec scan ./pod.yaml
+
+# Use a specific schema version from upstream (format x.y.z with no v prefix)
+# Schema will be fetched from: https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/v1.25.3-standalone-strict/pod-v1.json
+kubesec scan ./pod.yaml --kubernetes-version 1.25.3
+
+# Use a specific schema version in an airgapped environment over HTTP
+# Schema will be fetched from: `https://host.server/v<version>-standalone-strict/pod-v1.json`
+kubesec scan ./deployment.yaml --kubernetes-version <version> --schema-location https://host.server
+
+# Use a specific schema version in an airgap environment with local files
+# Schema will be read from: `/opt/schemas/v<version>-standalone-strict/pod-v1.json`
+kubesec scan ./deployment.yaml --kubernetes-version <version> --schema-location /opt/schemas
+```
+
+**Note:** in order to limit external network calls and allow usage in airgap
+environments, the `kubesec` image embeds schemas. If you are looking to change
+the schema location, you'll need to change the `K8S_SCHEMA_VER` and `SCHEMA_LOCATION`
+environment variables at runtime.
+
+## HTTP Server Mode
+
+Kubesec includes a bundled HTTP server that you can run locally or in a container to accept scan requests over the network.
+
+### CLI Usage
+
+```bash
+# Start the HTTP server in the background on port 8080
+kubesec http 8080 &
+
+# Send a file to the running server via POST
+curl -sSX POST --data-binary @deployment.yaml http://localhost:8080/scan
+
+# Stop the background local server when finished
+kill %
+```
+
+### Docker Usage
+
+```bash
+# Start the HTTP server using Docker
+docker run -d -p 8080:8080 kubesec/kubesec:v2 http 8080
+
+# Send a file to the running server via POST
+curl -sSX POST --data-binary @deployment.yaml http://localhost:8080/scan
+```
+
+Don't forget to stop the server.
+
+## Kubesec-as-a-Service
+
+Kubesec is also available via HTTPS at [v2.kubesec.io/scan](https://v2.kubesec.io/scan).
+
+**Do not submit sensitive YAML to this public service.**
+
+The service is ran on a good faith best effort basis.
+
+```bash
+# Submit a manifest directly to the hosted v2 API
+curl -sSX POST --data-binary @"deployment.yaml" https://v2.kubesec.io/scan
+
+# Parse the API output using jq to return a non-zero exit code if the score is <= 10
+curl -sSX POST --data-binary @"deployment.yaml" https://v2.kubesec.io/scan | jq --exit-status '.score > 10'
+```
+
+You may also define a Bash function, e.g.:
+
+```bash
+# Define a BASH function
+$ kubesec ()
+{
+    local FILE="${1:-}";
+    [[ ! -e "${FILE}" ]] && {
+        echo "kubesec: ${FILE}: No such file" >&2;
+        return 1
+    };
+    curl --silent \
+      --compressed \
+      --connect-timeout 5 \
+      -sSX POST \
+      --data-binary=@"${FILE}" \
+      https://v2.kubesec.io/scan
+}
+
+
+# POST a Kubernetes resource to v2.kubesec.io/scan
+$ kubesec ./deployment.yml
+
+# Return non-zero status code is the score is not greater than 10
+$ kubesec ./score-9-deployment.yml | jq --exit-status '.score > 10' >/dev/null
+# status code 1
+```
 
 ---
 
@@ -396,4 +353,4 @@ Your feedback is always welcome!
 
 ---
 
-Made with ❤ by https://control-plane.io/
+Made with ❤ by [ControlPlane](https://control-plane.io/)
