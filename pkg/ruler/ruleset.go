@@ -8,6 +8,7 @@ import (
 	"reflect"
 	"runtime"
 	"sort"
+	"strings"
 	"sync"
 
 	"github.com/ghodss/yaml"
@@ -30,321 +31,286 @@ func (e *InvalidInputError) Error() string {
 	return "Invalid input"
 }
 
-func NewRuleset(logger *zap.SugaredLogger) *Ruleset {
-	list := make([]Rule, 0)
-
-	hostNetworkRule := Rule{
-		Predicate: rules.HostNetwork,
-		ID:        "HostNetwork",
-		Selector:  ".spec .hostNetwork == true",
-		Reason:    "Sharing the host's network namespace permits processes in the pod to communicate with processes bound to the host's loopback adapter",
-		Kinds:     []string{"Pod", "Deployment", "StatefulSet", "DaemonSet"},
-		Points:    -9,
-	}
-	list = append(list, hostNetworkRule)
-
-	hostPIDRule := Rule{
-		Predicate: rules.HostPID,
-		ID:        "HostPID",
-		Selector:  ".spec .hostPID == true",
-		Reason:    "Sharing the host's PID namespace allows visibility of processes on the host, potentially leaking information such as environment variables and configuration",
-		Kinds:     []string{"Pod", "Deployment", "StatefulSet", "DaemonSet"},
-		Points:    -9,
-	}
-	list = append(list, hostPIDRule)
-
-	hostIPCRule := Rule{
-		Predicate: rules.HostIPC,
-		ID:        "HostIPC",
-		Selector:  ".spec .hostIPC == true",
-		Reason:    "Sharing the host's IPC namespace allows container processes to communicate with processes on the host",
-		Kinds:     []string{"Pod", "Deployment", "StatefulSet", "DaemonSet"},
-		Points:    -9,
-	}
-	list = append(list, hostIPCRule)
-
-	readOnlyRootFilesystemRule := Rule{
-		Predicate: rules.ReadOnlyRootFilesystem,
-		ID:        "ReadOnlyRootFilesystem",
-		Selector:  "containers[] .securityContext .readOnlyRootFilesystem == true",
-		Reason:    "An immutable root filesystem can prevent malicious binaries being added to PATH and increase attack cost",
-		Kinds:     []string{"Pod", "Deployment", "StatefulSet", "DaemonSet"},
-		Points:    1,
-		Advise:    3,
-	}
-	list = append(list, readOnlyRootFilesystemRule)
-
-	runAsNonRootRule := Rule{
-		Predicate: rules.RunAsNonRoot,
-		ID:        "RunAsNonRoot",
-		Selector:  ".spec, .spec.containers[] | .securityContext .runAsNonRoot == true",
-		Reason:    "Force the running image to run as a non-root user to ensure least privilege",
-		Kinds:     []string{"Pod", "Deployment", "StatefulSet", "DaemonSet"},
-		Points:    1,
-		Advise:    10,
-	}
-	list = append(list, runAsNonRootRule)
-
-	runAsUserRule := Rule{
-		Predicate: rules.RunAsUser,
-		ID:        "RunAsUser",
-		Selector:  ".spec, .spec.containers[] | .securityContext .runAsUser -gt 10000",
-		Reason:    "Run as a high-UID user to avoid conflicts with the host's users",
-		Kinds:     []string{"Pod", "Deployment", "StatefulSet", "DaemonSet"},
-		Points:    1,
-		Advise:    4,
-	}
-	list = append(list, runAsUserRule)
-
-	runAsGroupRule := Rule{
-		Predicate: rules.RunAsGroup,
-		ID:        "RunAsGroup",
-		Selector:  ".spec, .spec.containers[] | .securityContext .runAsGroup -gt 10000",
-		Reason:    "Run as a high-UID group to avoid conflicts with the host's groups",
-		Kinds:     []string{"Pod", "Deployment", "StatefulSet", "DaemonSet"},
-		Points:    1,
-		Advise:    4,
-	}
-	list = append(list, runAsGroupRule)
-
-	privilegedRule := Rule{
-		Predicate: rules.Privileged,
-		ID:        "Privileged",
-		Selector:  "containers[] .securityContext .privileged == true",
-		Reason:    "Privileged containers can allow almost completely unrestricted host access",
-		Kinds:     []string{"Pod", "Deployment", "StatefulSet", "DaemonSet"},
-		Points:    -30,
-	}
-	list = append(list, privilegedRule)
-
-	capSysAdminRule := Rule{
-		Predicate: rules.CapSysAdmin,
-		ID:        "CapSysAdmin",
-		Selector:  "containers[] .securityContext .capabilities .add == SYS_ADMIN",
-		Reason:    "CAP_SYS_ADMIN is the most privileged capability and should always be avoided",
-		Kinds:     []string{"Pod", "Deployment", "StatefulSet", "DaemonSet"},
-		Points:    -30,
-	}
-	list = append(list, capSysAdminRule)
-
-	capDropAnyRule := Rule{
-		Predicate: rules.CapDropAny,
-		ID:        "CapDropAny",
-		Selector:  "containers[] .securityContext .capabilities .drop",
-		Reason:    "Reducing kernel capabilities available to a container limits its attack surface",
-		Kinds:     []string{"Pod", "Deployment", "StatefulSet", "DaemonSet"},
-		Points:    1,
-	}
-	list = append(list, capDropAnyRule)
-
-	capDropAllRule := Rule{
-		Predicate: rules.CapDropAll,
-		ID:        "CapDropAll",
-		Selector:  "containers[] .securityContext .capabilities .drop | index(\"ALL\")",
-		Reason:    "Drop all capabilities and add only those required to reduce syscall attack surface",
-		Kinds:     []string{"Pod", "Deployment", "StatefulSet", "DaemonSet"},
-		Points:    1,
-	}
-	list = append(list, capDropAllRule)
-
-	dockerSockRule := Rule{
-		Predicate: rules.DockerSock,
-		ID:        "DockerSock",
-		Selector:  "volumes[] .hostPath .path == /var/run/docker.sock",
-		Reason:    "Mounting the docker.socket leaks information about other containers and can allow container breakout",
-		Kinds:     []string{"Pod", "Deployment", "StatefulSet", "DaemonSet"},
-		Points:    -9,
-	}
-	list = append(list, dockerSockRule)
-
-	procRule := Rule{
-		Predicate: rules.ProcMount,
-		ID:        "ProcMount",
-		Selector:  "volumes[] .hostPath .path == /proc",
-		Reason:    "Mounting the proc directory from the host system into a container gives access to information about other containers running on the same host and can allow container breakout",
-		Kinds:     []string{"Pod", "Deployment", "StatefulSet", "DaemonSet"},
-		Points:    -9,
-	}
-	list = append(list, procRule)
-
-	requestsCPURule := Rule{
-		Predicate: rules.RequestsCPU,
-		ID:        "RequestsCPU",
-		Selector:  "containers[] .resources .requests .cpu",
-		Reason:    "Enforcing CPU requests aids a fair balancing of resources across the cluster",
-		Kinds:     []string{"Pod", "Deployment", "StatefulSet", "DaemonSet"},
-		Points:    1,
-	}
-	list = append(list, requestsCPURule)
-
-	limitsCPURule := Rule{
-		Predicate: rules.LimitsCPU,
-		ID:        "LimitsCPU",
-		Selector:  "containers[] .resources .limits .cpu",
-		Reason:    "Enforcing CPU limits prevents DOS via resource exhaustion",
-		Kinds:     []string{"Pod", "Deployment", "StatefulSet", "DaemonSet"},
-		Points:    1,
-	}
-	list = append(list, limitsCPURule)
-
-	requestsMemoryRule := Rule{
-		Predicate: rules.RequestsMemory,
-		ID:        "RequestsMemory",
-		Selector:  "containers[] .resources .requests .memory",
-		Reason:    "Enforcing memory requests aids a fair balancing of resources across the cluster",
-		Kinds:     []string{"Pod", "Deployment", "StatefulSet", "DaemonSet"},
-		Points:    1,
-	}
-	list = append(list, requestsMemoryRule)
-
-	limitsMemoryRule := Rule{
-		Predicate: rules.LimitsMemory,
-		ID:        "LimitsMemory",
-		Selector:  "containers[] .resources .limits .memory",
-		Reason:    "Enforcing memory limits prevents DOS via resource exhaustion",
-		Kinds:     []string{"Pod", "Deployment", "StatefulSet", "DaemonSet"},
-		Points:    1,
-	}
-	list = append(list, limitsMemoryRule)
-
-	serviceAccountNameRule := Rule{
-		Predicate: rules.ServiceAccountName,
-		ID:        "ServiceAccountName",
-		Selector:  ".spec .serviceAccountName",
-		Reason:    "Service accounts restrict Kubernetes API access and should be configured with least privilege",
-		Kinds:     []string{"Pod", "Deployment", "StatefulSet", "DaemonSet"},
-		Points:    3,
-	}
-	list = append(list, serviceAccountNameRule)
-
-	hostAliasesRule := Rule{
-		Predicate: rules.HostAliases,
-		ID:        "HostAliases",
-		Selector:  ".spec .hostAliases",
-		Reason:    "Managing /etc/hosts aliases can prevent the container from modifying the file after a pod's containers have already been started. DNS should be managed by the orchestrator",
-		Kinds:     []string{"Pod", "Deployment", "StatefulSet", "DaemonSet"},
-		Points:    -3,
-	}
-	list = append(list, hostAliasesRule)
-
-	seccompAnyRule := Rule{
-		Predicate: rules.SeccompAny,
-		ID:        "SeccompAny",
-		Selector:  ".spec .securityContext .seccompProfile .type | .spec .containers[] .securityContext .seccompProfile .type | .spec .initContainers[] .securityContext .seccompProfile .type | .spec .ephemeralContainers[] .securityContext .seccompProfile .type",
-		Reason:    "Seccomp profiles set minimum privilege and secure against unknown threats",
-		Kinds:     []string{"Pod", "Deployment", "StatefulSet", "DaemonSet"},
-		Points:    1,
-	}
-	list = append(list, seccompAnyRule)
-
-	seccompUnconfinedRule := Rule{
-		Predicate: rules.SeccompUnconfined,
-		ID:        "SeccompUnconfined",
-		Selector:  ".spec .securityContext .seccompProfile .type | .spec .containers[] .securityContext .seccompProfile .type | .spec .initContainers[] .securityContext .seccompProfile .type | .spec .ephemeralContainers[] .securityContext .seccompProfile .type",
-		Reason:    "Unconfined Seccomp profiles have full system call access",
-		Kinds:     []string{"Pod", "Deployment", "StatefulSet", "DaemonSet"},
-		Points:    -1,
-	}
-	list = append(list, seccompUnconfinedRule)
-
-	apparmorAnyRule := Rule{
-		Predicate: rules.ApparmorAny,
-		ID:        "ApparmorAny",
-		Selector:  ".spec .securityContext .appArmorProfile .type | .spec .containers[] .securityContext .appArmorProfile .type | .spec .initContainers[] .securityContext .appArmorProfile .type | .spec .ephemeralContainers[] .securityContext .appArmorProfile .type",
-		Reason:    "Well defined AppArmor policies may provide greater protection from unknown threats.",
-		Kinds:     []string{"Pod", "Deployment", "StatefulSet", "DaemonSet"},
-		Points:    3,
-	}
-	list = append(list, apparmorAnyRule)
-
-	apparmorUnconfinedRule := Rule{
-		Predicate: rules.ApparmorUnconfined,
-		ID:        "ApparmorUnconfined",
-		Selector:  ".spec .securityContext .appArmorProfile .type | .spec .containers[] .securityContext .appArmorProfile .type | .spec .initContainers[] .securityContext .appArmorProfile .type | .spec .ephemeralContainers[] .securityContext .appArmorProfile .type",
-		Reason:    "Unconfined AppArmor profiles disable AppArmor enforcement on the workloads",
-		Kinds:     []string{"Pod", "Deployment", "StatefulSet", "DaemonSet"},
-		Points:    -1,
-	}
-	list = append(list, apparmorUnconfinedRule)
-
-	volumeClaimAccessModeReadWriteOnce := Rule{
-		Predicate: rules.VolumeClaimAccessModeReadWriteOnce,
-		ID:        "VolumeClaimAccessModeReadWriteOnce",
-		Selector:  ".spec .volumeClaimTemplates[] .spec .accessModes | index(\"ReadWriteOnce\")",
-		Reason:    "Setting the access mode of ReadWriteOnce on volumeClaimTemplates (if any exist) allows only one node to mount the persistentVolume",
-		Kinds:     []string{"StatefulSet"},
-		Points:    1,
-	}
-	list = append(list, volumeClaimAccessModeReadWriteOnce)
-
-	volumeClaimRequestsStorage := Rule{
-		Predicate: rules.VolumeClaimRequestsStorage,
-		ID:        "VolumeClaimRequestsStorage",
-		Selector:  ".spec .volumeClaimTemplates[] .spec .resources .requests .storage",
-		Reason:    "Setting a storage request on volumeClaimTemplates (if any exist) allows for the StatefulSet's PVCs to be bound to appropriately sized PVs.",
-		Kinds:     []string{"StatefulSet"},
-		Points:    1,
-	}
-	list = append(list, volumeClaimRequestsStorage)
-
-	allowPrivilegeEscalation := Rule{
-		Predicate: rules.AllowPrivilegeEscalation,
-		ID:        "AllowPrivilegeEscalation",
-		Selector:  "containers[] .securityContext .allowPrivilegeEscalation == true",
-		Reason:    "Ensure a non-root process can not gain more privileges",
-		Kinds:     []string{"Pod", "Deployment", "StatefulSet", "DaemonSet"},
-		Points:    -7,
-	}
-	list = append(list, allowPrivilegeEscalation)
-
-	automountServiceAccountTokenRule := Rule{
-		Predicate: rules.AutomountServiceAccountToken,
-		ID:        "AutomountServiceAccountToken",
-		Selector:  ".spec .automountServiceAccountToken == false",
-		Reason:    "Disabling the automounting of Service Account Token reduces the attack surface of the API server",
-		Kinds:     []string{"Pod", "Deployment", "StatefulSet", "DaemonSet"},
-		Points:    1,
+func NewRuleset(logger *zap.SugaredLogger, ruleIDs ...string) (*Ruleset, error) {
+	allRules := []Rule{
+		{
+			Predicate: rules.HostNetwork,
+			ID:        "HostNetwork",
+			Selector:  ".spec .hostNetwork == true",
+			Reason:    "Sharing the host's network namespace permits processes in the pod to communicate with processes bound to the host's loopback adapter",
+			Kinds:     []string{"Pod", "Deployment", "StatefulSet", "DaemonSet"},
+			Points:    -9,
+		},
+		{
+			Predicate: rules.HostPID,
+			ID:        "HostPID",
+			Selector:  ".spec .hostPID == true",
+			Reason:    "Sharing the host's PID namespace allows visibility of processes on the host, potentially leaking information such as environment variables and configuration",
+			Kinds:     []string{"Pod", "Deployment", "StatefulSet", "DaemonSet"},
+			Points:    -9,
+		},
+		{
+			Predicate: rules.HostIPC,
+			ID:        "HostIPC",
+			Selector:  ".spec .hostIPC == true",
+			Reason:    "Sharing the host's IPC namespace allows container processes to communicate with processes on the host",
+			Kinds:     []string{"Pod", "Deployment", "StatefulSet", "DaemonSet"},
+			Points:    -9,
+		},
+		{
+			Predicate: rules.ReadOnlyRootFilesystem,
+			ID:        "ReadOnlyRootFilesystem",
+			Selector:  "containers[] .securityContext .readOnlyRootFilesystem == true",
+			Reason:    "An immutable root filesystem can prevent malicious binaries being added to PATH and increase attack cost",
+			Kinds:     []string{"Pod", "Deployment", "StatefulSet", "DaemonSet"},
+			Points:    1,
+			Advise:    3,
+		},
+		{
+			Predicate: rules.RunAsNonRoot,
+			ID:        "RunAsNonRoot",
+			Selector:  ".spec, .spec.containers[] | .securityContext .runAsNonRoot == true",
+			Reason:    "Force the running image to run as a non-root user to ensure least privilege",
+			Kinds:     []string{"Pod", "Deployment", "StatefulSet", "DaemonSet"},
+			Points:    1,
+			Advise:    10,
+		},
+		{
+			Predicate: rules.RunAsUser,
+			ID:        "RunAsUser",
+			Selector:  ".spec, .spec.containers[] | .securityContext .runAsUser -gt 10000",
+			Reason:    "Run as a high-UID user to avoid conflicts with the host's users",
+			Kinds:     []string{"Pod", "Deployment", "StatefulSet", "DaemonSet"},
+			Points:    1,
+			Advise:    4,
+		},
+		{
+			Predicate: rules.RunAsGroup,
+			ID:        "RunAsGroup",
+			Selector:  ".spec, .spec.containers[] | .securityContext .runAsGroup -gt 10000",
+			Reason:    "Run as a high-UID group to avoid conflicts with the host's groups",
+			Kinds:     []string{"Pod", "Deployment", "StatefulSet", "DaemonSet"},
+			Points:    1,
+			Advise:    4,
+		},
+		{
+			Predicate: rules.Privileged,
+			ID:        "Privileged",
+			Selector:  "containers[] .securityContext .privileged == true",
+			Reason:    "Privileged containers can allow almost completely unrestricted host access",
+			Kinds:     []string{"Pod", "Deployment", "StatefulSet", "DaemonSet"},
+			Points:    -30,
+		},
+		{
+			Predicate: rules.CapSysAdmin,
+			ID:        "CapSysAdmin",
+			Selector:  "containers[] .securityContext .capabilities .add == SYS_ADMIN",
+			Reason:    "CAP_SYS_ADMIN is the most privileged capability and should always be avoided",
+			Kinds:     []string{"Pod", "Deployment", "StatefulSet", "DaemonSet"},
+			Points:    -30,
+		},
+		{
+			Predicate: rules.CapDropAny,
+			ID:        "CapDropAny",
+			Selector:  "containers[] .securityContext .capabilities .drop",
+			Reason:    "Reducing kernel capabilities available to a container limits its attack surface",
+			Kinds:     []string{"Pod", "Deployment", "StatefulSet", "DaemonSet"},
+			Points:    1,
+		},
+		{
+			Predicate: rules.CapDropAll,
+			ID:        "CapDropAll",
+			Selector:  "containers[] .securityContext .capabilities .drop | index(\"ALL\")",
+			Reason:    "Drop all capabilities and add only those required to reduce syscall attack surface",
+			Kinds:     []string{"Pod", "Deployment", "StatefulSet", "DaemonSet"},
+			Points:    1,
+		},
+		{
+			Predicate: rules.DockerSock,
+			ID:        "DockerSock",
+			Selector:  "volumes[] .hostPath .path == /var/run/docker.sock",
+			Reason:    "Mounting the docker.socket leaks information about other containers and can allow container breakout",
+			Kinds:     []string{"Pod", "Deployment", "StatefulSet", "DaemonSet"},
+			Points:    -9,
+		},
+		{
+			Predicate: rules.ProcMount,
+			ID:        "ProcMount",
+			Selector:  "volumes[] .hostPath .path == /proc",
+			Reason:    "Mounting the proc directory from the host system into a container gives access to information about other containers running on the same host and can allow container breakout",
+			Kinds:     []string{"Pod", "Deployment", "StatefulSet", "DaemonSet"},
+			Points:    -9,
+		},
+		{
+			Predicate: rules.RequestsCPU,
+			ID:        "RequestsCPU",
+			Selector:  "containers[] .resources .requests .cpu",
+			Reason:    "Enforcing CPU requests aids a fair balancing of resources across the cluster",
+			Kinds:     []string{"Pod", "Deployment", "StatefulSet", "DaemonSet"},
+			Points:    1,
+		},
+		{
+			Predicate: rules.LimitsCPU,
+			ID:        "LimitsCPU",
+			Selector:  "containers[] .resources .limits .cpu",
+			Reason:    "Enforcing CPU limits prevents DOS via resource exhaustion",
+			Kinds:     []string{"Pod", "Deployment", "StatefulSet", "DaemonSet"},
+			Points:    1,
+		},
+		{
+			Predicate: rules.RequestsMemory,
+			ID:        "RequestsMemory",
+			Selector:  "containers[] .resources .requests .memory",
+			Reason:    "Enforcing memory requests aids a fair balancing of resources across the cluster",
+			Kinds:     []string{"Pod", "Deployment", "StatefulSet", "DaemonSet"},
+			Points:    1,
+		},
+		{
+			Predicate: rules.LimitsMemory,
+			ID:        "LimitsMemory",
+			Selector:  "containers[] .resources .limits .memory",
+			Reason:    "Enforcing memory limits prevents DOS via resource exhaustion",
+			Kinds:     []string{"Pod", "Deployment", "StatefulSet", "DaemonSet"},
+			Points:    1,
+		},
+		{
+			Predicate: rules.ServiceAccountName,
+			ID:        "ServiceAccountName",
+			Selector:  ".spec .serviceAccountName",
+			Reason:    "Service accounts restrict Kubernetes API access and should be configured with least privilege",
+			Kinds:     []string{"Pod", "Deployment", "StatefulSet", "DaemonSet"},
+			Points:    3,
+		},
+		{
+			Predicate: rules.HostAliases,
+			ID:        "HostAliases",
+			Selector:  ".spec .hostAliases",
+			Reason:    "Managing /etc/hosts aliases can prevent the container from modifying the file after a pod's containers have already been started. DNS should be managed by the orchestrator",
+			Kinds:     []string{"Pod", "Deployment", "StatefulSet", "DaemonSet"},
+			Points:    -3,
+		},
+		{
+			Predicate: rules.SeccompAny,
+			ID:        "SeccompAny",
+			Selector:  ".spec .securityContext .seccompProfile .type | .spec .containers[] .securityContext .seccompProfile .type | .spec .initContainers[] .securityContext .seccompProfile .type | .spec .ephemeralContainers[] .securityContext .seccompProfile .type",
+			Reason:    "Seccomp profiles set minimum privilege and secure against unknown threats",
+			Kinds:     []string{"Pod", "Deployment", "StatefulSet", "DaemonSet"},
+			Points:    1,
+		},
+		{
+			Predicate: rules.SeccompUnconfined,
+			ID:        "SeccompUnconfined",
+			Selector:  ".spec .securityContext .seccompProfile .type | .spec .containers[] .securityContext .seccompProfile .type | .spec .initContainers[] .securityContext .seccompProfile .type | .spec .ephemeralContainers[] .securityContext .seccompProfile .type",
+			Reason:    "Unconfined Seccomp profiles have full system call access",
+			Kinds:     []string{"Pod", "Deployment", "StatefulSet", "DaemonSet"},
+			Points:    -1,
+		},
+		{
+			Predicate: rules.ApparmorAny,
+			ID:        "ApparmorAny",
+			Selector:  ".spec .securityContext .appArmorProfile .type | .spec .containers[] .securityContext .appArmorProfile .type | .spec .initContainers[] .securityContext .appArmorProfile .type | .spec .ephemeralContainers[] .securityContext .appArmorProfile .type",
+			Reason:    "Well defined AppArmor policies may provide greater protection from unknown threats.",
+			Kinds:     []string{"Pod", "Deployment", "StatefulSet", "DaemonSet"},
+			Points:    3,
+		},
+		{
+			Predicate: rules.ApparmorUnconfined,
+			ID:        "ApparmorUnconfined",
+			Selector:  ".spec .securityContext .appArmorProfile .type | .spec .containers[] .securityContext .appArmorProfile .type | .spec .initContainers[] .securityContext .appArmorProfile .type | .spec .ephemeralContainers[] .securityContext .appArmorProfile .type",
+			Reason:    "Unconfined AppArmor profiles disable AppArmor enforcement on the workloads",
+			Kinds:     []string{"Pod", "Deployment", "StatefulSet", "DaemonSet"},
+			Points:    -1,
+		},
+		{
+			Predicate: rules.VolumeClaimAccessModeReadWriteOnce,
+			ID:        "VolumeClaimAccessModeReadWriteOnce",
+			Selector:  ".spec .volumeClaimTemplates[] .spec .accessModes | index(\"ReadWriteOnce\")",
+			Reason:    "Setting the access mode of ReadWriteOnce on volumeClaimTemplates (if any exist) allows only one node to mount the persistentVolume",
+			Kinds:     []string{"StatefulSet"},
+			Points:    1,
+		},
+		{
+			Predicate: rules.VolumeClaimRequestsStorage,
+			ID:        "VolumeClaimRequestsStorage",
+			Selector:  ".spec .volumeClaimTemplates[] .spec .resources .requests .storage",
+			Reason:    "Setting a storage request on volumeClaimTemplates (if any exist) allows for the StatefulSet's PVCs to be bound to appropriately sized PVs.",
+			Kinds:     []string{"StatefulSet"},
+			Points:    1,
+		},
+		{
+			Predicate: rules.AllowPrivilegeEscalation,
+			ID:        "AllowPrivilegeEscalation",
+			Selector:  "containers[] .securityContext .allowPrivilegeEscalation == true",
+			Reason:    "Ensure a non-root process can not gain more privileges",
+			Kinds:     []string{"Pod", "Deployment", "StatefulSet", "DaemonSet"},
+			Points:    -7,
+		},
+		{
+			Predicate: rules.AutomountServiceAccountToken,
+			ID:        "AutomountServiceAccountToken",
+			Selector:  ".spec .automountServiceAccountToken == false",
+			Reason:    "Disabling the automounting of Service Account Token reduces the attack surface of the API server",
+			Kinds:     []string{"Pod", "Deployment", "StatefulSet", "DaemonSet"},
+			Points:    1,
+		},
+		{
+			Predicate: rules.HostUsers,
+			ID:        "HostUsers",
+			Selector:  ".spec .hostUsers == false",
+			Reason:    "A user namespace for a Pod is enabled by setting the hostUsers field of Pod .spec, which can prevent various attacks",
+			Kinds:     []string{"Pod", "Deployment", "StatefulSet", "DaemonSet"},
+			Points:    1,
+		},
+		{
+			Predicate: rules.SecretsAsEnvironmentVariables,
+			ID:        "SecretsAsEnvironmentVariables",
+			Selector:  ".spec .containers[] .env[] .valueFrom .secretKeyRef | .spec .initContainers[] .env[] .valueFrom .secretKeyRef | .spec .ephemeralContainers[] .env[] .valueFrom .secretKeyRef | .spec .containers[] .envFrom[] .secretRef | .spec .initContainers[] .envFrom[] .secretRef | .spec .ephemeralContainers[] .envFrom[] .secretRef",
+			Reason:    "Secrets passed as environment variables can be easily exposed through application logs, crash dumps, and system process inspection",
+			Kinds:     []string{"Pod", "Deployment", "StatefulSet", "DaemonSet", "ReplicaSet", "Job", "CronJob"},
+			Points:    -5,
+		},
+		{
+			Predicate: rules.BindingsToSystemAnonymous,
+			ID:        "BindingsToSystemAnonymous",
+			Selector:  ".subjects[] .name == \"system:anonymous\"",
+			Reason:    "Binding a Role or a ClusterRole to user system:anonymous gives any unauthenticated user the permissions granted by that role",
+			Kinds:     []string{"RoleBinding", "ClusterRoleBinding"},
+			Points:    -30,
+		},
 	}
 
-	list = append(list, automountServiceAccountTokenRule)
-
-	hostUsersRule := Rule{
-		Predicate: rules.HostUsers,
-		ID:        "HostUsers",
-		Selector:  ".spec .hostUsers == false",
-		Reason:    "A user namespace for a Pod is enabled by setting the hostUsers field of Pod .spec, which can prevent various attacks",
-		Kinds:     []string{"Pod", "Deployment", "StatefulSet", "DaemonSet"},
-		Points:    1,
+	// If no specific IDs were passed, return all rules.
+	if len(ruleIDs) == 0 {
+		return &Ruleset{Rules: allRules, logger: logger}, nil
 	}
 
-	list = append(list, hostUsersRule)
-
-	secretsAsEnvironmentVariablesRule := Rule{
-		Predicate: rules.SecretsAsEnvironmentVariables,
-		ID:        "SecretsAsEnvironmentVariables",
-		Selector:  ".spec .containers[] .env[] .valueFrom .secretKeyRef | .spec .initContainers[] .env[] .valueFrom .secretKeyRef | .spec .ephemeralContainers[] .env[] .valueFrom .secretKeyRef | .spec .containers[] .envFrom[] .secretRef | .spec .initContainers[] .envFrom[] .secretRef | .spec .ephemeralContainers[] .envFrom[] .secretRef",
-		Reason:    "Secrets passed as environment variables can be easily exposed through application logs, crash dumps, and system process inspection",
-		Kinds:     []string{"Pod", "Deployment", "StatefulSet", "DaemonSet", "ReplicaSet", "Job", "CronJob"},
-		Points:    -5,
+	// Map all available rules for validation and fast lookup
+	availableRules := make(map[string]Rule, len(allRules))
+	for _, rule := range allRules {
+		availableRules[rule.ID] = rule
 	}
 
-	list = append(list, secretsAsEnvironmentVariablesRule)
+	var filteredRules []Rule
+	var invalidIDs []string
 
-	bindingsToSystemAnonymous := Rule{
-		Predicate: rules.BindingsToSystemAnonymous,
-		ID:        "BindingsToSystemAnonymous",
-		Selector:  ".subjects[] .name == \"system:anonymous\"",
-		Reason:    "Binding a Role or a ClusterRole to user system:anonymous gives any unauthenticated user the permissions granted by that role",
-		Kinds:     []string{"RoleBinding", "ClusterRoleBinding"},
-		Points:    -30,
+	// Validate requested rules
+	for _, id := range ruleIDs {
+		if rule, exists := availableRules[id]; exists {
+			filteredRules = append(filteredRules, rule)
+		} else {
+			invalidIDs = append(invalidIDs, id)
+		}
 	}
 
-	list = append(list, bindingsToSystemAnonymous)
+	// Fail if any invalid IDs were provided
+	if len(invalidIDs) > 0 {
+		return nil, fmt.Errorf("invalid rule IDs requested: %s", strings.Join(invalidIDs, ", "))
+	}
 
 	return &Ruleset{
-		Rules:  list,
+		Rules:  filteredRules,
 		logger: logger,
-	}
+	}, nil
 }
 
 func (rs *Ruleset) Run(fileName string, fileBytes []byte, schemaConfig SchemaConfig) ([]Report, error) {

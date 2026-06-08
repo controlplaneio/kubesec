@@ -122,7 +122,11 @@ spec:
 			config.Locations = []string{server.URL}
 			config.ValidatorOpts.KubernetesVersion = tt.kubernetesVersion
 
-			reports, err := NewRuleset(zap.NewNop().Sugar()).Run("kube.yaml", []byte(tt.data), config)
+			ruleset, err := NewRuleset(zap.NewNop().Sugar())
+			if err != nil {
+				t.Fatal(err.Error())
+			}
+			reports, err := ruleset.Run("kube.yaml", []byte(tt.data), config)
 			if err != nil || len(reports) == 0 {
 				t.Fatal(err.Error())
 			}

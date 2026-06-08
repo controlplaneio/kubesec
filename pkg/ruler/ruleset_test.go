@@ -8,7 +8,7 @@ import (
 	"go.uber.org/zap"
 )
 
-func TestRulesetRun(t *testing.T) {
+func TestRuleset_Run(t *testing.T) {
 	tests := []struct {
 		name, data string
 	}{
@@ -119,7 +119,11 @@ spec:
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			config := NewDefaultSchemaConfig()
-			reports, err := NewRuleset(zap.NewNop().Sugar()).Run("kube.yaml", []byte(tt.data), config)
+			ruleset, err := NewRuleset(zap.NewNop().Sugar())
+			if err != nil {
+				t.Fatal(err.Error())
+			}
+			reports, err := ruleset.Run("kube.yaml", []byte(tt.data), config)
 			if err != nil || len(reports) == 0 {
 				t.Fatal(err.Error())
 			}
@@ -143,7 +147,8 @@ spec:
 		})
 	}
 }
-func TestRulesetRunNoSchemaValidation(t *testing.T) {
+
+func TestRuleset_Run_NoSchemaValidation(t *testing.T) {
 	tests := []struct {
 		name, data string
 	}{
@@ -175,7 +180,11 @@ spec:
 			config := NewDefaultSchemaConfig()
 			config.DisableValidation = true
 
-			reports, err := NewRuleset(zap.NewNop().Sugar()).Run("kube.yaml", []byte(tt.data), config)
+			ruleset, err := NewRuleset(zap.NewNop().Sugar())
+			if err != nil {
+				t.Fatal(err.Error())
+			}
+			reports, err := ruleset.Run("kube.yaml", []byte(tt.data), config)
 			if err != nil || len(reports) == 0 {
 				t.Fatal(err.Error())
 			}
@@ -190,7 +199,7 @@ spec:
 	}
 }
 
-func TestRulesetRunInvalid(t *testing.T) {
+func TestRuleset_Run_Invalid(t *testing.T) {
 	tests := []struct {
 		name, data      string
 		expectedMessage string
@@ -273,7 +282,11 @@ data:
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			config := NewDefaultSchemaConfig()
-			reports, err := NewRuleset(zap.NewNop().Sugar()).Run("kube.yaml", []byte(tt.data), config)
+			ruleset, err := NewRuleset(zap.NewNop().Sugar())
+			if err != nil {
+				t.Fatal(err.Error())
+			}
+			reports, err := ruleset.Run("kube.yaml", []byte(tt.data), config)
 			if err != nil || len(reports) == 0 {
 				t.Fatal(err.Error())
 			}
@@ -319,7 +332,11 @@ spec:
 `
 
 	config := NewDefaultSchemaConfig()
-	reports, err := NewRuleset(zap.NewNop().Sugar()).Run("kube.yaml", []byte(data), config)
+	ruleset, err := NewRuleset(zap.NewNop().Sugar())
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+	reports, err := ruleset.Run("kube.yaml", []byte(data), config)
 	if err != nil || len(reports) == 0 {
 		t.Fatal(err.Error())
 	}
@@ -329,5 +346,156 @@ spec:
 	if len(link.Materials) < 1 || len(link.Products) < 1 {
 		t.Errorf("Should have generated a report with at least one material and a product %+v",
 			link)
+	}
+}
+
+func TestRuleset_Run_SpecificRules(t *testing.T) {
+	tests := []struct {
+		name, data string
+	}{
+		{
+			name: "valid yaml",
+			data: `
+---
+apiVersion: apps/v1
+kind: Deployment
+spec:
+  selector:
+    matchLabels:
+      app: podinfo
+  template:
+    metadata:
+      annotations:
+        prometheus.io/scrape: "true"
+      labels:
+        app: podinfo
+    spec:
+      hostNetwork: true
+      initContainers:
+        - name: init1
+          securityContext:
+            readOnlyRootFilesystem: true
+        - name: init2
+          securityContext:
+            readOnlyRootFilesystem: false
+        - name: init3
+      containers:
+        - name: c1
+        - name: c2
+          securityContext:
+            readOnlyRootFilesystem: false
+            runAsNonRoot: true
+            runAsUser: 1001
+        - name: c3
+          securityContext:
+            readOnlyRootFilesystem: true
+`,
+		},
+		{
+			name: "valid json",
+			data: `
+{
+  "apiVersion": "apps/v1",
+  "kind": "Deployment",
+  "spec": {
+    "selector": {
+      "matchLabels": {
+        "app": "podinfo"
+      }
+    },
+    "template": {
+      "metadata": {
+        "annotations": {
+          "prometheus.io/scrape": "true"
+        },
+        "labels": {
+          "app": "podinfo"
+        }
+      },
+      "spec": {
+        "hostNetwork": true,
+        "initContainers": [
+          {
+            "name": "init1",
+            "securityContext": {
+              "readOnlyRootFilesystem": true
+            }
+          },
+          {
+            "name": "init2",
+            "securityContext": {
+              "readOnlyRootFilesystem": false
+            }
+          },
+          {
+            "name": "init3"
+          }
+        ],
+        "containers": [
+          {
+            "name": "c1"
+          },
+          {
+            "name": "c2",
+            "securityContext": {
+              "readOnlyRootFilesystem": false,
+              "runAsNonRoot": true,
+              "runAsUser": 1001
+            }
+          },
+          {
+            "name": "c3",
+            "securityContext": {
+              "readOnlyRootFilesystem": true
+            }
+          }
+        ]
+      }
+    }
+  }
+}`,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			config := NewDefaultSchemaConfig()
+			// Create ruleset with specific rule IDs only
+			ruleset, err := NewRuleset(zap.NewNop().Sugar(), "HostNetwork", "RunAsNonRoot", "RunAsUser")
+			if err != nil {
+				t.Fatal(err.Error())
+			}
+			reports, err := ruleset.Run("kube.yaml", []byte(tt.data), config)
+			if err != nil || len(reports) == 0 {
+				t.Fatal(err.Error())
+			}
+
+			report := reports[0]
+
+			// Report must be only for the 3 specific rule IDs specified
+			if len(report.Rules) != 3 {
+				t.Errorf("Got %v rules scanned, wanted exactly %d", len(report.Rules), 3)
+			}
+
+			critical := len(report.Scoring.Critical)
+			if critical != 1 {
+				t.Errorf("Got %v critical rules, wanted exactly %d", critical, 1)
+			}
+
+			advise := len(report.Scoring.Advise)
+			if advise != 1 {
+				t.Errorf("Got %v advise rules, wanted exactly %d", advise, 1)
+			}
+
+			passed := len(report.Scoring.Passed)
+			if advise != 1 {
+				t.Errorf("Got %v passed rules, wanted exactly %d", passed, 1)
+			}
+
+			if report.Score > 0 {
+				t.Errorf("Got score %v, wanted a negative value", report.Score)
+			}
+
+		})
 	}
 }

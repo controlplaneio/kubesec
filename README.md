@@ -155,6 +155,16 @@ kubesec scan ./deployment.yaml --format table
 kubesec scan ./deployment.yaml --format template --template report-template.tmpl
 ```
 
+#### Scan specific rules
+
+```bash
+# One rule
+kubesec scan --rules CapSysAdmin kubesec-test.yaml
+
+# Multiple rules
+kubesec scan --rules RunAsNonRoot,SeccompAny,ApparmorAny kubesec-test.yaml
+```
+
 ##### Example JSON Output
 
 ```json
@@ -294,6 +304,9 @@ curl -sSX POST --data-binary @"deployment.yaml" https://v2.kubesec.io/scan
 
 # Parse the API output using jq to return a non-zero exit code if the score is <= 10
 curl -sSX POST --data-binary @"deployment.yaml" https://v2.kubesec.io/scan | jq --exit-status '.score > 10'
+
+# Use the "rule" query parameter to scan only specific rules (multiple supported)
+curl -sSX POST --data-binary @test/asset/score-0-cap-sys-admin.yml "http://localhost:8080/scan?rule=SeccompAny&rule=ApparmorAny"
 ```
 
 You may also define a Bash function, e.g.:

@@ -31,6 +31,7 @@ var (
 	schemaLocations = []string{}
 	outputLocation  string
 	exitCode        int
+	rulesIDs        []string
 )
 
 func init() {
@@ -40,6 +41,7 @@ func init() {
 	scanCmd.Flags().StringVar(&k8sVersion, "kubernetes-version", "", "Kubernetes version to validate manifets")
 	scanCmd.Flags().StringSliceVar(&schemaLocations, "schema-location", []string{}, "Override schema location search path, local or http (can be specified multiple times)")
 	scanCmd.Flags().StringVarP(&template, "template", "t", "", "Set output template, it will check for a file or read input as the template")
+	scanCmd.Flags().StringSliceVarP(&rulesIDs, "rules", "r", []string{}, "Comma-separated list of rule IDs to scan (empty scans all rules). Run 'kubesec print-rules' to see all rules")
 	scanCmd.Flags().StringVarP(&outputLocation, "output", "o", "", "Set output location")
 	scanCmd.Flags().IntVar(&exitCode, "exit-code", 2, "Set the exit-code to use on failure")
 	rootCmd.AddCommand(scanCmd)
@@ -126,7 +128,11 @@ var scanCmd = &cobra.Command{
 		schemaConfig.Locations = schemaLocations
 		schemaConfig.ValidatorOpts.KubernetesVersion = k8sVersion
 
-		reports, err := ruler.NewRuleset(logger).Run(file.fileName, file.fileBytes, schemaConfig)
+		ruleset, err := ruler.NewRuleset(logger, rulesIDs...)
+		if err != nil {
+			return err
+		}
+		reports, err := ruleset.Run(file.fileName, file.fileBytes, schemaConfig)
 		if err != nil {
 			return err
 		}
