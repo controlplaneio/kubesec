@@ -70,7 +70,27 @@ $ GO111MODULE="on" go get github.com/controlplaneio/kubesec/v2
 #### Command line usage:
 
 ```bash
-$ kubesec scan k8s-deployment.yaml
+$ kubesec scan --help
+Scans Kubernetes resource YAML or JSON
+
+Usage:
+  kubesec scan [file] [flags]
+
+Examples:
+  kubesec scan ./deployment.yaml
+  cat file.json | kubesec scan -
+  helm template -f values.yaml ./chart | kubesec scan /dev/stdin
+
+Flags:
+      --absolute-path               use the absolute path for the file name
+      --debug                       turn on debug logs
+      --exit-code int               Set the exit-code to use on failure (default 2)
+  -f, --format string               Set output format (json, table, template) (default "json")
+  -h, --help                        help for scan
+      --kubernetes-version string   Kubernetes version to validate manifets
+  -o, --output string               Set output location
+      --schema-location strings     Override schema location search path, local or http (can be specified multiple times)
+  -t, --template string             Set output template, it will check for a file or read input as the template
 ```
 
 #### Usage example:
@@ -295,7 +315,21 @@ $ kubesec ./score-9-deployment.yml | jq --exit-status '.score > 10' >/dev/null
 
 ## Example output
 
-Kubesec returns a JSON array, and can scan multiple YAML documents in a single input file.
+Kubesec supports three different output formats, specified by the `--format` / `-f` flag: `json` (default),
+`table`, and `template`, and can scan multiple YAML documents in a single input file.
+
+> [!NOTE]
+> You can also cat multiple files, as long as they're correctly formatted as multiple documents separated by `---`. E.g.
+> ```bash
+> { cat test/asset/multi.yml;
+> echo "---";
+> cat test/asset/critical-double-multiple.yml;
+> } | dist/kubesec scan -
+> ```
+
+### JSON
+
+When running a scan with the default `json` format, Kubesec returns a JSON array:
 
 ```json
 [
@@ -327,17 +361,13 @@ Kubesec returns a JSON array, and can scan multiple YAML documents in a single i
 ]
 ```
 
-> [!NOTE]
-> You can also cat multiple files, as long as they're correctly formatted as multiple documents separated by `---`. E.g.
-> ```
-> { cat test/asset/multi.yml;
-> echo "---";
-> cat test/asset/critical-double-multiple.yml;
-> } | dist/kubesec scan -
-> ```
+### Table
+
+When running a scan with the `--format table`, Kubesec outputs the same information as a human-readable table.
+
+![Table output](/doc/images/table-output.png)
 
 ---
-
 
 ## Contributing
 
