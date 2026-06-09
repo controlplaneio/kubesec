@@ -128,8 +128,23 @@ func scanHandler(logger *zap.SugaredLogger, keypath string, schemaConfig ruler.S
 			return
 		}
 
+		// Extract rule IDs from query params
+		// Supports multiple e.g. ?rule=Foo&rule=Bar, scans all if unset
+		var ruleIDs []string
+		if rules, ok := r.URL.Query()["rule"]; ok {
+			ruleIDs = append(ruleIDs, rules...)
+		}
+
 		var payload interface{}
-		reports, err := ruler.NewRuleset(logger).Run(fileName, body, schemaConfig)
+		ruleset, err := ruler.NewRuleset(logger, ruleIDs...)
+		if err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			if _, err := w.Write([]byte(err.Error() + "\n")); err != nil {
+				logger.Errorf("Writing response failed %v", err)
+			}
+			return
+		}
+		reports, err := ruleset.Run(fileName, body, schemaConfig)
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
 			w.Write([]byte(err.Error() + "\n"))

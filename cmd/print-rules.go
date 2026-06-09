@@ -27,7 +27,10 @@ func init() {
 		rootCmd.SilenceErrors = true
 		rootCmd.SilenceUsage = true
 
-		ruleSet := ruler.NewRuleset(logger)
+		ruleSet, err := ruler.NewRuleset(logger)
+		if err != nil {
+			return err
+		}
 
 		// Sort by rule ID
 		sort.Slice(ruleSet.Rules, func(i, j int) bool {
