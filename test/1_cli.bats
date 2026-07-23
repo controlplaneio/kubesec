@@ -15,7 +15,7 @@ teardown() {
   assert_lt_zero_points
 }
 
-@test "fails with CAP_CHOWN" {
+@test "passes with a score of 0 for CAP_CHOWN-only (no critical)" {
   run _app "${TEST_DIR}/asset/score-0-cap-chown.yml"
   assert_zero_points
 }
