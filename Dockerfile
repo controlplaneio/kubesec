@@ -1,4 +1,4 @@
-FROM alpine:3.23 AS downloader
+FROM index.docker.io/library/alpine:3.24@sha256:28bd5fe8b56d1bd048e5babf5b10710ebe0bae67db86916198a6eec434943f8b AS downloader
 
 ARG K8S_SCHEMA_VER=master
 
@@ -15,7 +15,7 @@ RUN set -x && \
     curl -sSL --output-dir "${SCHEMA_PATH}" -O "${BASE_URL}/${SCHEMA_PATH}/deployment-apps-v1.json" && \
     curl -sSL --output-dir "${SCHEMA_PATH}" -O "${BASE_URL}/${SCHEMA_PATH}/statefulset-apps-v1.json"
 
-FROM golang:1.26 AS builder
+FROM index.docker.io/library/golang:1.27@sha256:f44f6e88636cfb311f9ebace870ded69d943f227bb3cb27d32ffd84ea18c43ea AS builder
 
 WORKDIR /kubesec
 
@@ -27,7 +27,7 @@ RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o kubesec .
 
 # ===
 
-FROM alpine:3.23
+FROM index.docker.io/library/alpine:3.24@sha256:28bd5fe8b56d1bd048e5babf5b10710ebe0bae67db86916198a6eec434943f8b
 
 ARG K8S_SCHEMA_VER
 ENV K8S_SCHEMA_VER=${K8S_SCHEMA_VER:-}

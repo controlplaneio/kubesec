@@ -4,7 +4,6 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/in-toto/in-toto-golang/in_toto"
 	"go.uber.org/zap"
 )
 
@@ -341,7 +340,7 @@ spec:
 		t.Fatal(err.Error())
 	}
 
-	link := GenerateInTotoLink(reports, []byte(data)).Signed.(in_toto.Link)
+	link := GenerateInTotoLink(reports, []byte(data)).Signed.(InTotoLink)
 
 	if len(link.Materials) < 1 || len(link.Products) < 1 {
 		t.Errorf("Should have generated a report with at least one material and a product %+v",
