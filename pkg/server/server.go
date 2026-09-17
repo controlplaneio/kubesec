@@ -1,9 +1,15 @@
 package server
 
 import (
+	"bytes"
 	"context"
+	"crypto/ed25519"
+	"crypto/x509"
+	"encoding/hex"
 	"encoding/json"
+	"encoding/pem"
 	"errors"
+	"fmt"
 	"io"
 	"net/http"
 	"os"
@@ -13,10 +19,33 @@ import (
 
 	"github.com/controlplaneio/kubesec/v2/pkg/report"
 	"github.com/controlplaneio/kubesec/v2/pkg/ruler"
-	"github.com/in-toto/in-toto-golang/in_toto"
+	"github.com/in-toto/go-witness/cryptoutil"
+	"github.com/in-toto/go-witness/dsse"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"go.uber.org/zap"
 )
+
+func parseEd25519PrivateKey(data []byte) (ed25519.PrivateKey, error) {
+	block, _ := pem.Decode(data)
+	if block == nil {
+		return nil, errors.New("failed to PEM decode private key")
+	}
+
+	switch block.Type {
+	case "PRIVATE KEY":
+		key, err := x509.ParsePKCS8PrivateKey(block.Bytes)
+		if err != nil {
+			return nil, err
+		}
+		privKey, ok := key.(ed25519.PrivateKey)
+		if !ok {
+			return nil, errors.New("not an ed25519 private key")
+		}
+		return privKey, nil
+	default:
+		return nil, fmt.Errorf("unsupported PEM block type: %s", block.Type)
+	}
+}
 
 type HandlerFunc func(c context.Context) error
 
@@ -263,7 +292,7 @@ func scanHandler(logger *zap.SugaredLogger, keypath string, schemaConfig ruler.S
 			if _, err := w.Write([]byte(err.Error() + "\n")); err != nil {
 				logger.Errorf("Writing response failed %v", err)
 			}
-			return
+			return nil
 		}
 		reports, err := ruleset.Run(fileName, body, schemaConfig)
 		if err != nil {
@@ -271,21 +300,49 @@ func scanHandler(logger *zap.SugaredLogger, keypath string, schemaConfig ruler.S
 		}
 
 		if r.URL.Query().Get("in-toto") != "" {
-			intotoKey := in_toto.Key{}
-
-			err := intotoKey.LoadKey(keypath, "ed25519", []string{"sha256", "sha512"})
+			keyData, err := os.ReadFile(keypath)
 			if err != nil {
 				return NewHTTPError("attempted to serve an in-toto payload but the key is unavailable").Wrap(err)
 			}
 
-			link := ruler.GenerateInTotoLink(reports, body)
-			err = link.Sign(intotoKey)
+			privKey, err := parseEd25519PrivateKey(keyData)
+			if err != nil {
+				return NewHTTPError("failed to parse private key").Wrap(err)
+			}
+
+			signer := cryptoutil.NewED25519Signer(privKey)
+			keyID, err := signer.KeyID()
+			if err != nil {
+				return NewHTTPError("failed to compute key ID").Wrap(err)
+			}
+
+			linkMb := ruler.GenerateInTotoLink(reports, body)
+
+			payloadBytes, err := json.Marshal(linkMb.Signed)
+			if err != nil {
+				return NewHTTPError("failed to marshal link payload").Wrap(err)
+			}
+
+			envelope, err := dsse.Sign(
+				"https://in-toto.io/Statement/v0.1",
+				bytes.NewReader(payloadBytes),
+				dsse.SignWithSigners(signer),
+			)
 			if err != nil {
 				return NewHTTPError("could not sign in-toto link").Wrap(err)
 			}
+
+			for _, sig := range envelope.Signatures {
+				linkMb.Signatures = append(linkMb.Signatures, ruler.InTotoSignature{
+					KeyID:       keyID,
+					Sig:         hex.EncodeToString(sig.Signature),
+					Certificate: "",
+				})
+			}
+
 			payload = map[string]interface{}{
 				"reports": reports,
-				"link":    link,
+				"link":    linkMb,
 			}
 		} else {
 			payload = reports
