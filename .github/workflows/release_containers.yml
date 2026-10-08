@@ -22,16 +22,10 @@ jobs:
             suffix: -scratch
 
     steps:
-      - name: Cache container layers
-        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5
-        with:
-          path: /tmp/.buildx-cache
-          key: ${{ runner.os }}${{ matrix.containers.suffix }}-buildx-${{ github.sha }}
-          restore-keys: |
-            ${{ runner.os }}${{ matrix.containers.suffix }}-buildx-
-
       - name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          persist-credentials: false
 
       - name: Generate container tags and labels
         id: docker_meta
@@ -72,7 +66,5 @@ jobs:
           context: .
           push: ${{ github.event_name != 'pull_request' }}
           file: ${{ matrix.containers.file }}
-          cache-from: type=local,src=/tmp/.buildx-cache
-          cache-to: mode=max,type=local,dest=/tmp/.buildx-cache
           tags: ${{ steps.docker_meta.outputs.tags }}
           labels: ${{ steps.docker_meta.outputs.labels }}

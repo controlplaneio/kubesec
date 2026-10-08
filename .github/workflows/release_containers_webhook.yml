@@ -26,6 +26,7 @@ jobs:
         with:
           repository: controlplaneio/kubesec-webhook
           ref: ${{ inputs.tag }}
+          persist-credentials: false
 
       - name: Generate container tags and labels
         id: docker_meta
