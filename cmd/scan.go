@@ -143,7 +143,8 @@ var scanCmd = &cobra.Command{
 
 		var lowScore bool
 		for _, r := range reports {
-			if r.Score <= 0 {
+			// Score 0 is a pass ("Passed with a score of 0 points"); only negative scores fail.
+			if r.Score < 0 {
 				lowScore = true
 				break
 			}

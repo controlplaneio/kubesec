@@ -15,7 +15,7 @@ teardown() {
   assert_lt_zero_points
 }
 
-@test "fails with CAP_CHOWN" {
+@test "passes with a score of 0 for CAP_CHOWN-only (no critical)" {
   run _app "${TEST_DIR}/asset/score-0-cap-chown.yml"
   assert_zero_points
 }
@@ -45,12 +45,12 @@ teardown() {
   assert_gt_zero_points
 }
 
-@test "fails deployment with pod securitycontext runAsUser 1" {
+@test "scores 0 deployment with pod securitycontext runAsUser 1" {
   run _app "${TEST_DIR}/asset/score-1-dep-podseccon-run-as-user-1.yml"
   assert_zero_points
 }
 
-@test "fails deployment with securitycontext runAsUser 1" {
+@test "scores 0 deployment with securitycontext runAsUser 1" {
   run _app "${TEST_DIR}/asset/score-1-dep-seccon-run-as-user-1.yml"
   assert_zero_points
 }
@@ -65,12 +65,12 @@ teardown() {
   assert_gt_zero_points
 }
 
-@test "fails deployment with pod securitycontext runAsGroup 1" {
+@test "scores 0 deployment with pod securitycontext runAsGroup 1" {
   run _app "${TEST_DIR}/asset/score-1-dep-podseccon-run-as-group-1.yml"
   assert_zero_points
 }
 
-@test "fails deployment with securitycontext runAsGroup 1" {
+@test "scores 0 deployment with securitycontext runAsGroup 1" {
   run _app "${TEST_DIR}/asset/score-1-dep-seccon-run-as-group-1.yml"
   assert_zero_points
 }
@@ -85,7 +85,7 @@ teardown() {
   assert_gt_zero_points
 }
 
-@test "fails deployment with empty security context" {
+@test "scores 0 deployment with empty security context" {
   run _app "${TEST_DIR}/asset/score-1-dep-empty-security-context.yml"
   assert_zero_points
 }
@@ -118,7 +118,7 @@ teardown() {
   assert_gt_zero_points
 }
 
-@test "fails StatefulSet with no security" {
+@test "scores 0 StatefulSet with no security" {
   run _app "${TEST_DIR}/asset/score-0-statefulset-no-sec.yml"
   assert_zero_points
 }
@@ -133,7 +133,7 @@ teardown() {
   assert_lt_zero_points
 }
 
-@test "fails Deployment with unconfined apparmor for all containers" {
+@test "scores 0 Deployment with unconfined apparmor for all containers" {
   run _app "${TEST_DIR}/asset/score-0-dep-apparmor-empty-securitycontext.yml"
   assert_zero_points
 }
@@ -178,7 +178,7 @@ teardown() {
   assert_lt_zero_points
 }
 
-@test "fails Deployment with unconfined seccomp for all containers" {
+@test "scores 0 Deployment with unconfined seccomp for all containers" {
   run _app "${TEST_DIR}/asset/score-0-dep-seccomp-empty-securitycontext.yml"
   assert_zero_points
 }

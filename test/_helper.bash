@@ -106,7 +106,8 @@ else
 
   assert_zero_points() {
     assert_output --regexp ".*with a score of 0 points.*"
-    assert_failure
+    # Score 0 is a pass message; exit 0 (issue #580). Negative scores still assert_failure.
+    assert_success
   }
 
   assert_lt_zero_points() {
