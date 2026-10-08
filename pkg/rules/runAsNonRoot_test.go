@@ -3,7 +3,7 @@ package rules
 import (
 	"testing"
 
-	"github.com/ghodss/yaml"
+	"sigs.k8s.io/yaml"
 )
 
 func Test_RunAsNonRoot_Pod(t *testing.T) {

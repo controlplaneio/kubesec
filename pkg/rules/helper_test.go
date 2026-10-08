@@ -3,8 +3,8 @@ package rules
 import (
 	"testing"
 
-	"github.com/ghodss/yaml"
 	"github.com/thedevsaddam/gojsonq/v2"
+	"sigs.k8s.io/yaml"
 )
 
 func testCheckSecurityContextRule(json []byte) int {
@@ -115,7 +115,6 @@ spec:
 	}
 
 	for _, tt := range tests {
-		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			json, err := yaml.YAMLToJSON([]byte(tt.data))
 			if err != nil {

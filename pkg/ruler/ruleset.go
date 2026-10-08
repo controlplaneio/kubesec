@@ -11,10 +11,9 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/ghodss/yaml"
-	"github.com/in-toto/in-toto-golang/in_toto"
 	"github.com/thedevsaddam/gojsonq/v2"
 	"go.uber.org/zap"
+	"sigs.k8s.io/yaml"
 
 	"github.com/controlplaneio/kubesec/v2/pkg/rules"
 )
@@ -349,9 +348,32 @@ func (rs *Ruleset) Run(fileName string, fileBytes []byte, schemaConfig SchemaCon
 	return reports, nil
 }
 
-func GenerateInTotoLink(reports []Report, fileBytes []byte) in_toto.Metablock {
+type InTotoLink struct {
+	Type        string                 `json:"_type,omitempty"`
+	Schema      string                 `json:"_schema,omitempty"`
+	Name        string                 `json:"name,omitempty"`
+	PayloadType string                 `json:"payloadType,omitempty"`
+	Materials   map[string]interface{} `json:"materials,omitempty"`
+	Products    map[string]interface{} `json:"products,omitempty"`
+	ByProducts  map[string]interface{} `json:"byproducts,omitempty"`
+	Command     []string               `json:"command,omitempty"`
+	Environment map[string]interface{} `json:"environment,omitempty"`
+}
 
-	var linkMb in_toto.Metablock
+type InTotoSignature struct {
+	KeyID       string `json:"keyid"`
+	Sig         string `json:"sig"`
+	Certificate string `json:"certificate,omitempty"`
+}
+
+type InTotoMetablock struct {
+	Signed     interface{}       `json:"signed"`
+	Signatures []InTotoSignature `json:"signatures"`
+}
+
+func GenerateInTotoLink(reports []Report, fileBytes []byte) InTotoMetablock {
+
+	var linkMb InTotoMetablock
 
 	materials := make(map[string]interface{})
 	request := make(map[string]interface{})
@@ -378,15 +400,13 @@ func GenerateInTotoLink(reports []Report, fileBytes []byte) in_toto.Metablock {
 		products[report.Object] = reportArtifact
 	}
 
-	linkMb.Signatures = []in_toto.Signature{}
-	linkMb.Signed = in_toto.Link{
-		Type:       "link",
-		Name:       "kubesec",
-		Materials:  materials,
-		Products:   products,
-		ByProducts: map[string]interface{}{},
-		// FIXME: the command should include whether this is called through the
-		// server or a standalone tool.
+	linkMb.Signatures = []InTotoSignature{}
+	linkMb.Signed = InTotoLink{
+		Type:        "link",
+		Name:        "kubesec",
+		Materials:   materials,
+		Products:    products,
+		ByProducts:  map[string]interface{}{},
 		Command:     []string{},
 		Environment: map[string]interface{}{},
 	}
